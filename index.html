@@ -12,7 +12,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <!-- Crypto JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-<!-- Chart.js (YENİ: Dashboard Grafikleri İçin) -->
+<!-- Chart.js (YENİ: Dashboard Grafikleri İçin Eklendi) -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -233,7 +233,7 @@
                 <div class="dash-card-sub"><span style="color:var(--success);">Aktif</span> performans kaydı</div>
             </div>
 
-            <!-- Kart 3: Hedef (Statik Örnek) -->
+            <!-- Kart 3: Hedef -->
             <div class="dash-card" style="border-left: 4px solid var(--warning);">
                 <div class="dash-card-icon" style="background: var(--warning); color: var(--warning);"><i class="fa-solid fa-bullseye"></i></div>
                 <div class="dash-card-title">Hedef Tutma Oranı</div>
@@ -271,19 +271,27 @@
 <div class="crafted-by-badge">Crafted by Doğuş Yalçınkaya</div>
 <script src="app.js"></script>
 <script>
-// Menü Dropdown Scriptleri
-function toggleUserDropdown() {
-    const dropdown = document.getElementById('userDropdown');
-    const arrow = document.getElementById('user-menu-arrow');
-    dropdown.classList.toggle('show');
-    arrow.style.transform = dropdown.classList.contains('show') ? 'rotate(180deg)' : 'rotate(0deg)';
-}
-window.addEventListener('click', function(e) {
-    if (!document.getElementById('adminBtn').contains(e.target)) {
-        document.getElementById('userDropdown').classList.remove('show');
-        document.getElementById('user-menu-arrow').style.transform = 'rotate(0deg)';
+    // Header Dropdown Kontrolü
+    function toggleUserDropdown() {
+        const dropdown = document.getElementById('userDropdown');
+        const arrow = document.getElementById('user-menu-arrow');
+        dropdown.classList.toggle('show');
+        if (dropdown.classList.contains('show')) {
+            arrow.style.transform = 'rotate(180deg)';
+        } else {
+            arrow.style.transform = 'rotate(0deg)';
+        }
     }
-});
+    window.addEventListener('click', function(e) {
+        if (!document.getElementById('adminBtn').contains(e.target)) {
+            const dropdown = document.getElementById('userDropdown');
+            const arrow = document.getElementById('user-menu-arrow');
+            if (dropdown && dropdown.classList.contains('show')) {
+                dropdown.classList.remove('show');
+                arrow.style.transform = 'rotate(0deg)';
+            }
+        }
+    });
 </script>
 </body>
 </html>
