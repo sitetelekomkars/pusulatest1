@@ -19,7 +19,7 @@ let wizardStepsData = {};
 const MONTH_NAMES = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
 // --- KALİTE PUANLAMA LOGİĞİ ---
 
-// DEĞİŞİKLİK BAŞLANGICI: updateRowScore ve recalcTotalScore (Görsel ve Zorunluluk)
+// DEĞİŞİKLİK: window.updateRowScore ve recalcTotalScore (Görsel ve Zorunluluk)
 window.updateRowScore = function(index, max) {
     const slider = document.getElementById(`slider-${index}`);
     const badge = document.getElementById(`badge-${index}`);
@@ -31,15 +31,15 @@ window.updateRowScore = function(index, max) {
     // Görsel değişimler ve Zorunluluk Kontrolü
     if (val < max) {
         noteInput.style.display = 'block';
-        noteInput.required = true; // Kırılım varsa notu zorunlu yap
-        badge.style.background = 'var(--accent)'; // Kırmızı
+        noteInput.required = true; 
+        badge.style.background = 'var(--accent)'; 
         row.style.borderColor = '#ffcdd2';
         row.style.background = '#fff5f5';
     } else {
         noteInput.style.display = 'none';
         noteInput.required = false;
-        noteInput.value = ''; // Puan tamsa notu sil
-        badge.style.background = 'var(--success)'; // Yeşil
+        noteInput.value = ''; 
+        badge.style.background = 'var(--success)'; 
         row.style.borderColor = '#eee';
         row.style.background = '#fff';
     }
@@ -56,21 +56,19 @@ window.recalcTotalScore = function() {
     });
     const liveScoreEl = document.getElementById('live-score');
     const ringEl = document.getElementById('score-ring');
-    const percentage = maxTotal > 0 ? (currentTotal / maxTotal) * 100 : 0; // Yüzdelik hesaplama
+    const percentage = maxTotal > 0 ? (currentTotal / maxTotal) * 100 : 0; 
     
-    if(liveScoreEl) liveScoreEl.innerText = Math.round(percentage); // Yüzdeyi göster
+    if(liveScoreEl) liveScoreEl.innerText = Math.round(percentage); 
     
     if(ringEl) {
-        let color = 'var(--success)'; // >= 95
-        if(percentage < 50) color = 'var(--accent)'; // Kırmızı
-        else if(percentage < 85) color = 'var(--warning)'; // Turuncu
-        else if(percentage < 95) color = 'var(--secondary)'; // Sarı
+        let color = 'var(--success)'; 
+        if(percentage < 50) color = 'var(--accent)'; 
+        else if(percentage < 85) color = 'var(--warning)'; 
+        else if(percentage < 95) color = 'var(--secondary)'; 
         
-        // Conic gradient ile halka grafiği güncelle
         ringEl.style.background = `conic-gradient(${color} ${percentage}%, #444 ${percentage}%)`;
     }
 };
-// DEĞİŞİKLİK BİTİŞİ: updateRowScore ve recalcTotalScore
 
 // --- YARDIMCI FONKSİYONLAR ---
 function getToken() { return localStorage.getItem("sSportToken"); }
@@ -1639,6 +1637,7 @@ async function editEvaluation(targetCallId) {
         }).catch(err => { Swal.fire('Hata', 'Sunucu hatası.', 'error'); });
     }
 }
+
 // --- PENALTY GAME FUNCTIONS ---
 let pScore=0, pBalls=10, pCurrentQ=null;
 function updateJokerButtons() {
