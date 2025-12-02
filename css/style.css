@@ -1,30 +1,32 @@
-:root {
-    --primary: #0e1b42;
-    --secondary: #fabb00;
-    --bg: #f4f6f8;
-    --card-bg: #ffffff;
-    --accent: #d32f2f;
-    --success: #2e7d32;
-    --info: #0288d1;
-    --warning: #ed6c02;
-    --sales: #10b981;
-    --quiz: #8e24aa;
+:root { 
+    --primary: #0e1b42; 
+    --secondary: #fabb00; 
+    --bg: #f4f6f8; 
+    --card-bg: #ffffff; 
+    --accent: #d32f2f; 
+    --success: #2e7d32; 
+    --info: #0288d1; 
+    --warning: #ed6c02; 
+    --sales: #10b981; 
+    --quiz: #8e24aa; 
     --text-dark: #2c3e50;
     --text-light: #95a5a6;
 }
-body {
-    margin: 0; padding: 0;
-    font-family: 'Segoe UI', 'Roboto', Helvetica, Arial, sans-serif;
-    background-color: var(--bg);
+
+body { 
+    margin: 0; padding: 0; 
+    font-family: 'Segoe UI', 'Roboto', Helvetica, Arial, sans-serif; 
+    background-color: var(--bg); 
     color: var(--text-dark);
-    user-select: none;
+    user-select: none; 
     overflow-x: hidden;
 }
-/* --- LOGIN SCREEN (DÜZELTİLDİ) --- */
-#login-screen {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 5000;
+
+/* --- LOGIN SCREEN --- */
+#login-screen { 
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 5000; 
     display: flex; justify-content: center; align-items: center;
-    background: #0e1b42;
+    background: #0e1b42; 
 }
 .login-card {
     background: #1c2438; padding: 25px 40px; border-radius: 12px; text-align: center;
@@ -32,60 +34,95 @@ body {
     border: 1px solid rgba(255,255,255,0.05);
 }
 .login-logo-img {
-    width: 90px; height: auto; margin-bottom: 0px;
+    width: 90px;
+    height: auto; 
+    margin-bottom: 0px; 
     filter: drop-shadow(0 0 10px rgba(250, 187, 0, 0.3));
 }
-.login-card h2 { margin-top: 5px !important; margin-bottom: 0px !important; }
-.login-card p { margin-top: 5px !important; margin-bottom: 25px !important; }
-.login-input {
-    width: 100%; padding: 12px; margin: 8px 0; background: #2c344a; color: #fff;
-    border: 1px solid #3a4563; border-radius: 6px; text-align: center; box-sizing: border-box;
+.login-card h2 {
+    margin-top: 5px !important; 
+    margin-bottom: 0px !important;
+}
+.login-card p {
+    margin-top: 5px !important; 
+    margin-bottom: 25px !important;
+}
+.login-input { 
+    width: 100%; padding: 12px; margin: 8px 0; background: #2c344a; color: #fff; 
+    border: 1px solid #3a4563; border-radius: 6px; text-align: center; box-sizing: border-box; 
     font-size: 0.9rem; outline: none; transition: 0.3s;
 }
 .login-input:focus { border-color: var(--secondary); background: #323c54; }
-.login-btn {
-    width: 100%; padding: 12px; background: var(--secondary); border: none;
-    border-radius: 6px; font-weight: 700; cursor: pointer; margin-top: 15px;
+.login-btn { 
+    width: 100%; padding: 12px; background: var(--secondary); border: none; 
+    border-radius: 6px; font-weight: 700; cursor: pointer; margin-top: 15px; 
     color: #0e1b42; transition: 0.2s;
 }
 .login-btn:hover { background: #e0a800; }
 .loading-text { font-size: 0.8rem; color: #666; margin-top: 10px; display: none; }
 #maintenance-screen { display: none !important; }
 #main-app { display: none; }
+
 /* --- HEADER YAPISI --- */
-.header {
-    background: #0e1b42; color: white; padding: 0; position: sticky; top: 0; z-index: 1000;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: flex; flex-direction: column;
+.header { 
+    background: #0e1b42; 
+    color: white; 
+    padding: 0; 
+    position: sticky; top: 0; 
+    z-index: 1000; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+    display: flex;
+    flex-direction: column;
 }
+
 .header-content-limit {
-    width: 100%; max-width: 1600px; margin-right: auto; margin-left: 0; padding: 5px 25px 0px 10px;
+    width: 100%;
+    max-width: 1600px; 
+    /* Sol tarafa kaydırma için ayar */
+    margin-right: auto; 
+    margin-left: 0; 
+  
+    padding: 5px 25px 0px 10px; 
     box-sizing: border-box;
 }
-.header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0px; }
+
+.header-top { 
+    display: flex; justify-content: space-between; align-items: center; 
+    /* Kırmızı boşlukları silmek için marjini sıfırladık */
+    margin-bottom: 0px; 
+}
+
+/* MARKA ALANI */
 .brand-area { display: flex; align-items: center; gap: 10px; }
-.brand-img {
-    height: 65px; width: 65px; object-fit: contain;
+.brand-img { 
+    /* Logo boyutunu dikey alana yayılacak şekilde artırdık */
+    height: 65px; 
+    width: 65px; 
+    object-fit: contain;
     filter: drop-shadow(0 0 5px rgba(250, 187, 0, 0.3));
 }
 .brand-text { display: flex; flex-direction: row; align-items: center; gap: 8px; }
 .brand-text .main-text { font-size: 1.0rem; font-weight: 700; color: #fff; letter-spacing: 0.5px; white-space: nowrap; }
 .brand-text .sub-text { font-size: 1.0rem; font-weight: 300; color: rgba(255,255,255,0.6); white-space: nowrap; border-left: 1px solid rgba(255,255,255,0.3); padding-left: 8px; }
+
 .header-controls { display: flex; align-items: center; gap:10px; }
-.action-btn {
-    background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15);
-    color: #ccc; padding: 5px 10px; border-radius: 4px; cursor: pointer;
-    font-weight: 500; font-size: 0.75rem; display: flex; align-items: center; gap: 6px; transition: all 0.2s;
+
+.action-btn { 
+    background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); 
+    color: #ccc; padding: 5px 10px; border-radius: 4px; cursor: pointer; 
+    font-weight: 500; font-size: 0.75rem; display: flex; align-items: center; 
+    gap: 6px; transition: all 0.2s; 
 }
 .action-btn:hover { background: rgba(255, 255, 255, 0.15); color: #fff; }
 .action-btn.active { background: var(--secondary); border-color: var(--secondary); color: #0e1b42; }
+
 /* KULLANICI MENÜSÜ & DROPDOWN */
 .user-menu-wrapper { position: relative; }
-.user-btn { background: transparent; border: none; color: #eee; padding: 6px 10px; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center;
-    gap: 8px; border-radius: 4px; border: 1px solid transparent; transition: all 0.2s; }
+.user-btn { background: transparent; border: none; color: #eee; padding: 6px 10px; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; border-radius: 4px; border: 1px solid transparent; transition: all 0.2s; }
 .user-btn:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
 .user-avatar { width: 26px; height: 26px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--secondary); font-size: 0.8rem; }
-.dropdown-menu { display: none; position: absolute; right: 0; top: 110%; background-color: #1c2438; min-width: 180px; box-shadow: 0 8px 25px rgba(0,0,0,0.5);
-    border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); z-index: 2000; overflow: hidden; animation: fadeInDropdown 0.2s ease; }
+
+.dropdown-menu { display: none; position: absolute; right: 0; top: 110%; background-color: #1c2438; min-width: 180px; box-shadow: 0 8px 25px rgba(0,0,0,0.5); border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); z-index: 2000; overflow: hidden; animation: fadeInDropdown 0.2s ease; }
 .dropdown-menu.show { display: block; }
 .dropdown-header { padding: 10px 15px; background: rgba(0,0,0,0.2); border-bottom: 1px solid rgba(255,255,255,0.05); }
 .dropdown-item { display: flex; align-items: center; gap: 10px; padding: 12px 15px; color: #ddd; text-decoration: none; font-size: 0.85rem; transition: 0.2s; }
@@ -96,107 +133,170 @@ body {
 .dropdown-item.logout i { color: #ff6b6b; }
 .dropdown-divider { height: 1px; background: rgba(255,255,255,0.05); margin: 0; }
 @keyframes fadeInDropdown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
 /* --- ORTA KONTROL ALANI --- */
-.control-wrapper {
-    display: flex; align-items: center; justify-content: flex-start; gap: 15px; padding-bottom: 0; position: relative;
-    flex-wrap: wrap;
+.control-wrapper { 
+    display: flex; 
+    align-items: center; 
+    /* Sola hizalı */
+    justify-content: flex-start; 
+    gap: 15px; 
+    /* Kırmızı boşlukları silmek için padding'i sıfırladık */
+    padding-bottom: 0; 
+    position: relative;
+    flex-wrap: wrap; 
 }
+
 .search-container { position: relative; width: 300px; flex-shrink: 0; }
-#searchInput {
-    width: 100%; padding: 6px 15px 6px 35px; background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 4px; color: white;
-    font-size: 0.85rem; box-sizing: border-box; transition: all 0.3s ease;
+#searchInput { 
+    width: 100%; padding: 6px 15px 6px 35px;
+    background: rgba(255, 255, 255, 0.1); 
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px; 
+    color: white;
+    font-size: 0.85rem;
+    box-sizing: border-box; 
+    transition: all 0.3s ease;
     box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
 }
 #searchInput::placeholder { color: rgba(255, 255, 255, 0.5); }
 #searchInput:focus {
-    background: rgba(255, 255, 255, 0.15); border-color: #fabb00; outline: none;
+    background: rgba(255, 255, 255, 0.15);
+    border-color: #fabb00; 
+    outline: none;
     box-shadow: 0 0 0 2px rgba(250, 187, 0, 0.15);
 }
 .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: rgba(255, 255, 255, 0.5); font-size: 0.85rem; }
+
 /* Filtre Alanı */
-.filter-container {
-    display: flex; gap: 6px; align-items: center; overflow-x: auto; padding-bottom: 2px;
-    max-width: 100%; position: relative;
+.filter-container { 
+    display: flex; 
+    gap: 6px; 
+    align-items: center;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    max-width: 100%;
+    position: relative;
 }
-.filter-container::-webkit-scrollbar { height: 0px; }
+.filter-container::-webkit-scrollbar { height: 0px; } 
+
 /* GENEL FİLTRE BUTONU */
-.filter-btn {
-    background-color: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.15);
-    color: rgba(255, 255, 255, 0.75); padding: 5px 10px; border-radius: 4px;
-    cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 6px;
-    font-weight: 500; font-size: 0.75rem; white-space: nowrap; z-index: 1;
+.filter-btn { 
+    background-color: rgba(255, 255, 255, 0.03); 
+    border: 1px solid rgba(255, 255, 255, 0.15); 
+    color: rgba(255, 255, 255, 0.75); 
+    padding: 5px 10px; 
+    border-radius: 4px; 
+    cursor: pointer; 
+    transition: all 0.2s ease; 
+    display: flex; align-items: center; gap: 6px; 
+    font-weight: 500; font-size: 0.75rem; 
+    white-space: nowrap; 
+    z-index: 1; 
 }
-.filter-btn:hover {
-    background-color: rgba(255, 255, 255, 0.1); color: white; border-color: rgba(255, 255, 255, 0.4);
+.filter-btn:hover { 
+    background-color: rgba(255, 255, 255, 0.1); 
+    color: white;
+    border-color: rgba(255, 255, 255, 0.4); 
     transform: translateY(-1px);
 }
 /* Aktif Buton */
-.filter-btn.active {
-    background-color: #fabb00 !important; color: #0e1b42 !important; border-color: #fabb00 !important;
-    font-weight: 700; box-shadow: 0 2px 8px rgba(250, 187, 0, 0.3);
+.filter-btn.active { 
+    background-color: #fabb00 !important; 
+    color: #0e1b42 !important; 
+    border-color: #fabb00 !important; 
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(250, 187, 0, 0.3);
 }
+
 .divider { width: 1px; height: 18px; background: rgba(255,255,255,0.15); margin: 0 4px; }
 .link-btn { color: rgba(255, 255, 255, 0.7); }
 .link-btn:hover { color: #fff; background: rgba(255,255,255,0.1); }
+
 /* --- TICKER (Duyuru Barı İyileştirmesi) --- */
-.news-ticker-box {
-    width: 100%; background: #0a1532; border-top: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 0 25px; height: 25px; display: flex; align-items: center; gap: 15px;
-    cursor: pointer; transition: 0.2s; margin-top: 0px; box-sizing: border-box; overflow: hidden;
+.news-ticker-box { 
+    width: 100%;
+    /* Rengi üst barın ana rengine yakın, hafif koyu yaptık */
+    background: #0a1532; 
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 0 25px; 
+    height: 25px; /* Duyuru barını daralttık */
+    display: flex; 
+    align-items: center; 
+    gap: 15px; 
+    cursor: pointer; 
+    transition: 0.2s;
+    margin-top: 0px; 
+    box-sizing: border-box;
+    overflow: hidden; 
 }
-.news-ticker-box:hover { background: #1c2438; }
-.ticker-label {
-    font-size: 0.65rem; color: #fabb00; font-weight: 800; display: flex; align-items: center; gap: 6px; letter-spacing: 0.5px; min-width: fit-content; z-index: 5;
-    background: #0a1532; padding-right: 15px; height: 100%; display: flex; align-items: center;
+.news-ticker-box:hover { background: #1c2438; } 
+
+.ticker-label { 
+    font-size: 0.65rem; color: #fabb00; font-weight: 800; display: flex; align-items: center; gap: 6px; letter-spacing: 0.5px; min-width: fit-content; z-index: 5; 
+    background: #0a1532; /* Arka planı kutu arka planıyla eşleştirdik */
+    padding-right: 15px; height: 100%; 
+    display: flex; align-items: center;
 }
 .pulse-dot { width: 5px; height: 5px; background: var(--secondary); border-radius: 50%; display: inline-block; animation: pulse 2s infinite; }
+
 .ticker-scroll-wrapper {
-    flex-grow: 1; overflow: hidden; position: relative; height: 100%; display: flex; align-items: center;
+    flex-grow: 1;
+    overflow: hidden;
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: center;
 }
+
 /* KAYAN YAZI ANİMASYONU */
-.ticker-content {
-    font-size: 0.7rem; color: rgba(255, 255, 255, 0.9); white-space: nowrap; position: absolute;
-    left: 100%; animation: ticker-scroll 30s linear infinite; font-weight: 400; font-family: 'Segoe UI', sans-serif;
+.ticker-content { 
+    font-size: 0.7rem; /* Metin boyutunu küçülttük */
+    color: rgba(255, 255, 255, 0.9); 
+    white-space: nowrap; 
+    position: absolute; 
+    left: 100%; 
+    animation: ticker-scroll 30s linear infinite; 
+    font-weight: 400; font-family: 'Segoe UI', sans-serif; 
 }
-@keyframes ticker-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-100%) translateX(-200px); } }
+
+@keyframes ticker-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-100%) translateX(-200px); } 
+}
+
 /* --- CARDS & GRID --- */
 .container { padding: 25px; max-width: 1600px; margin: 0 auto; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-.card { background: var(--card-bg); border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #eaedf2;
-    border-left: 4px solid var(--info); display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s; position: relative; }
+.card { background: var(--card-bg); border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #eaedf2; border-left: 4px solid var(--info); display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s; position: relative; }
 .card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.06); border-color: #dfe3e8; }
 .card.Teknik { border-left-color: var(--primary); }
-.card.İkna { border-left-color: var(--accent); }
-.card.Kampanya { border-left-color: var(--success); }
+.card.İkna { border-left-color: var(--accent); } 
+.card.Kampanya { border-left-color: var(--success); } 
 .card.Bilgi { border-left-color: var(--info); }
 .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; padding-right: 25px; }
 .card-title { font-weight: 600; font-size: 1.05rem; margin: 0; color: #2c3e50; line-height: 1.3; }
-.badge { font-size: 0.65rem; padding: 3px 6px; border-radius: 3px; background: #f7f9fc; text-transform: uppercase; font-weight: 600; color: #7f8c8d;
-    border: 1px solid #edf2f7; }
+.badge { font-size: 0.65rem; padding: 3px 6px; border-radius: 3px; background: #f7f9fc; text-transform: uppercase; font-weight: 600; color: #7f8c8d; border: 1px solid #edf2f7; }
 .card-content { font-size: 0.9rem; color: #555; margin-bottom: 15px; line-height: 1.5; flex-grow: 1; cursor: pointer; }
 .card-text-truncate { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-.script-box { background: #fffdf5; border: 1px solid #f9f1d8; padding: 10px; border-radius: 4px; font-style: italic; color: #666; margin-top: auto; position: relative;
-    font-size: 0.85rem; }
+.script-box { background: #fffdf5; border: 1px solid #f9f1d8; padding: 10px; border-radius: 4px; font-style: italic; color: #666; margin-top: auto; position: relative; font-size: 0.85rem; }
 .card-actions { margin-top: 12px; display: flex; justify-content: flex-end; gap: 8px; }
 .btn { padding: 5px 10px; border-radius: 4px; cursor: pointer; border: none; font-weight: 600; font-size: 0.8rem; display: flex; align-items: center; gap: 5px; }
 .btn-copy { background: #0e1b42; color: white; transition: background 0.2s; }
 .btn-copy:hover { background: #2c3e50; }
 .btn-link { background: transparent; border: 1px solid #ddd; color: var(--info); text-decoration: none; }
 .btn-link:hover { background: #f0f8ff; border-color: var(--info); }
-.new-badge { position: absolute; top: 12px; left: -4px; background: #2e7d32; color: white; font-size: 0.6rem; padding: 2px 5px;
-    border-radius: 0 3px 3px 0; font-weight: bold; box-shadow: 1px 1px 2px rgba(0,0,0,0.2); z-index:15; }
+.new-badge { position: absolute; top: 12px; left: -4px; background: #2e7d32; color: white; font-size: 0.6rem; padding: 2px 5px; border-radius: 0 3px 3px 0; font-weight: bold; box-shadow: 1px 1px 2px rgba(0,0,0,0.2); z-index:15; }
 .icon-wrapper { position: absolute; top: 10px; right: 10px; display: flex; gap: 5px; z-index: 20; }
 .edit-icon { color: var(--secondary); cursor: pointer; display: none; font-size: 0.9rem; padding: 5px; background: white; border-radius: 50%; border:1px solid #eee; }
 body.editing .edit-icon { display: block !important; }
 .fav-icon { color: #dce0e6; cursor: pointer; font-size: 1.1rem; padding: 5px; transition: 0.2s; }
 .fav-icon:hover { color: #b0b8c1; }
 .fav-icon.active { color: var(--secondary); }
+
 /* MODAL/MODÜL STİLLERİ */
-.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(14, 27, 66, 0.8);
-    z-index: 5000; justify-content: center; align-items: center; backdrop-filter: blur(3px); }
-.modal-content { background: white; width: 90%; max-width: 800px; border-radius: 8px; padding: 30px; position: relative; max-height: 90vh; overflow-y: auto;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(14, 27, 66, 0.8); z-index: 5000; justify-content: center; align-items: center; backdrop-filter: blur(3px); }
+.modal-content { background: white; width: 90%; max-width: 800px; border-radius: 8px; padding: 30px; position: relative; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
 .close-modal { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; cursor: pointer; color: #999; transition: 0.2s; }
 .close-modal:hover { color: #333; }
 .swal2-container { z-index: 10000 !important; }
@@ -208,9 +308,9 @@ body.editing .edit-icon { display: block !important; }
 @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
 /* NEWS ITEMS & BADGES */
-.news-item { border-left: 4px solid var(--primary); padding: 15px 15px 15px 20px; margin-bottom: 20px; position: relative; background-color: #fcfcfc; border-radius: 6px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #eee; border-left-width: 4px; }
+.news-item { border-left: 4px solid var(--primary); padding: 15px 15px 15px 20px; margin-bottom: 20px; position: relative; background-color: #fcfcfc; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #eee; border-left-width: 4px; }
 .news-date { font-size: 0.75rem; color: #999; font-weight: 700; display: block; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
 .news-title { font-size: 1.1rem; font-weight: 700; color: var(--primary); display: block; margin-bottom: 8px; line-height: 1.3; }
 .news-desc { font-size: 0.95rem; color: #555; line-height: 1.6; margin-bottom: 10px; }
@@ -218,7 +318,8 @@ body.editing .edit-icon { display: block !important; }
 .tag-fix { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
 .tag-update { background: #fff3e0; color: #ef6c00; border: 1px solid #ffe0b2; }
 .tag-info { background: #e3f2fd; color: #0277bd; border: 1px solid #bbdefb; }
-/* PENALTY & FUNCTIONAL STYLES */
+
+/* PENALTY & FUNCTIONAL STYLES (Restored) */
 .penalty-stats { background: #111; color: #fff; padding: 10px 15px; border-radius: 6px; display:flex; justify-content:space-between; font-weight:700; margin-bottom: 15px; border: 1px solid #333; }
 .penalty-stats span span { color: var(--secondary); }
 .joker-btn { background: #6a1b9a; color: white; padding: 10px; border-radius: 6px; border:none; cursor:pointer; flex:1; margin:0 5px; font-weight: bold; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.9rem; }
@@ -289,7 +390,6 @@ body.editing .edit-icon { display: block !important; }
 .keeper-dive-left .arm.left { transform: rotate(-180deg) translateZ(2px); }
 .keeper-dive-right { transform: translateX(140px) translateY(50px) rotate(70deg) !important; }
 .keeper-dive-right .arm.right { transform: rotate(-180deg) translateZ(2px); }
-/* --- KALİTE MODALI STİLLERİ (Görsel Düzeltmeler) --- */
 .evaluation-details-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-in-out; margin-top: 0; }
 .evaluation-summary { transition: background 0.2s; }
 .evaluation-summary:hover { background: #fcfcfc; }
@@ -297,7 +397,7 @@ body.editing .edit-icon { display: block !important; }
 .quality-filter-group { display: flex; gap: 15px; align-items: center; flex-grow: 1; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 1rem; background: #f0f4ff; border: 1px solid #d0d8f0; justify-content: space-around; }
 .eval-modal-wrapper { display: flex; flex-direction: column; gap: 15px; text-align: left; font-family: 'Segoe UI', sans-serif; }
 .eval-header-card { background: #f8f9fa; padding: 15px; border-radius: 10px; border-left: 5px solid var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-.score-dashboard { background: #0e1b42; color: white; border-radius: 12px; padding: 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 5px 15px rgba(14, 27, 66, 0.3); position: sticky; top: 0; z-index: 10; margin-bottom: 10px; }
+.score-dashboard { background: #0e1b42; color: white; border-radius: 12px; padding: 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 5px 15px rgba(14, 27, 66, 0.3); margin-bottom: 10px; position: sticky; top: 0; z-index: 10; }
 .score-circle-outer { width: 80px; height: 80px; border-radius: 50%; background: conic-gradient(var(--success) 0%, #444 0%); display: flex; align-items: center; justify-content: center; transition: background 0.5s ease; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
 .score-circle-inner { width: 64px; height: 64px; background: #0e1b42; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.5rem; color: white; }
 .criteria-container { max-height: 400px; overflow-y: auto; padding-right: 5px; }
@@ -305,7 +405,7 @@ body.editing .edit-icon { display: block !important; }
 .criteria-row:hover { border-color: #bbb; box-shadow: 0 3px 6px rgba(0,0,0,0.05); }
 .criteria-header { display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 0.95rem; color: #333; }
 .criteria-controls { display: flex; align-items: center; gap: 15px; background: #f9f9f9; padding: 8px; border-radius: 6px; }
-.score-badge { background: var(--success); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; min-width: 30px; text-align: center; }
+.score-badge { background: #333; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; min-width: 30px; text-align: center; }
 .note-input { width: 100%; border: 1px solid #e0e0e0; border-radius: 4px; padding: 6px; font-size: 0.85rem; background: #fff; }
 .note-input:focus { border-color: var(--secondary); outline: none; }
 .quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
