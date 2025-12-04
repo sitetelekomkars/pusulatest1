@@ -22,12 +22,15 @@ let adminUserList = [];
 let allEvaluationsData = [];
 let wizardStepsData = {};
 
+// --- YENİ: TEKNİK ASİSTAN GEÇMİŞ YÖNETİMİ ---
+let technicalHistory = []; 
+let currentTechnicalStepId = 'start';
+
 const MONTH_NAMES = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
 
 // =========================================================
 // 0. BÖLÜM: TEKNİK ASİSTAN VERİSİ (KODA GÖMÜLÜ - SABİT)
 // =========================================================
-// Bu veri doğrudan uygulamanın içinde durur, sunucudan çekilmez. %100 Hızlı ve Hatasızdır.
 const TECHNICAL_STEPS = {
     // --- BAŞLANGIÇ ---
     "start": {
@@ -2181,8 +2184,23 @@ function renderStep(k){
 // --- TEKNİK ASİSTAN FONKSİYONLARI (KODA GÖMÜLÜ) ---
 function openTechnicalWizard() {
     document.getElementById('tech-wizard-modal').style.display = 'flex';
-    // Veriyi yüklemek yerine direkt renderTechnicalStep ile başlatıyoruz
+    technicalHistory = []; // Geçmişi sıfırla
+    currentTechnicalStepId = 'start'; // Başlangıca ayarla
     renderTechnicalStep('start');
+}
+
+// Adım değiştiğinde
+function handleTechnicalNext(nextId) {
+    technicalHistory.push(currentTechnicalStepId); // Mevcut adımı kaydet
+    renderTechnicalStep(nextId);
+}
+
+// Geri tuşuna basıldığında
+function handleTechnicalBack() {
+    if (technicalHistory.length > 0) {
+        const prevId = technicalHistory.pop(); // Son adımı al ve listeden çıkar
+        renderTechnicalStep(prevId);
+    }
 }
 
 function renderTechnicalStep(stepId) {
@@ -2194,6 +2212,9 @@ function renderTechnicalStep(stepId) {
         container.innerHTML = `<h3 style="color:red; text-align:center;">Hata: "${stepId}" adımı bulunamadı.</h3><div style="text-align:center;"><button class="restart-btn" onclick="renderTechnicalStep('start')">Başa Dön</button></div>`;
         return;
     }
+    
+    // Mevcut adımı güncelle (Geri dönülse bile burası güncellenmeli ki bir sonraki ileri adımda doğru kayıt yapılsın)
+    currentTechnicalStepId = stepId;
 
     let html = `
         <div style="text-align:center; margin-bottom:20px;">
@@ -2213,7 +2234,6 @@ function renderTechnicalStep(stepId) {
                 <h3 style="margin:0 0 10px 0;">${step.text}</h3>
                 ${step.script ? `<div class="script-box" style="font-size:1rem; margin-top:15px; text-align:left;">${step.script}</div>` : ''}
             </div>
-            <button class="restart-btn" onclick="renderTechnicalStep('start')"><i class="fas fa-redo"></i> Başa Dön</button>
         `;
     } 
     // SORU EKRANI (Seçenekler varsa)
@@ -2226,17 +2246,28 @@ function renderTechnicalStep(stepId) {
         
         if(step.options && step.options.length > 0) {
             step.options.forEach(opt => {
-                html += `<button class="option-btn" onclick="renderTechnicalStep('${opt.next}')">
+                html += `<button class="option-btn" onclick="handleTechnicalNext('${opt.next}')">
                             <i class="fas fa-chevron-right" style="float:right; opacity:0.5;"></i> ${opt.text}
                          </button>`;
             });
         }
-        
         html += `</div>`;
-        if (stepId !== 'start') {
-            html += `<button class="restart-btn" style="background:#eee; color:#333; margin-top:20px;" onclick="renderTechnicalStep('start')">⬅ Başa Dön</button>`;
-        }
     }
+    
+    // --- BUTON ALANI (GERİ ve BAŞA DÖN) ---
+    html += `<div style="margin-top:20px; display:flex; justify-content:center; gap:10px;">`;
+    
+    // Geri Butonu (Sadece geçmişte adım varsa göster)
+    if (technicalHistory.length > 0) {
+        html += `<button class="restart-btn" style="background:#999; color:white;" onclick="handleTechnicalBack()"><i class="fas fa-arrow-left"></i> Geri</button>`;
+    }
+
+    // Başa Dön Butonu (Başlangıç ekranı hariç her yerde göster)
+    if (stepId !== 'start') {
+        html += `<button class="restart-btn" onclick="openTechnicalWizard()"><i class="fas fa-redo"></i> Başa Dön</button>`;
+    }
+    
+    html += `</div>`;
 
     container.innerHTML = html;
 }
