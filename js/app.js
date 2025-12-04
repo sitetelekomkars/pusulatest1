@@ -18,6 +18,7 @@ let adminUserList = [];
 let allEvaluationsData = [];
 let wizardStepsData = {};
 const MONTH_NAMES = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+
 // --- KALİTE PUANLAMA LOGİĞİ ---
 window.updateRowScore = function(index, max) {
     const slider = document.getElementById(`slider-${index}`);
@@ -40,29 +41,30 @@ window.updateRowScore = function(index, max) {
         row.style.borderColor = '#eee';
         row.style.background = '#fff';
     }
-    window.recalcTotalScore = function() {
-        let currentTotal = 0;
-        let maxTotal = 0;
-        const sliders = document.querySelectorAll('.slider-input');
-        sliders.forEach(s => {
-            currentTotal += parseInt(s.value) || 0;
-            maxTotal += parseInt(s.getAttribute('max')) || 0;
-        });
-        const liveScoreEl = document.getElementById('live-score');
-        const ringEl = document.getElementById('score-ring');
-        
-        if(liveScoreEl) liveScoreEl.innerText = currentTotal;
-        
-        if(ringEl) {
-            let color = '#2e7d32';
-            let ratio = maxTotal > 0 ? (currentTotal / maxTotal) * 100 : 0;
-            if(ratio < 50) color = '#d32f2f';
-            else if(ratio < 85) color = '#ed6c02';
-            else if(ratio < 95) color = '#fabb00';
-            ringEl.style.background = `conic-gradient(${color} ${ratio}%, #444 ${ratio}%)`;
-        }
-    };
     window.recalcTotalScore();
+};
+
+window.recalcTotalScore = function() {
+    let currentTotal = 0;
+    let maxTotal = 0;
+    const sliders = document.querySelectorAll('.slider-input');
+    sliders.forEach(s => {
+        currentTotal += parseInt(s.value) || 0;
+        maxTotal += parseInt(s.getAttribute('max')) || 0;
+    });
+    const liveScoreEl = document.getElementById('live-score');
+    const ringEl = document.getElementById('score-ring');
+    
+    if(liveScoreEl) liveScoreEl.innerText = currentTotal;
+    
+    if(ringEl) {
+        let color = '#2e7d32';
+        let ratio = maxTotal > 0 ? (currentTotal / maxTotal) * 100 : 0;
+        if(ratio < 50) color = '#d32f2f';
+        else if(ratio < 85) color = '#ed6c02';
+        else if(ratio < 95) color = '#fabb00';
+        ringEl.style.background = `conic-gradient(${color} ${ratio}%, #444 ${ratio}%)`;
+    }
 };
 
 // --- YARDIMCI FONKSİYONLAR ---
@@ -123,11 +125,22 @@ function escapeForJsString(text) {
     if (!text) return "";
     return text.toString().replace(/\\/g, '\\\\').replace(/'/g, '\\\'').replace(/"/g, '\\"').replace(/\n/g, '\\n').replace(/\r/g, '');
 }
+// YENİ GÜVENLİ KOPYALAMA FONKSİYONU (Sihirbaz İçin)
+function copyScriptContent(encodedText) {
+    const text = decodeURIComponent(encodedText);
+    copyText(text);
+}
+function copyText(t) {
+    navigator.clipboard.writeText(t.replace(/\\n/g, '\n')).then(() => 
+        Swal.fire({icon:'success', title:'Kopyalandı', toast:true, position:'top-end', showConfirmButton:false, timer:1500}) );
+}
+
 document.addEventListener('contextmenu', event => event.preventDefault());
 document.onkeydown = function(e) { if(e.keyCode == 123) return false; }
 document.addEventListener('DOMContentLoaded', () => {
     checkSession();
 });
+
 // --- SESSION & LOGIN ---
 function checkSession() {
     const savedUser = localStorage.getItem("sSportUser");
@@ -420,7 +433,6 @@ function loadTechWizardData() {
                 resolve();
             } else {
                 techWizardData = {};
-                // Hata mesajı vermiyoruz, sessizce geçebilir veya loglayabiliriz
             }
         })
         .catch(error => {
@@ -516,10 +528,6 @@ function showCardDetail(title, text) {
         width: '600px',
         background: '#f8f9fa'
     });
-}
-function copyText(t) {
-    navigator.clipboard.writeText(t.replace(/\\n/g, '\n')).then(() => 
-        Swal.fire({icon:'success', title:'Kopyalandı', toast:true, position:'top-end', showConfirmButton:false, timer:1500}) );
 }
 function toggleEditMode() {
     if (!isAdminMode) return;
@@ -1958,12 +1966,19 @@ function twRenderStep() {
         html += `<p style="font-size:1rem; margin-bottom:15px;">${stepData.text}</p>`;
     }
 
-    // Script Kutusu (Varsa)
+    // Script Kutusu (Varsa) - GÜVENLİ KOPYALAMA BUTONU EKLENDİ
     if (stepData.script) {
+        // Encode URI Component ile metni güvenli hale getiriyoruz (Tırnak ve satır hatalarını önler)
+        const safeScript = encodeURIComponent(stepData.script);
         html += `
         <div class="tech-script-box">
             <span class="tech-script-label">Müşteriye Okunacak:</span>
             "${stepData.script}"
+            <div style="margin-top:10px; text-align:right;">
+                <button class="btn btn-copy" style="font-size:0.8rem; padding:5px 10px;" onclick="copyScriptContent('${safeScript}')">
+                    <i class="fas fa-copy"></i> Kopyala
+                </button>
+            </div>
         </div>`;
     }
 
@@ -2005,4 +2020,3 @@ function twResetWizard() {
     twState.history = [];
     twRenderStep();
 }
-"}
