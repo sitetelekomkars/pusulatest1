@@ -705,7 +705,7 @@ if(!formValues.title) { Swal.fire('Hata', 'Başlık zorunlu!', 'error'); return;
 Swal.fire({ title: 'Ekleniyor...', didOpen: () => { Swal.showLoading() } });
 fetch(SCRIPT_URL, {
 method: 'POST',
-headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+headers: { "Content-Type": "text/plain;charset=utf-8" },
 body: JSON.stringify({ action: "addCard", username: currentUser, token: getToken(), ...formValues })
 })
 .then(response => response.json()).then(data => {
@@ -978,44 +978,32 @@ async function fetchTrainingRecords(targetAgent, targetGroup, selectedMonth) {
     
     // Simülasyon Verisi (Backend hazır olana kadar)
     let sampleData = [
-        { date: '01.12.2025', title: '**Özel Geri Bildirim Görüşmesi:** Yeni Kural İhlali', status: 'Görüşme Kayıt', evaluator: 'Ayşe T.', resultScore: 80, isCompleted: false },
-        { date: '14.11.2025', title: 'Yeni Kampanya İkna Eğitimi', status: 'Tamamlandı', evaluator: 'Mehmet K.', resultScore: 95, isCompleted: true },
-        { date: '28.10.2025', title: 'Hatalı Bilgi Düzeltme Eğitimi', status: 'Tamamlandı', evaluator: 'Ayşe T.', resultScore: 88, isCompleted: true },
-        { date: '05.09.2025', title: 'Teknik Destek Süreç Geliştirme Eğitimi', status: 'Tamamlandı', evaluator: 'Ali Y.', resultScore: 92, isCompleted: true },
+        { id: 1, date: '01.12.2025', title: '**Özel Geri Bildirim Görüşmesi:** Yeni Kural İhlali', status: 'Görüşme Kayıt', evaluator: 'Ayşe T.', resultScore: 80, isCompleted: false },
+        { id: 2, date: '14.11.2025', title: 'Yeni Kampanya İkna Eğitimi', status: 'Tamamlandı', evaluator: 'Mehmet K.', resultScore: 95, isCompleted: true },
+        { id: 3, date: '28.10.2025', title: 'Hatalı Bilgi Düzeltme Eğitimi', status: 'Tamamlandı', evaluator: 'Ayşe T.', resultScore: 88, isCompleted: true },
+        { id: 4, date: '05.09.2025', title: 'Teknik Destek Süreç Geliştirme Eğitimi', status: 'Tamamlandı', evaluator: 'Ali Y.', resultScore: 92, isCompleted: true },
+        { id: 5, date: '05.12.2025', title: 'Sistem Hatası Giderimi Eğitimi', status: 'Planlandı', evaluator: 'Yönetici', resultScore: null, isCompleted: false },
+
     ];
 
-    // Gerçek API çağrısı bu kısma eklenecek
-    /*
-    try {
-        const response = await fetch(SCRIPT_URL, {
-            method: 'POST',
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({ action: "fetchTraining", targetAgent, targetGroup, month: selectedMonth, token: getToken() })
-        });
-        const data = await response.json();
-        if (data.result === "success") {
-            trainingRecordsData = data.trainings || [];
-            return trainingRecordsData;
-        } else {
-            console.error("Eğitim verisi çekme hatası:", data.message);
-            return sampleData; // Hata durumunda simülasyon verisi dön
-        }
-    } catch(err) {
-        console.error("Bağlantı hatası:", err);
-        return sampleData; // Hata durumunda simülasyon verisi dön
-    }
-    */
-    
     // Şimdilik simülasyon verisini döndürüyoruz.
-    trainingRecordsData = sampleData;
+    trainingRecordsData = sampleData.filter(t => t.date.substring(3) === selectedMonth || isAdminMode); // Sadece admin tümünü görür, yoksa sadece ilgili ay
     return trainingRecordsData;
 }
 
 function renderTrainingTab(targetAgent, targetGroup, selectedMonth) {
     const listEl = document.getElementById('training-records-list');
     const tableElBody = document.getElementById('training-performance-body');
+    const adminControls = document.getElementById('training-admin-controls'); // Yönetim kontrol alanı
     
     if (!listEl || !tableElBody) return;
+
+    // Yönetici butonunun görünürlüğünü ayarla (HTML'e taşıdık, burada sadece içerik kontrolü)
+    const isSingleAgentSelected = targetAgent !== 'all';
+    if (adminControls) {
+        adminControls.style.display = (isAdminMode && isSingleAgentSelected) ? 'flex' : 'none';
+    }
+
 
     listEl.innerHTML = '<div style="text-align:center; color:#999; padding:20px;">Eğitim verileri yükleniyor...</div>';
     tableElBody.innerHTML = '';
@@ -1032,19 +1020,36 @@ function renderTrainingTab(targetAgent, targetGroup, selectedMonth) {
                 let statusClass = 'status-success';
                 if (t.status.includes('Görüşme Kayıt')) statusClass = 'status-red';
                 if (t.status.includes('Planlandı')) statusClass = 'status-warning';
+                
+                // Temsilcinin tamamlayabileceği buton
+                let actionBtn = '';
+                if (!t.isCompleted && !isAdminMode) {
+                    actionBtn = `<button class="btn btn-copy" style="background:var(--success); padding:5px 10px; font-size:0.8rem; margin-left:10px;" onclick="completeTraining(${t.id})">  ✅   Tamamla</button>`;
+                }
+                
+                // Yönetici ise düzenleme butonu ekleyebilir (Simülasyon için)
+                let editBtn = '';
+                if (isAdminMode) {
+                    editBtn = `<i class="fas fa-pen" style="color:#fabb00; cursor:pointer; margin-right:10px;" onclick="editTrainingPopup(${t.id})"></i>`;
+                }
+
 
                 listHtml += `
-                <div class="training-item" onclick="openTrainingDetail('${escapeForJsString(t.title)}', '${t.date}')">
+                <div class="training-item" style="padding-right:20px;">
                     <div class="training-date">${t.date}</div>
                     <div class="training-title">${t.title.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</div>
-                    <div class="training-status ${statusClass}">${t.status}</div>
+                    <div style="display:flex; align-items:center;">
+                        ${editBtn}
+                        <span class="training-status ${statusClass}" style="min-width: 100px;">${t.status}</span>
+                        ${actionBtn}
+                    </div>
                 </div>`;
                 
                 // Performans Takip Tablosu için veri hazırla
                 if (t.resultScore && t.isCompleted) {
                     perfTableData.push({
                         date: t.date,
-                        topic: t.title.substring(0, 40) + '...',
+                        topic: t.title.replace(/\*\*(.*?)\*\*/g, '').substring(0, 40) + '...',
                         score: `${t.resultScore} / 100`,
                         evaluator: t.evaluator
                     });
@@ -1074,10 +1079,158 @@ function openTrainingDetail(title, date) {
         title: title.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'),
         html: `<p style="font-size:0.9rem; color:#888;">Tarih: ${date}</p>
                <p style="text-align:left;">Bu alanda, atanan eğitimin içeriği, tamamlanması gereken adımlar ve varsa ilgili doküman linkleri gösterilecektir.</p>
-               ${!isAdminMode ? '<button class="btn btn-copy" style="background:var(--success); margin-top:15px;" onclick="Swal.close()">  ✅   Eğitimi Tamamla</button>' : ''}`,
+               ${!isAdminMode ? '<button class="btn btn-copy" style="background:var(--success); margin-top:15px;" onclick="completeTraining(1)">  ✅   Eğitimi Tamamla</button>' : ''}`,
         showCloseButton: true,
         showConfirmButton: false,
         width: '500px'
+    });
+}
+// YENİ FONKSİYON: EĞİTİM PLANLAMA POP-UP'I
+async function planNewTrainingPopup() {
+    if (!isAdminMode) return;
+
+    const agentSelect = document.getElementById('agent-select-admin');
+    const targetAgent = agentSelect ? agentSelect.options[agentSelect.selectedIndex].text : "Tüm Temsilciler";
+
+    if (targetAgent.includes('Tüm')) {
+        Swal.fire('Uyarı', 'Lütfen eğitim atamak için listeden tek bir personel seçiniz.', 'warning');
+        return;
+    }
+
+    const { value: formValues } = await Swal.fire({
+        title: `${targetAgent} için Eğitim Planla`,
+        html: `
+            <div style="text-align:left; margin-top:10px;">
+                <label style="font-weight:bold; font-size:0.9rem;">Eğitim Konusu</label>
+                <input id="swal-training-title" class="swal2-input" placeholder="Örn: Yeni Kampanya Süreçleri">
+                
+                <label style="font-weight:bold; font-size:0.9rem;">Açıklama / Link</label>
+                <textarea id="swal-training-desc" class="swal2-textarea" placeholder="Eğitim içeriği veya doküman linki..."></textarea>
+
+                <label style="font-weight:bold; font-size:0.9rem;">Eğitim Türü</label>
+                <select id="swal-training-type" class="swal2-input">
+                    <option value="Görüşme">Özel Geri Bildirim Görüşmesi</option>
+                    <option value="Sistem">Sistem/Süreç Eğitimi</option>
+                    <option value="İkna">İkna Geliştirme</option>
+                </select>
+                
+                <label style="font-weight:bold; font-size:0.9rem;">Son Tamamlama Tarihi (Opsiyonel)</label>
+                <input type="date" id="swal-training-date" class="swal2-input">
+            </div>`,
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: 'Planlamayı Kaydet',
+        cancelButtonText: 'İptal',
+        preConfirm: () => {
+            const title = document.getElementById('swal-training-title').value;
+            if (!title) {
+                Swal.showValidationMessage('Eğitim konusu boş bırakılamaz.');
+                return false;
+            }
+            return {
+                agent: targetAgent,
+                title: title,
+                desc: document.getElementById('swal-training-desc').value,
+                type: document.getElementById('swal-training-type').value,
+                dueDate: document.getElementById('swal-training-date').value
+            }
+        }
+    });
+
+    if (formValues) {
+        Swal.fire({ title: 'Eğitim Atanıyor...', didOpen: () => Swal.showLoading() });
+        
+        // Simülasyon: Yeni eğitim kaydını array'e ekleyelim
+        const newId = trainingRecordsData.length + 100;
+        const today = new Date().toLocaleDateString('tr-TR');
+        trainingRecordsData.push({
+            id: newId,
+            date: today,
+            title: `**${formValues.type}** ${formValues.title}`,
+            status: 'Planlandı',
+            evaluator: currentUser,
+            resultScore: null,
+            isCompleted: false
+        });
+
+        setTimeout(() => {
+             Swal.fire({
+                icon: 'success',
+                title: 'Başarılı!',
+                text: `${formValues.agent} kişisine "${formValues.title}" eğitimi atandı.`,
+                timer: 2500,
+                showConfirmButton: false
+            });
+            // Eğitim listesini yeniden yükle
+            const currentMonth = document.getElementById('month-select-filter').value;
+            renderTrainingTab(targetAgent, 'all', currentMonth);
+        }, 1500);
+    }
+}
+// YENİ FONKSİYON: EĞİTİMİ TAMAMLAMA (Temsilci Tarafı)
+function completeTraining(trainingId) {
+    // Temsilcinin eğitimi tamamladığını varsayarak backend'e bildirelim.
+    Swal.fire({
+        title: 'Eğitimi Onayla',
+        text: 'Bu eğitimi başarıyla tamamladığınızı onaylıyor musunuz?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Evet, Tamamladım',
+        cancelButtonText: 'İptal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({ title: 'Onay Gönderiliyor...', didOpen: () => Swal.showLoading() });
+
+            // Simülasyon: Kaydı Güncelle
+            const training = trainingRecordsData.find(t => t.id === trainingId);
+            if (training) {
+                training.isCompleted = true;
+                training.status = 'Tamamlandı';
+            }
+
+            setTimeout(() => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Tebrikler!',
+                    text: 'Eğitim tamamlama kaydınız alındı.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                
+                // Eğitim listesini yeniden yükle
+                const agentSelect = document.getElementById('agent-select-admin');
+                const targetAgent = agentSelect ? agentSelect.value : currentUser;
+                const currentMonth = document.getElementById('month-select-filter').value;
+                renderTrainingTab(targetAgent, 'all', currentMonth);
+            }, 1000);
+        }
+    });
+}
+function editTrainingPopup(trainingId) {
+    const training = trainingRecordsData.find(t => t.id === trainingId);
+    if (!training) return Swal.fire('Hata', 'Eğitim kaydı bulunamadı.', 'error');
+    
+    // Simülasyon düzenleme pop-up'ı (Gerçekte veriler çekilmeli ve kaydedilmelidir)
+    Swal.fire({
+        title: `Eğitimi Düzenle: ${training.title}`,
+        html: `<p style="font-size:0.9rem; color:#888;">Bu, yönetici düzenleme alanıdır.</p>
+               <input id="swal-edit-status" class="swal2-input" placeholder="Durum" value="${training.status}">
+               <input id="swal-edit-score" type="number" class="swal2-input" placeholder="Sonuç Puanı (Opsiyonel)" value="${training.resultScore || ''}">`,
+        showCancelButton: true,
+        confirmButtonText: 'Güncelle',
+        preConfirm: () => {
+            training.status = document.getElementById('swal-edit-status').value;
+            training.resultScore = document.getElementById('swal-edit-score').value || null;
+            training.isCompleted = training.status.includes('Tamamlandı') || training.status.includes('Görüşme Kayıt');
+
+            // Yeniden render et
+            const agentSelect = document.getElementById('agent-select-admin');
+            const targetAgent = agentSelect ? agentSelect.value : currentUser;
+            const currentMonth = document.getElementById('month-select-filter').value;
+            renderTrainingTab(targetAgent, 'all', currentMonth);
+
+            Swal.fire('Başarılı', 'Eğitim kaydı güncellendi.', 'success');
+        }
     });
 }
 function openQualityArea() {
@@ -1452,11 +1605,11 @@ detailEl.style.marginTop = '10px';
 }
 async function logEvaluationPopup() {
 const agentSelect = document.getElementById('agent-select-admin');
-const agentName = agentSelect ? agentSelect.value : "";
+const agentName = agentSelect ? agentSelect.options[agentSelect.selectedIndex].text : currentUser;
 
 // Güvenlik: İsim seçili mi?
-if (!agentName || agentName === 'all') {
-Swal.fire('Uyarı', 'Lütfen işlem yapmak için listeden bir personel seçiniz.', 'warning');
+if (!agentName || agentName.includes('Tüm')) {
+Swal.fire('Uyarı', 'Lütfen işlem yapmak için listeden tek bir personel seçiniz.', 'warning');
 return;
 }
 // 1. ADIM: Grubun Doğru Belirlenmesi
