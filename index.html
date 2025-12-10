@@ -1,357 +1,311 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>S Sport Plus - Pusula</title>
-<link rel="stylesheet" href="css/style.css">
-<link rel="icon" type="image/png" href="favicon.png">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S Sport Plus - Pusula</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </head>
 <body>
-<div id="login-screen">
-<div class="login-card">
-<img src="favicon.png" alt="Logo" class="login-logo-img">
-<h2 style="color:white; font-weight:300; margin-top:10px;">S Sport Plus <strong style="color:#fabb00;">Pusula</strong></h2>
-<p style="opacity:0.6; font-size:0.9rem; margin-bottom:20px;">Personel Girişi</p>
-<input type="text" id="usernameInput" class="login-input" placeholder="Kullanıcı Adı">
-<input type="password" id="passInput" class="login-input" placeholder="Şifre" onkeyup="enterBas(event)">
-<button class="login-btn" onclick="girisYap()">Giriş Yap</button>
-<div id="loading-msg" class="loading-text">Bağlanıyor...</div>
-<p id="error-msg" style="color:#ef5350; display:none; margin-top:10px; font-size:0.9rem;">Hatalı Kullanıcı Adı veya Şifre!</p>
-</div>
-</div>
-<div id="maintenance-screen">
-<div class="maintenance-content" style="text-align:center; color:white;">
-<span style="font-size: 4rem;">  👨  ‍  🏫  </span>
-<h1>Sistem Mola Verdi!</h1>
-<p>Bakım çalışması sürüyor...   🚀  </p>
-</div>
-</div>
-<div id="main-app">
-<div class="header">
-<div class="header-content-limit">
-<div class="header-top">
-<div class="brand-area">
-<img src="favicon.png" alt="S Sport Logo" class="brand-img">
-<div class="brand-text">
-<span class="main-text">S Sport Plus</span>
-<span class="sub-text">Temsilci Pusulası</span>
-</div>
-</div>
-<div class="header-controls">
-<div class="user-menu-wrapper">
-<button id="adminBtn" class="user-btn" onclick="toggleUserDropdown()">
-<div class="user-avatar"><i class="fas fa-user"></i></div>
-<span id="user-display">Misafir</span>
-<i class="fas fa-chevron-down" id="user-menu-arrow" style="font-size:0.7rem; opacity:0.5; transition:0.3s;"></i>
-</button>
-<div id="userDropdown" class="dropdown-menu">
-<div class="dropdown-header">
-<span style="font-size:0.8rem; color:#999;">Hesap İşlemleri</span>
-</div>
-<a href="javascript:void(0)" class="dropdown-item" onclick="changePasswordPopup()">
-<i class="fas fa-key"></i> Şifre Değiştir
-</a>
-<a href="javascript:void(0)" class="dropdown-item" id="dropdownAddCard" style="display:none;" onclick="addNewCardPopup()">
-<i class="fas fa-plus" style="color:var(--success);"></i> İçerik Ekle
-</a>
-<a href="javascript:void(0)" class="dropdown-item" id="dropdownQuickEdit" style="display:none;" onclick="toggleEditMode()">
-<i class="fas fa-pen" style="color:var(--secondary);"></i> Düzenlemeyi Aç
-</a>
-<div class="dropdown-divider"></div>
-<a href="javascript:void(0)" class="dropdown-item logout" onclick="logout()">
-<i class="fas fa-sign-out-alt"></i> Çıkış Yap
-</a>
-</div>
-</div>
-</div>
-</div>
-
-<div class="control-wrapper">
-<div class="search-container">
-<i class="fas fa-search search-icon"></i>
-<input type="text" id="searchInput" placeholder="İçeriklerde hızlı ara..." onkeyup="filterContent()">
-</div>
-<div class="filter-container">
-<button class="filter-btn btn-fav" onclick="filterCategory(this, 'fav')"><i class="fas fa-star"></i></button>
-<button class="filter-btn btn-all active" onclick="filterCategory(this, 'all')"><i class="fas fa-layer-group"></i> Tümü</button>
-<button class="filter-btn" onclick="filterCategory(this, 'Teknik')"><i class="fas fa-wrench"></i> Teknik</button>
-<button class="filter-btn" onclick="filterCategory(this, 'İkna')"><i class="fas fa-hand-holding-dollar"></i> İkna</button>
-<button class="filter-btn" onclick="filterCategory(this, 'Kampanya')"><i class="fas fa-gift"></i> Kampanya</button>
-<button class="filter-btn" onclick="filterCategory(this, 'Bilgi')"><i class="fas fa-info-circle"></i> Bilgi</button>
-<div class="divider"></div>
-<a href="https://www.ssportplus.com/yayin-akisi/" target="_blank" class="filter-btn link-btn"><i class="fas fa-calendar-alt"></i> Yayın Akışı</a>
-<button class="filter-btn link-btn" onclick="openGuide()"><i class="fas fa-book"></i> Spor Rehberi</button>
-<button class="filter-btn link-btn" onclick="openWizard()"><i class="fas fa-robot"></i> İade Asistanı</button>
-
-<button class="filter-btn link-btn" onclick="openTechWizard()"><i class="fas fa-magic"></i> Teknik Sihirbaz</button>
-
-<button class="filter-btn link-btn" onclick="openSales()"><i class="fas fa-headset"></i> TeleSatış</button>
-<button class="filter-btn link-btn" onclick="openPenaltyGame()"><i class="fas fa-futbol"></i> Oyun</button>
-<button class="filter-btn link-btn" onclick="openQualityArea()"><i class="fas fa-chart-pie"></i> Kalite</button>
-</div>
-</div>
-</div>
-
-<div class="news-ticker-box" onclick="openNews()">
-<div class="ticker-label">
-<span class="pulse-dot"></span> DUYURU
-</div>
-<div class="ticker-scroll-wrapper">
-<div id="ticker-content" class="ticker-content">Veriler yükleniyor...</div>
-</div>
-</div>
-</div>
-<div class="container">
-<div id="loading" style="text-align:center; padding:40px; color:#999;">
-<i class="fas fa-circle-notch fa-spin fa-2x"></i><br>
-<span style="font-size:0.9rem; margin-top:10px; display:block;">Veriler güncelleniyor...</span>
-</div>
-<div class="grid" id="cardGrid"></div>
-</div>
-</div>
-<div id="news-modal" class="modal-overlay">
-<div class="modal-content">
-<span class="close-modal" onclick="closeModal('news-modal')">&times;</span>
-<h2 style="color:var(--primary);">  📢   Duyurular</h2>
-<div id="news-container"></div>
-</div>
-</div>
-<div id="wizard-modal" class="modal-overlay">
-<div class="modal-content">
-<span class="close-modal" onclick="closeModal('wizard-modal')">&times;</span>
-<div id="wizard-body"></div>
-</div>
-</div>
-
-<div id="tech-wizard-modal" class="modal-overlay">
-<div class="modal-content" style="max-width: 900px; padding: 0; overflow: hidden; display: flex; flex-direction: column;">
-
-<div style="background-color: #0e1b42; color: #fabb00; padding: 20px; text-align: center; font-size: 1.4rem; font-weight: 800; border-bottom: 5px solid #fabb00; position: relative;">
-📺  S Sport Plus - Teknik Çözüm Sihirbazı
-<span class="close-modal" onclick="closeModal('tech-wizard-modal')" style="color: white; top: 15px; right: 20px;">&times;</span>
-</div>
-<div style="background-color: #eaeaea; padding: 10px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ccc;">
-<button id="tw-btn-back" class="btn btn-copy" style="background:#6c757d; color:white; display:none;" onclick="twGoBack()"> ⬅  Önceki Adım</button>
-<button class="btn btn-copy" style="background:#d32f2f; color:white;" onclick="twResetWizard()"> ↻  Ba ş a D ö n</button>
-</div>
-<div id="tech-wizard-content" style="padding: 30px; overflow-y: auto; max-height: 60vh;">
-</div>
-</div>
-</div>
-<div id="guide-modal" class="modal-overlay">
-<div class="modal-content">
-<span class="close-modal" onclick="closeModal('guide-modal')">&times;</span>
-<h2 style="text-align:center; color:var(--primary);">  📖   Spor Terimleri & İçerik Rehberi</h2>
-<div class="guide-grid" id="guide-grid"></div>
-</div>
-</div>
-<div id="sales-modal" class="modal-overlay">
-<div class="modal-content">
-<span class="close-modal" onclick="closeModal('sales-modal')">&times;</span>
-<h2 style="text-align:center; color:var(--sales);">  📞   Satış Scriptleri</h2>
-<div class="sales-grid" id="sales-grid"></div>
-</div>
-</div>
-<div id="penalty-modal" class="modal-overlay">
-<div class="modal-content" style="max-width: 650px; background: #1a1a1a; border: 1px solid #333; min-height:600px; display:flex; flex-direction:column;">
-<span class="close-modal" onclick="closeModal('penalty-modal')">&times;</span>
-<h2 style="text-align:center; color:#fabb00; margin-top:0;">  ⚽   S Sport Arena</h2>
-<div id="penalty-lobby" style="text-align:center; padding:20px; flex-grow:1; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-<h3 style="color:white; margin-bottom:15px;">  🏆   Liderlik Tablosu (Top 5)</h3>
-<div id="leaderboard-loader" style="color:#aaa;">Yükleniyor...</div>
-<table id="leaderboard-table" style="width:100%; color:#eee; border-collapse:collapse; margin-bottom:30px; display:none;">
-<thead><tr style="border-bottom:1px solid #555; color:#fabb00;"><th style="padding:10px;">#</th><th style="padding:10px;">Temsilci</th><th style="padding:10px;">Maç</th><th style="padding:10px;">Ort.</th></tr></thead>
-<tbody id="leaderboard-body"></tbody>
-</table>
-<button class="penalty-btn" style="width:200px; background:#2e7d32; color:white; border-color:#1b5e20;" onclick="startGameFromLobby()">MAÇA BAŞLA   🏃  ‍  ♂️⚽  </button>
-</div>
-<div id="penalty-game-area" style="display:none;">
-<div class="penalty-stats"><span>SKOR: <span id="p-score">0</span></span><span>TOP: <span id="p-balls">10</span></span></div>
-<div class="penalty-field">
-<div class="stadium-stands"></div><div class="grass-stripes"></div>
-<div class="goal-container"><div class="goal-net"></div><div class="goal-top-bar"></div><div class="goal-post-left"></div><div class="goal-post-right"></div><div id="keeper-wrap" class="keeper-wrapper"><div class="player-figure"><div class="head"></div><div class="torso"></div><div class="arms"><div class="arm left"><div class="gloves"></div></div><div class="arm right"><div class="gloves"></div></div></div><div class="shorts"></div><div class="legs"><div class="leg left"></div><div class="leg right"></div></div></div><div class="keeper-shadow"></div></div></div>
-<div class="goal-message" id="goal-msg">GOL!</div><div class="penalty-area"></div><div class="penalty-spot-mark"></div><div id="ball-wrap" class="ball-wrapper"><div class="football"></div><div class="ball-shadow"></div></div><div id="shooter-wrap" class="shooter-wrapper"><div class="player-figure"><div class="head"></div><div class="torso"></div><div class="arms"><div class="arm left"></div><div class="arm right"></div></div><div class="shorts"></div><div class="legs"><div class="leg left"><div class="sock"></div><div class="shoe"></div></div><div class="leg right"><div class="sock"></div><div class="shoe"></div></div></div></div></div>
-</div>
-<div style="margin-top:15px; color:#ddd; min-height:50px; font-weight:500; text-align:center; padding:10px; background:rgba(255,255,255,0.05); border-radius:8px;" id="p-question-text">Soru yükleniyor...</div>
-<div id="joker-container" style="display: flex; justify-content: space-around; margin: 15px 0;">
-<button id="joker-call" class="joker-btn" onclick="useJoker('call')" title="Telefon Jokeri">  📞   Telefon</button>
-<button id="joker-half" class="joker-btn" onclick="useJoker('half')" title="Yarı Yarıya Joker">  ✂️   50:50</button>
-<button id="joker-double" class="joker-btn" onclick="useJoker('double')" title="Çift Cevap Hakkı">2️  ⃣    Ç ift Cevap</button>
-</div>
-<div class="penalty-options" id="p-options"></div>
-<button id="p-restart-btn" class="restart-btn" style="display:none; width:100%; background:#fabb00; color:black; font-weight:bold;" onclick="showLobby()">LOBİYE DÖN   🏠  </button>
-</div>
-</div>
-</div>
-<div id="quality-modal" class="modal-overlay">
-<div class="modal-content">
-<div class="quality-modal-header">
-<h2 id="quality-modal-title" style="color:var(--primary);">  📊   Kalite Yönetim Paneli</h2>
-<span class="close-modal" onclick="closeModal('quality-modal')">&times;</span>
-</div>
-
-<div id="admin-quality-controls" style="display:none; margin: 0 25px;">
-    <div class="quality-controls-top" style="align-items:flex-start;">
-        <div style="display:flex; gap:10px; flex-shrink:0;">
-            <button class="btn btn-copy" style="background:var(--accent); border:none; color:white; padding:8px 15px; border-radius:4px; cursor:pointer;" onclick="logEvaluationPopup()"><i class="fas fa-plus"></i> Değerlendirme Ekle</button>
-            <button class="btn btn-copy" style="background:var(--primary); color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer;" onclick="exportEvaluations()"><i class="fas fa-file-csv"></i> Kırılım Raporu</button>
+    <!-- LOGIN EKRANI -->
+    <div id="login-screen">
+        <div class="login-card">
+            <img src="favicon.png" alt="Logo" class="login-logo-img">
+            <h2 style="color:white; font-weight:300; margin-top:10px;">S Sport Plus <strong style="color:#fabb00;">Pusula</strong></h2>
+            <p style="opacity:0.6; font-size:0.9rem; margin-bottom:20px;">Personel Girişi</p>
+            <input type="text" id="usernameInput" class="login-input" placeholder="Kullanıcı Adı">
+            <input type="password" id="passInput" class="login-input" placeholder="Şifre" onkeyup="enterBas(event)">
+            <button class="login-btn" onclick="girisYap()">Giriş Yap</button>
+            <div id="loading-msg" class="loading-text">Bağlanıyor...</div>
+            <p id="error-msg" style="color:#ef5350; display:none; margin-top:10px; font-size:0.9rem;">Hatalı Kullanıcı Adı veya Şifre!</p>
         </div>
-        <div class="quality-filter-group" style="margin-left: auto;">
-            <div style="display:flex; flex-direction:column;">
-                <label style="font-size:0.7rem; color:#999; margin-bottom:2px;">Ekip / Grup</label>
-                <select id="group-select-admin" class="swal2-input" onchange="updateAgentListBasedOnGroup()" style="width: 150px; padding:5px; height:35px; margin:0; border-color:#ccc; font-size:0.85rem;"></select>
+    </div>
+    <!-- BAKIM EKRANI -->
+    <div id="maintenance-screen">
+        <div class="maintenance-content" style="text-align:center; color:white;">
+            <span style="font-size: 4rem;">  👨  ‍  🏫  </span>
+            <h1>Sistem Mola Verdi!</h1>
+            <p>Bakım çalışması sürüyor...   🚀  </p>
+        </div>
+    </div>
+    <!-- ANA UYGULAMA -->
+    <div id="main-app">
+        <div class="header">
+            <div class="header-content-limit">
+                <div class="header-top">
+                    <div class="brand-area">
+                        <img src="favicon.png" alt="S Sport Logo" class="brand-img">
+                        <div class="brand-text">
+                            <span class="main-text">S Sport Plus</span>
+                            <span class="sub-text">Temsilci Pusulası</span>
+                        </div>
+                    </div>
+                    <div class="header-controls">
+                        <div class="user-menu-wrapper">
+                            <button id="adminBtn" class="user-btn" onclick="toggleUserDropdown()">
+                                <div class="user-avatar"><i class="fas fa-user"></i></div>
+                                <span id="user-display">Misafir</span>
+                                <i class="fas fa-chevron-down" id="user-menu-arrow" style="font-size:0.7rem; opacity:0.5; transition:0.3s;"></i>
+                            </button>
+                            <div id="userDropdown" class="dropdown-menu">
+                                <div class="dropdown-header">
+                                    <span style="font-size:0.8rem; color:#999;">Hesap İşlemleri</span>
+                                </div>
+                                <a href="javascript:void(0)" class="dropdown-item" onclick="changePasswordPopup()">
+                                    <i class="fas fa-key"></i> Şifre Değiştir
+                                </a>
+                                <a href="javascript:void(0)" class="dropdown-item" id="dropdownAddCard" style="display:none;" onclick="addNewCardPopup()">
+                                    <i class="fas fa-plus" style="color:var(--success);"></i> İçerik Ekle
+                                </a>
+                                <a href="javascript:void(0)" class="dropdown-item" id="dropdownQuickEdit" style="display:none;" onclick="toggleEditMode()">
+                                    <i class="fas fa-pen" style="color:var(--secondary);"></i> Düzenlemeyi Aç
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a href="javascript:void(0)" class="dropdown-item logout" onclick="logout()">
+                                    <i class="fas fa-sign-out-alt"></i> Çıkış Yap
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="control-wrapper">
+                    <div class="search-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="searchInput" placeholder="İçeriklerde hızlı ara..." onkeyup="filterContent()">
+                    </div>
+                    <div class="filter-container">
+                        <button class="filter-btn btn-fav" onclick="filterCategory(this, 'fav')"><i class="fas fa-star"></i></button>
+                        <button class="filter-btn btn-all active" onclick="filterCategory(this, 'all')"><i class="fas fa-layer-group"></i> Tümü</button>
+                        <button class="filter-btn" onclick="filterCategory(this, 'Teknik')"><i class="fas fa-wrench"></i> Teknik</button>
+                        <button class="filter-btn" onclick="filterCategory(this, 'İkna')"><i class="fas fa-hand-holding-dollar"></i> İkna</button>
+                        <button class="filter-btn" onclick="filterCategory(this, 'Kampanya')"><i class="fas fa-gift"></i> Kampanya</button>
+                        <button class="filter-btn" onclick="filterCategory(this, 'Bilgi')"><i class="fas fa-info-circle"></i> Bilgi</button>
+                        <div class="divider"></div>
+                        <a href="https://www.ssportplus.com/yayin-akisi/" target="_blank" class="filter-btn link-btn"><i class="fas fa-calendar-alt"></i> Yayın Akışı</a>
+                        <button class="filter-btn link-btn" onclick="openGuide()"><i class="fas fa-book"></i> Spor Rehberi</button>
+                        <button class="filter-btn link-btn" onclick="openWizard()"><i class="fas fa-robot"></i> İade Asistanı</button>
+                        
+                        <!-- YENİ EKLENEN BUTON: TEKNİK SİHİRBAZ -->
+                        <button class="filter-btn link-btn" onclick="openTechWizard()"><i class="fas fa-magic"></i> Teknik Sihirbaz</button>
+                        
+                        <button class="filter-btn link-btn" onclick="openSales()"><i class="fas fa-headset"></i> TeleSatış</button>
+                        <button class="filter-btn link-btn" onclick="openPenaltyGame()"><i class="fas fa-futbol"></i> Oyun</button>
+                        <button class="filter-btn link-btn" onclick="openQualityArea()"><i class="fas fa-chart-pie"></i> Kalite</button>
+                    </div>
+                </div>
             </div>
-            <div style="display:flex; flex-direction:column;">
-                <label style="font-size:0.7rem; color:#999; margin-bottom:2px;">Temsilci</label>
-                <select id="agent-select-admin" class="swal2-input" onchange="fetchEvaluationsForAgent()" style="width: 180px; padding:5px; height:35px; margin:0; border-color:#ccc; font-size:0.85rem;"></select>
+            
+            <div class="news-ticker-box" onclick="openNews()">
+                <div class="ticker-label">
+                    <span class="pulse-dot"></span> DUYURU
+                </div>
+                <div class="ticker-scroll-wrapper">
+                    <div id="ticker-content" class="ticker-content">Veriler yükleniyor...</div>
+                </div>
             </div>
-            <div style="display:flex; flex-direction:column;">
-                <label style="font-size:0.75rem; color:#999; margin-bottom:2px;">Dönem Seçimi:</label>
-                <select id="month-select-filter" class="minimal-select swal2-input" onchange="fetchEvaluationsForAgent()" style="width: 120px; padding:5px; height:35px; margin:0; border-color:#ccc; font-size:0.85rem;">
-                </select>
+        </div>
+        <div class="container">
+            <div id="loading" style="text-align:center; padding:40px; color:#999;">
+                <i class="fas fa-circle-notch fa-spin fa-2x"></i><br>
+                <span style="font-size:0.9rem; margin-top:10px; display:block;">Veriler güncelleniyor...</span>
+            </div>
+            <div class="grid" id="cardGrid"></div>
+        </div>
+    </div>
+    <!-- MODAL: DUYURULAR -->
+    <div id="news-modal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('news-modal')">&times;</span>
+            <h2 style="color:var(--primary);">  📢   Duyurular</h2>
+            <div id="news-container"></div>
+        </div>
+    </div>
+    <!-- MODAL: İADE ASİSTANI -->
+    <div id="wizard-modal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('wizard-modal')">&times;</span>
+            <div id="wizard-body"></div>
+        </div>
+    </div>
+    
+    <!-- YENİ MODAL: TEKNİK SİHİRBAZ -->
+    <div id="tech-wizard-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 900px; padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+            
+            <!-- Header Kısmı -->
+            <div style="background-color: #0e1b42; color: #fabb00; padding: 20px; text-align: center; font-size: 1.4rem; font-weight: 800; border-bottom: 5px solid #fabb00; position: relative;">
+                 📺  S Sport Plus - Teknik Çözüm Sihirbazı
+                <span class="close-modal" onclick="closeModal('tech-wizard-modal')" style="color: white; top: 15px; right: 20px;">&times;</span>
+            </div>
+            <!-- Navigasyon Barı -->
+            <div style="background-color: #eaeaea; padding: 10px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ccc;">
+                <button id="tw-btn-back" class="btn btn-copy" style="background:#6c757d; color:white; display:none;" onclick="twGoBack()"> ⬅  Önceki Adım</button>
+                <button class="btn btn-copy" style="background:#d32f2f; color:white;" onclick="twResetWizard()"> ↻  Ba ş a D ö n</button>
+            </div>
+            <!-- İçerik Alanı -->
+            <div id="tech-wizard-content" style="padding: 30px; overflow-y: auto; max-height: 60vh;">
+                <!-- JS burayı dolduracak -->
             </div>
         </div>
     </div>
-</div>
-<div class="q-tabs">
-<button id="tab-overview-btn" class="q-tab-btn active" onclick="switchQualityTab('overview')">Performans Özeti</button>
-<button id="tab-training-btn" class="q-tab-btn" onclick="switchQualityTab('training')">Eğitim ve Gelişim</button>
-</div>
-
-<div id="quality-content">
-<div id="quality-tab-overview" class="q-tab-content">
-<div class="q-stats-grid">
-<div class="q-stat-card card-blue">
-<div class="q-card-title">ORTALAMA PUAN</div>
-<div class="q-card-value" id="dash-avg-score">-</div>
-<div class="q-card-footer">Seçili dönem ort.</div>
-<div class="q-card-icon-bg" style="color:var(--info);"><i class="fas fa-star"></i></div>
-</div>
-
-<div class="q-stat-card card-green">
-<div class="q-card-title">HEDEF TUTMA</div>
-<div class="q-card-value" id="dash-target-rate">-%</div>
-<div class="q-card-footer">Hedef: 90+ Puan</div>
-<div class="q-card-icon-bg" style="color:var(--success);"><i class="fas fa-bullseye"></i></div>
-</div>
-
-<div class="q-stat-card card-orange">
-<div class="q-card-title">ÇAĞRI ADEDİ</div>
-<div class="q-card-value" id="dash-eval-count">-</div>
-<div class="q-card-footer">Değerlendirilen adet</div>
-<div class="q-card-icon-bg" style="color:var(--warning);"><i class="fas fa-headset"></i></div>
-</div>
-
-<div class="q-stat-card card-red">
-<div class="q-card-title">KRİTİK KIRILIM</div>
-<div class="q-card-value" id="dash-negative-notes">-</div>
-<div class="q-card-footer">Not girilen adet (Hata)</div>
-<div class="q-card-icon-bg" style="color:var(--accent);"><i class="fas fa-exclamation-triangle"></i></div>
-</div>
-
-<div class="q-stat-card card-yellow">
-<div class="q-card-title">DÜZELTME KAYDI</div>
-<div class="q-card-value" id="dash-revision-count">-</div>
-<div class="q-card-footer">Revize edilen adet</div>
-<div class="q-card-icon-bg" style="color:var(--secondary);"><i class="fas fa-pen"></i></div>
-</div>
-</div>
-
-<h3 class="list-section-title">Değerlendirme Geçmişi (Ters Kronolojik)</h3>
-<div id="quality-loader" style="text-align:center; color:#999; font-style:italic; display:none; margin:20px 0;">Yükleniyor...</div>
-<div id="evaluations-list">
-</div>
-</div>
-
-<div id="quality-tab-training" class="q-tab-content hidden">
-    <div id="training-admin-controls" style="display:flex; justify-content:flex-end; margin-bottom:15px; margin-top:5px; gap:10px;">
-        <button class="btn btn-copy" style="background:#0288d1; color:white; padding:8px 15px; border-radius:4px; cursor:pointer;" onclick="planNewTrainingPopup()"><i class="fas fa-chalkboard-teacher"></i> Eğitim Planla/Ata</button>
-    </div>
-
-    <div class="q-section-card">
-        <h4>Atanmış Eğitimler / Görüşme Kayıtları</h4>
-        <div id="training-records-list">
+    <!-- MODAL: SPOR REHBERİ -->
+    <div id="guide-modal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('guide-modal')">&times;</span>
+            <h2 style="text-align:center; color:var(--primary);">  📖   Spor Terimleri & İçerik Rehberi</h2>
+            <div class="guide-grid" id="guide-grid"></div>
         </div>
     </div>
-
-    <div class="q-section-card" style="margin-top:15px;">
-        <h4><i class="fas fa-chart-line"></i> Eğitim Sonrası Performans Takibi</h4>
-        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 15px;">Eğitim/Görüşme sonrası yapılan kalite değerlendirmelerinde elde edilen puanlar.</p>
-        <table class="simple-table">
-        <thead>
-        <tr><th>Tarih</th><th>Eğitim Konusu</th><th>Puan</th><th>Değerlendiren</th></tr>
-        </thead>
-        <tbody id="training-performance-body">
-        </tbody>
-        </table>
+    <!-- MODAL: SATIŞ SCRIPTLERI -->
+    <div id="sales-modal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('sales-modal')">&times;</span>
+            <h2 style="text-align:center; color:var(--sales);">  📞   Satış Scriptleri</h2>
+            <div class="sales-grid" id="sales-grid"></div>
+        </div>
     </div>
-</div>
-</div>
-</div>
-</div>
-<div class="crafted-by-badge">Crafted by Doğuş Yalçınkaya</div>
-<script src="js/app.js"></script>
-<script>
-function toggleUserDropdown() {
-const dropdown = document.getElementById('userDropdown');
-const arrow = document.getElementById('user-menu-arrow');
-dropdown.classList.toggle('show');
-if (dropdown.classList.contains('show')) {
-arrow.style.transform = 'rotate(180deg)';
-} else {
-arrow.style.transform = 'rotate(0deg)';
-}
-}
-window.addEventListener('click', function(e) {
-if (!document.getElementById('adminBtn').contains(e.target)) {
-const dropdown = document.getElementById('userDropdown');
-const arrow = document.getElementById('user-menu-arrow');
-if (dropdown.classList.contains('show')) {
-dropdown.classList.remove('show');
-arrow.style.transform = 'rotate(0deg)';
-}
-}
-});
-window.openUserMenu = function() {
-toggleUserDropdown();
-};
-function switchQualityTab(tabId) {
-// Tüm içerikleri gizle
-document.querySelectorAll('.q-tab-content').forEach(c => c.classList.add('hidden'));
-// İlgili içeriği göster
-document.getElementById('quality-tab-' + tabId).classList.remove('hidden');
-
-// Tüm butonların 'active' sınıfını kaldır
-document.querySelectorAll('.q-tab-btn').forEach(b => b.classList.remove('active'));
-// Tıklanan butona 'active' sınıfını ekle
-document.getElementById('tab-' + tabId + '-btn').classList.add('active');
-
-// Filtrelerden seçilen temsilciyi al
-const agentSelect = document.getElementById('agent-select-admin');
-const targetAgent = agentSelect ? agentSelect.value : currentUser;
-const groupSelect = document.getElementById('group-select-admin');
-const targetGroup = groupSelect ? groupSelect.value : 'all';
-const selectedMonth = document.getElementById('month-select-filter').value;
-
-// Eğer Eğitim sekmesine geçiliyorsa, Yönetici butonlarını ve veriyi güncelle
-const trainingControls = document.getElementById('training-admin-controls');
-if (tabId === 'training') {
-    // Yöneticiyse ve tek bir temsilci seçiliyse butonu göster
-    if (isAdminMode && targetAgent !== 'all') {
-        trainingControls.style.display = 'flex';
-    } else {
-        trainingControls.style.display = 'none';
-    }
-    renderTrainingTab(targetAgent, targetGroup, selectedMonth);
-} else {
-    // Performans Özeti'nde gizle
-    trainingControls.style.display = 'none';
-}
-}
-</script>
+    <!-- MODAL: PENALTI OYUNU -->
+    <div id="penalty-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 650px; background: #1a1a1a; border: 1px solid #333; min-height:600px; display:flex; flex-direction:column;">
+            <span class="close-modal" onclick="closeModal('penalty-modal')">&times;</span>
+            <h2 style="text-align:center; color:#fabb00; margin-top:0;">  ⚽   S Sport Arena</h2>
+            <div id="penalty-lobby" style="text-align:center; padding:20px; flex-grow:1; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                <h3 style="color:white; margin-bottom:15px;">  🏆   Liderlik Tablosu (Top 5)</h3>
+                <div id="leaderboard-loader" style="color:#aaa;">Yükleniyor...</div>
+                <table id="leaderboard-table" style="width:100%; color:#eee; border-collapse:collapse; margin-bottom:30px; display:none;">
+                    <thead><tr style="border-bottom:1px solid #555; color:#fabb00;"><th style="padding:10px;">#</th><th style="padding:10px;">Temsilci</th><th style="padding:10px;">Maç</th><th style="padding:10px;">Ort.</th></tr></thead>
+                    <tbody id="leaderboard-body"></tbody>
+                </table>
+                <button class="penalty-btn" style="width:200px; background:#2e7d32; color:white; border-color:#1b5e20;" onclick="startGameFromLobby()">MAÇA BAŞLA   🏃  ‍  ♂️⚽  </button>
+            </div>
+            <div id="penalty-game-area" style="display:none;">
+                <div class="penalty-stats"><span>SKOR: <span id="p-score">0</span></span><span>TOP: <span id="p-balls">10</span></span></div>
+                <div class="penalty-field">
+                    <div class="stadium-stands"></div><div class="grass-stripes"></div>
+                    <div class="goal-container"><div class="goal-net"></div><div class="goal-top-bar"></div><div class="goal-post-left"></div><div class="goal-post-right"></div><div id="keeper-wrap" class="keeper-wrapper"><div class="player-figure"><div class="head"></div><div class="torso"></div><div class="arms"><div class="arm left"><div class="gloves"></div></div><div class="arm right"><div class="gloves"></div></div></div><div class="shorts"></div><div class="legs"><div class="leg left"></div><div class="leg right"></div></div></div><div class="keeper-shadow"></div></div></div>
+                    <div class="goal-message" id="goal-msg">GOL!</div><div class="penalty-area"></div><div class="penalty-spot-mark"></div><div id="ball-wrap" class="ball-wrapper"><div class="football"></div><div class="ball-shadow"></div></div><div id="shooter-wrap" class="shooter-wrapper"><div class="player-figure"><div class="head"></div><div class="torso"></div><div class="arms"><div class="arm left"></div><div class="arm right"></div></div><div class="shorts"></div><div class="legs"><div class="leg left"><div class="sock"></div><div class="shoe"></div></div><div class="leg right"><div class="sock"></div><div class="shoe"></div></div></div></div></div>
+                </div>
+                <div style="margin-top:15px; color:#ddd; min-height:50px; font-weight:500; text-align:center; padding:10px; background:rgba(255,255,255,0.05); border-radius:8px;" id="p-question-text">Soru yükleniyor...</div>
+                <div id="joker-container" style="display: flex; justify-content: space-around; margin: 15px 0;">
+                    <button id="joker-call" class="joker-btn" onclick="useJoker('call')" title="Telefon Jokeri">  📞   Telefon</button>
+                    <button id="joker-half" class="joker-btn" onclick="useJoker('half')" title="Yarı Yarıya Joker">  ✂️   50:50</button>
+                    <button id="joker-double" class="joker-btn" onclick="useJoker('double')" title="Çift Cevap Hakkı">2️  ⃣    Ç ift Cevap</button>
+                </div>
+                <div class="penalty-options" id="p-options"></div>
+                <button id="p-restart-btn" class="restart-btn" style="display:none; width:100%; background:#fabb00; color:black; font-weight:bold;" onclick="showLobby()">LOBİYE DÖN   🏠  </button>
+            </div>
+        </div>
+    </div>
+    <!-- MODAL: KALİTE YÖNETİM PANELİ (GÜNCELLENMİŞ HALİ) -->
+    <div id="quality-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 900px;">
+            <span class="close-modal" onclick="closeModal('quality-modal')">&times;</span>
+            <h2 style="text-align:center; color:var(--primary); margin-bottom: 20px;">Kalite</h2>
+            
+            <!-- Admin Kontrolleri (GÜNCELLENDİ) -->
+            <div id="admin-quality-controls" style="display:none; margin-bottom:15px;">
+                <div class="quality-controls-top">
+                    <div style="display:flex; gap:10px;">
+                        <button class="add-btn" style="background:var(--accent); border:none; color:white; padding:8px 15px; border-radius:4px; cursor:pointer;" onclick="logEvaluationPopup()"><i class="fas fa-plus"></i> Ekle</button>
+                        <button class="admin-btn" style="background:var(--primary); color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer;" onclick="exportEvaluations()"><i class="fas fa-file-csv"></i> Rapor</button>
+                    </div>
+                    <!-- YENİ: Grup ve Temsilci Filtresi -->
+                    <div style="font-weight:bold; display:flex; align-items:center; gap: 15px;">
+                        <div style="display:flex; flex-direction:column;">
+                            <label style="font-size:0.7rem; color:#999; margin-bottom:2px;">Ekip / Grup</label>
+                            <select id="group-select-admin" class="swal2-input" onchange="updateAgentListBasedOnGroup()" style="width: 150px; padding:5px; height:35px; margin:0; border-color:#ccc; font-size:0.85rem;"></select>
+                        </div>
+                        <div style="display:flex; flex-direction:column;">
+                            <label style="font-size:0.7rem; color:#999; margin-bottom:2px;">Temsilci</label>
+                            <select id="agent-select-admin" class="swal2-input" onchange="fetchEvaluationsForAgent()" style="width: 180px; padding:5px; height:35px; margin:0; border-color:#ccc; font-size:0.85rem;"></select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- GÜNCELLENMİŞ KALİTE İÇERİĞİ -->
+            <div id="quality-content" style="padding: 10px; border-radius: 8px;">
+    
+                <!-- ÜST KISIM: BAŞLIK VE FİLTRE -->
+                <div class="q-dashboard-header" style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:1px solid #eee; padding-bottom:10px; margin-bottom:15px;">
+                    <div>
+                        <h3 style="font-size:1.2rem; color:var(--primary); margin:0; font-weight:700;">Kalite Yönetim Paneli</h3>
+                        <p style="font-size:0.8rem; color:#888; margin:2px 0 0 0;">Genel performans özeti</p>
+                    </div>
+                    
+                    <div style="text-align:right;">
+                        <label style="font-size:0.75rem; color:#999; display:block; margin-bottom:2px;">Dönem Seçimi:</label>
+                        <select id="month-select-filter" class="minimal-select" style="font-size:0.9rem; font-weight:bold; color:var(--primary); border:none; border-bottom:1px dashed #ccc; outline:none; background:transparent; cursor:pointer;" onchange="fetchEvaluationsForAgent()">
+                            <!-- JS burayı dolduracak -->
+                        </select>
+                    </div>
+                </div>
+            
+                <!-- ORTA KISIM: 3'LÜ İSTATİSTİK KARTLARI -->
+                <div class="q-stats-grid">
+                    <div class="q-stat-card card-blue">
+                        <div class="q-card-title">ORTALAMA PUAN</div>
+                        <div class="q-card-value" id="dash-avg-score">-</div>
+                        <div class="q-card-footer">Seçili dönem</div>
+                        <div class="q-card-icon-bg"><i class="fas fa-chart-pie"></i></div>
+                    </div>
+            
+                    <div class="q-stat-card card-green">
+                        <div class="q-card-title">ÇAĞRI ADEDİ</div>
+                        <div class="q-card-value" id="dash-eval-count">-</div>
+                        <div class="q-card-footer">Değerlendirilen</div>
+                        <div class="q-card-icon-bg"><i class="fas fa-check"></i></div>
+                    </div>
+            
+                    <div class="q-stat-card card-orange">
+                        <div class="q-card-title">HEDEF TUTMA</div>
+                        <div class="q-card-value" id="dash-target-rate">-%</div>
+                        <div class="q-card-footer">Hedef: 90+</div>
+                        <div class="q-card-icon-bg"><i class="fas fa-trophy"></i></div>
+                    </div>
+                </div>
+                
+                <!-- ALT KISIM: LİSTE BAŞLIĞI VE LİSTE -->
+                <div class="list-section-title" style="font-size:0.85rem; font-weight:700; color:#333; margin:15px 0 10px 0; padding-left:5px; border-left:3px solid #ccc;">
+                    Değerlendirme Geçmişi
+                </div>
+                
+                <div id="quality-loader" style="text-align:center; color:#999; font-style:italic; display:none; margin:20px 0;">Yükleniyor...</div>
+            
+                <div id="evaluations-list" style="max-height: 380px; overflow-y: auto; padding-right:5px;"></div>
+            </div>
+        </div>
+    </div>
+    <div class="crafted-by-badge">Crafted by Doğuş Yalçınkaya</div>
+    <script src="js/app.js"></script>
+    <script>
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            const arrow = document.getElementById('user-menu-arrow');
+            dropdown.classList.toggle('show');
+            if (dropdown.classList.contains('show')) {
+                arrow.style.transform = 'rotate(180deg)';
+            } else {
+                arrow.style.transform = 'rotate(0deg)';
+            }
+        }
+        window.addEventListener('click', function(e) {
+            if (!document.getElementById('adminBtn').contains(e.target)) {
+                const dropdown = document.getElementById('userDropdown');
+                const arrow = document.getElementById('user-menu-arrow');
+                if (dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                    arrow.style.transform = 'rotate(0deg)';
+                }
+            }
+        });
+        window.openUserMenu = function() {
+            toggleUserDropdown();
+        };
+    </script>
 </body>
 </html>
