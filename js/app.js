@@ -62,6 +62,7 @@ window.setButtonScore = function(index, score, max) {
 
 /**
  * Toplam skoru hesaplar ve göstergeyi günceller.
+ * (Artık slider yerine .score-badge'lerden okur ve .criteria-row'ların data-max-score attribute'ünden max puanı alır)
  */
 window.recalcTotalScore = function() {
     let currentTotal = 0;
@@ -168,9 +169,6 @@ document.addEventListener('DOMContentLoaded', () => {
     checkSession();
 });
 // --- SESSION & LOGIN ---
-/**
- * qusers rolü için sadece kalite modalını açar ve diğer içerikleri gizler.
- */
 function checkSession() {
     const savedUser = localStorage.getItem("sSportUser");
     const savedToken = localStorage.getItem("sSportToken");
@@ -181,31 +179,13 @@ function checkSession() {
         document.getElementById("user-display").innerText = currentUser;
         checkAdmin(savedRole);
         startSessionTimer();
-        
-        if (BAKIM_MODU) {
+        if (BAKIM_MODU)
             document.getElementById("maintenance-screen").style.display = "flex";
-        } else {
+        else {
             document.getElementById("main-app").style.display = "block";
             loadContentData();
             loadWizardData();
-            loadTechWizardData();
-            
-            // Eğer qusers rolündeyse, ana içeriği gizle ve kalite modalını aç
-            if (savedRole === 'qusers') {
-                 // Ana içeriği (kartlar) gizle
-                const grid = document.getElementById('cardGrid');
-                if (grid) grid.style.display = 'none';
-
-                // Filtre ve arama alanını gizle
-                const controls = document.querySelector('.control-wrapper');
-                if (controls) controls.style.display = 'none';
-
-                // Ticker'ı gizle
-                const ticker = document.querySelector('.news-ticker-box');
-                if (ticker) ticker.style.display = 'none';
-                
-                openQualityArea();
-            }
+            loadTechWizardData(); // YENİ: Otomatik yükle
         }
     }
 }
@@ -239,9 +219,6 @@ function girisYap() {
             localStorage.setItem("sSportUser", currentUser);
             localStorage.setItem("sSportToken", data.token);
             localStorage.setItem("sSportRole", data.role);
-            
-            const savedRole = data.role; // Yeni eklenen
-            
             if (data.forceChange === true) {
                 Swal.fire({
                     icon: 'warning',
@@ -254,32 +231,15 @@ function girisYap() {
             } else {
                 document.getElementById("login-screen").style.display = "none";
                 document.getElementById("user-display").innerText = currentUser;
-                checkAdmin(savedRole);
+                checkAdmin(data.role);
                 startSessionTimer();
-                
-                if (BAKIM_MODU) {
+                if (BAKIM_MODU)
                     document.getElementById("maintenance-screen").style.display = "flex";
-                } else {
+                else {
                     document.getElementById("main-app").style.display = "block";
                     loadContentData();
                     loadWizardData();
-                    loadTechWizardData();
-                    
-                    if (savedRole === 'qusers') { 
-                        // Ana içeriği (kartlar) gizle
-                        const grid = document.getElementById('cardGrid');
-                        if (grid) grid.style.display = 'none';
-
-                        // Filtre ve arama alanını gizle
-                        const controls = document.querySelector('.control-wrapper');
-                        if (controls) controls.style.display = 'none';
-
-                        // Ticker'ı gizle
-                        const ticker = document.querySelector('.news-ticker-box');
-                        if (ticker) ticker.style.display = 'none';
-
-                        openQualityArea();
-                    }
+                    loadTechWizardData(); // YENİ: Yükle
                 }
             }
         } else {
@@ -301,47 +261,6 @@ function checkAdmin(role) {
     isAdminMode = (role === "admin");
     isEditingActive = false;
     document.body.classList.remove('editing');
-    
-    // qusers rolü için menü butonlarını devre dışı bırak
-    const isQualityUser = (role === 'qusers');
-    const filterButtons = document.querySelectorAll('.filter-btn:not(.btn-fav)'); 
-    
-    if (isQualityUser) {
-        // Tüm menü butonlarını devre dışı bırak
-        filterButtons.forEach(btn => {
-            // Kalite butonu hariç diğer tüm menü butonlarını gizle/devre dışı bırak
-            if (btn.innerText.indexOf('Kalite') === -1) {
-                btn.style.opacity = '0.5';
-                btn.style.pointerEvents = 'none';
-                btn.style.filter = 'grayscale(100%)';
-            } else {
-                btn.style.filter = 'none';
-            }
-        });
-        
-        // Ana navigasyon filtresini de devre dışı bırakalım
-        const searchInput = document.getElementById('searchInput');
-        if (searchInput) {
-            searchInput.disabled = true;
-            searchInput.placeholder = "Arama devre dışı (Kalite Modu)";
-            searchInput.style.opacity = '0.6';
-        }
-
-    } else {
-        // Tüm menü butonlarını aktif et
-        filterButtons.forEach(btn => {
-            btn.style.opacity = '1';
-            btn.style.pointerEvents = 'auto';
-            btn.style.filter = 'none';
-        });
-        const searchInput = document.getElementById('searchInput');
-        if (searchInput) {
-            searchInput.disabled = false;
-            searchInput.placeholder = "İçeriklerde hızlı ara...";
-            searchInput.style.opacity = '1';
-        }
-    }
-    
     if(isAdminMode) {
         if(addCardDropdown) addCardDropdown.style.display = 'flex';
         if(quickEditDropdown) {
@@ -892,7 +811,7 @@ async function editSport(title) {
             <input id="swal-tip" class="swal2-input" style="width:100%; margin-bottom:10px;" value="${s.tip || ''}">
             <label style="font-weight:bold;">Detay (Alt Metin)</label>
             <textarea id="swal-detail" class="swal2-textarea" style="margin-bottom:10px;">${s.detail || ''}</textarea>
-            <label style="font-weight:bold;">Okunuşu (Pronunciation)</label>
+            <label style="font-weight:bold;">Okunuş</label>
             <input id="swal-pron" class="swal2-input" style="width:100%; margin-bottom:10px;" value="${s.pronunciation || ''}">
             <label style="font-weight:bold;">İkon Sınıfı (Icon)</label>
             <input id="swal-icon" class="swal2-input" style="width:100%;" value="${s.icon || ''}">
@@ -2046,4 +1965,118 @@ function openWizard(){
             }
         }).catch(() => {
             Swal.close();
-            document.getElementById('wizard-body').innerHTML = '<h2 style="color:red;">Sunucudan veri çekme hatası oluştu.
+            document.getElementById('wizard-body').innerHTML = '<h2 style="color:red;">Sunucudan veri çekme hatası oluştu.</h2>';
+        });
+    } else {
+        renderStep('start');
+    }
+}
+function renderStep(k){
+    const s = wizardStepsData[k];
+    if (!s) {
+        document.getElementById('wizard-body').innerHTML = `<h2 style="color:red;">HATA: Adım ID'si (${k}) bulunamadı. Lütfen yöneticinizle iletişime geçin.</h2>`;
+        return;
+    }
+    const b = document.getElementById('wizard-body');
+    let h = `<h2 style="color:var(--primary);">${s.title || ''}</h2>`;
+    
+    if(s.result) {
+        let i = s.result === 'red' ? '  🛑  ' : (s.result === 'green' ? '  ✅  ' : '  ⚠️  ');
+        let c = s.result === 'red' ? 'res-red' : (s.result === 'green' ? 'res-green' : 'res-yellow');
+        h += `<div class="result-box ${c}"><div style="font-size:3rem;margin-bottom:10px;">${i}</div><h3>${s.title}</h3><p>${s.text}</p>${s.script ? `<div class="script-box">${s.script}</div>` : ''}</div><button class="restart-btn" onclick="renderStep('start')"><i class="fas fa-redo"></i> Başa Dön</button>`;
+    } else {
+        h += `<p>${s.text}</p><div class="wizard-options">`;
+        s.options.forEach(o => {
+            h += `<button class="option-btn" onclick="renderStep('${o.next}')"><i class="fas fa-chevron-right"></i> ${o.text}</button>`;
+        });
+        h += `</div>`;
+        if(k !== 'start')
+            h += `<button class="restart-btn" onclick="renderStep('start')" style="background:#eee;color:#333;margin-top:15px;">Başa Dön</button>`;
+    }
+    b.innerHTML = h;
+}
+// --- TEKNİK SİHİRBAZ MODÜLÜ (DİNAMİK VERİ İLE) ---
+// State Yönetimi
+const twState = {
+    currentStep: 'start',
+    history: []
+};
+// Modal Açma Fonksiyonu
+function openTechWizard() {
+    document.getElementById('tech-wizard-modal').style.display = 'flex';
+    // Eğer veri henüz yüklenmediyse tekrar dene
+    if (Object.keys(techWizardData).length === 0) {
+        Swal.fire({ title: 'Veriler Yükleniyor...', didOpen: () => Swal.showLoading() });
+        loadTechWizardData().then(() => {
+            Swal.close();
+            twResetWizard();
+        });
+    } else {
+        twRenderStep();
+    }
+}
+// Navigasyon ve Render Mantığı
+function twRenderStep() {
+    const contentDiv = document.getElementById('tech-wizard-content');
+    const backBtn = document.getElementById('tw-btn-back');
+    const stepData = techWizardData[twState.currentStep];
+    // Geri butonu kontrolü
+    if (twState.history.length > 0) backBtn.style.display = 'block';
+    else backBtn.style.display = 'none';
+    if (!stepData) {
+        contentDiv.innerHTML = `<div class="alert" style="color:red;">Hata: Adım bulunamadı (${twState.currentStep}). Lütfen tabloyu kontrol edin.</div>`;
+        return;
+    }
+    let html = `<div class="tech-step-title">${stepData.title || ''}</div>`;
+    // Metin (Varsa)
+    if (stepData.text) {
+        html += `<p style="font-size:1rem; margin-bottom:15px;">${stepData.text}</p>`;
+    }
+    // Script Kutusu (Varsa) - GÜVENLİ KOPYALAMA BUTONU EKLENDİ
+    if (stepData.script) {
+        // Encode URI Component ile metni güvenli hale getiriyoruz (Tırnak ve satır hatalarını önler)
+        const safeScript = encodeURIComponent(stepData.script);
+        html += `
+        <div class="tech-script-box">
+            <span class="tech-script-label">Müşteriye iletilecek:</span>
+            "${stepData.script}"
+            <div style="margin-top:10px; text-align:right;">
+                <button class="btn btn-copy" style="font-size:0.8rem; padding:5px 10px;" onclick="copyScriptContent('${safeScript}')">
+                    <i class="fas fa-copy"></i> Kopyala
+                </button>
+            </div>
+        </div>`;
+    }
+    // Uyarı/Alert (Varsa)
+    if (stepData.alert) {
+        html += `<div class="tech-alert">${stepData.alert}</div>`;
+    }
+    // Butonlar
+    if (stepData.buttons && stepData.buttons.length > 0) {
+        html += `<div class="tech-buttons-area">`;
+        stepData.buttons.forEach(btn => {
+            let btnClass = btn.style === 'option' ? 'tech-btn-option' : 'tech-btn-primary';
+            html += `<button class="tech-btn ${btnClass}" onclick="twChangeStep('${btn.next}')">${btn.text}</button>`;
+        });
+        html += `</div>`;
+    }
+    contentDiv.innerHTML = html;
+}
+// Navigasyon Fonksiyonları
+function twChangeStep(newStep) {
+    // Özel komutlar (Eski hardcoded mantıktan kalanlar varsa buraya eklenebilir ama şu an hepsi tabloda)
+    twState.history.push(twState.currentStep);
+    twState.currentStep = newStep;
+    twRenderStep();
+}
+function twGoBack() {
+    if (twState.history.length > 0) {
+        twState.currentStep = twState.history.pop();
+        twRenderStep();
+    }
+}
+function twResetWizard() {
+    twState.currentStep = 'start';
+    twState.history = [];
+    twRenderStep();
+}
