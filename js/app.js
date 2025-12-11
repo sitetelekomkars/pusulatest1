@@ -882,21 +882,7 @@ async function fetchEvaluationsForAgent(forcedName) {
                 const scoreColor = evalItem.score >= 90 ? '#2e7d32' : (evalItem.score >= 70 ? '#ed6c02' : '#d32f2f');
                 const displayCallDate = formatDateToDDMMYYYY(evalItem.callDate);
                 const displayLogDate  = formatDateToDDMMYYYY(evalItem.date);
-                
-                let detailHtml = '';
-                try {
-                    const detailObj = JSON.parse(evalItem.details);
-                    detailHtml = '<table style="width:100%; font-size:0.85rem; border-collapse:collapse; margin-top:10px;">';
-                    detailObj.forEach(item => {
-                        let rowColor = item.score < item.max ? '#ffebee' : '#f9f9f9';
-                        let noteDisplay = item.note ? `<br><em style="color: #d32f2f; font-size:0.8rem;">(Not: ${item.note})</em>` : '';
-                        detailHtml += `<tr style="background:${rowColor}; border-bottom:1px solid #fff;">
-                            <td style="padding:8px; border-radius:4px;">${item.q}${noteDisplay}</td>
-                            <td style="padding:8px; font-weight:bold; text-align:right;">${item.score}/${item.max}</td>
-                        </tr>`;
-                    });
-                    detailHtml += '</table>';
-                } catch (e) { detailHtml = `<p style="white-space:pre-wrap; margin:0; font-size:0.9rem;">${evalItem.details}</p>`; }
+                let typeIcon = evalItem.feedbackType === 'Manuel Log' ? '<i class="fas fa-bolt" title="Hızlı Feedback"></i>' : '<i class="fas fa-phone-alt"></i>';
                 let editBtn = isAdminMode ? `<i class="fas fa-pen" style="font-size:1rem; color:#fabb00; cursor:pointer; margin-right:5px; padding:5px;" onclick="event.stopPropagation(); editEvaluation('${evalItem.callId}')" title="Kaydı Düzenle"></i>` : '';
                 // Eğer Toplu Gösterim modundaysak, her satırda Ajan adını da gösterelim ki karışmasın
                 let agentNameDisplay = (targetAgent === 'all' || targetAgent === targetGroup) ? `<span style="font-size:0.8rem; font-weight:bold; color:#555; background:#eee; padding:2px 6px; border-radius:4px; margin-left:10px;">${evalItem.agent}</span>` : '';
@@ -908,7 +894,7 @@ async function fetchEvaluationsForAgent(forcedName) {
                         <div style="display:flex; flex-direction:column; gap:4px;">
                             <!-- ÜST: ÇAĞRI TARİHİ + (Opsiyonel Ajan Adı) -->
                             <div style="display:flex; align-items:center; gap:8px;">
-                                <i class="fas fa-phone-alt" style="color:#b0b8c1; font-size:0.9rem;"></i>
+                                ${typeIcon}
                                 <span style="font-weight:700; color:#2c3e50; font-size:1.05rem;">${displayCallDate}</span>
                                 ${agentNameDisplay}
                             </div>
@@ -1875,4 +1861,150 @@ function twResetWizard() {
     twState.currentStep = 'start';
     twState.history = [];
     twRenderStep();
+}
+// --- MANUEL FEEDBACK (HIZLI LOG) ---
+async function saveManualFeedback() {
+    const agentSelect = document.getElementById('agent-select-admin');
+    const title = document.getElementById('mf-title').value;
+    const date = document.getElementById('mf-date').value;
+    const desc = document.getElementById('mf-desc').value;
+    const impact = document.getElementById('mf-impact').value;
+    const agentName = agentSelect ? agentSelect.value : currentUser; // Admin değilse kendi
+    
+    if(!isAdminMode) { Swal.fire('Hata','Yetkiniz yok.','error'); return; }
+    if(!agentName || agentName === 'all') { Swal.fire('Hata','Lütfen bir temsilci seçin.','warning'); return; }
+    if(!title || !desc) { Swal.fire('Eksik','Konu ve detay zorunludur.','warning'); return; }
+    
+    Swal.fire({ title: 'Kaydediliyor...', didOpen: () => Swal.showLoading() });
+    
+    let scoreVal = impact === 'N/A' ? 'Bilgi' : parseInt(impact);
+    
+    // Grup bilgisini bul
+    let agentGroup = 'Genel';
+    const foundUser = adminUserList.find(u => u.name === agentName);
+    if(foundUser) agentGroup = foundUser.group;
+
+    fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ 
+            action: "logEvaluation", 
+            username: currentUser, 
+            token: getToken(),
+            agentName: agentName,
+            agentGroup: agentGroup,
+            callId: "MANUEL-" + Math.floor(Math.random()*100000), // Rastgele ID
+            callDate: date,
+            score: scoreVal,
+            details: JSON.stringify([{ q: title, note: desc, score: scoreVal }]), // Detay formatına uydurma
+            feedback: desc,
+            feedbackType: "Manuel Log"
+        })
+    })
+    .then(r => r.json()).then(d => {
+        if(d.result === "success") {
+            Swal.fire('Başarılı','Feedback kaydedildi.','success');
+            document.getElementById('mf-desc').value = '';
+            document.getElementById('mf-title').value = '';
+            fetchEvaluationsForAgent(); // Listeyi güncelle
+        } else {
+            Swal.fire('Hata', d.message, 'error');
+        }
+    });
+}
+// --- EĞİTİM MODÜLÜ ---
+function loadEducationData() {
+    const listEl = document.getElementById('education-list');
+    const loader = document.getElementById('education-loader');
+    const agentSelect = document.getElementById('agent-select-admin');
+    const targetAgent = isAdminMode ? (agentSelect ? agentSelect.value : 'all') : currentUser;
+    
+    // Admin panel görünürlüğü
+    document.getElementById('admin-edu-panel').style.display = isAdminMode ? 'block' : 'none';
+    
+    listEl.innerHTML = '';
+    loader.style.display = 'block';
+    
+    fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "getEducation", username: currentUser, token: getToken(), targetAgent: targetAgent })
+    })
+    .then(r => r.json()).then(data => {
+        loader.style.display = 'none';
+        if(data.result === "success") {
+            if(data.data.length === 0) { listEl.innerHTML = '<p style="color:#999;">Atanmış eğitim yok.</p>'; return; }
+            
+            data.data.forEach(edu => {
+                let isDone = edu.status === 'Tamamlandı';
+                let btnHtml = isDone 
+                    ? `<span style="color:green; font-weight:bold; float:right;"><i class="fas fa-check"></i> ${edu.completedDate}</span>` 
+                    : `<button class="edu-btn" onclick="completeEducation('${edu.id}')">Tamamla</button>`;
+                
+                let linkHtml = edu.link ? `<a href="${edu.link}" target="_blank" style="color:#0288d1; font-size:0.85rem; display:block; margin-bottom:10px;"><i class="fas fa-link"></i> Eğitime Git</a>` : '';
+                
+                listEl.innerHTML += `
+                <div class="edu-card ${isDone ? 'done' : ''}">
+                    <span class="edu-title">${edu.title}</span>
+                    <span style="font-size:0.7rem; color:#aaa;">Atayan: ${edu.assigner} | ${edu.date}</span>
+                    <p class="edu-desc">${edu.desc}</p>
+                    ${linkHtml}
+                    ${btnHtml}
+                </div>`;
+            });
+        }
+    });
+}
+function assignEducation() {
+    const title = document.getElementById('edu-assign-title').value;
+    const link = document.getElementById('edu-assign-link').value;
+    const desc = document.getElementById('edu-assign-desc').value;
+    const agentSelect = document.getElementById('agent-select-admin');
+    
+    if(!agentSelect || agentSelect.value === 'all') { Swal.fire('Uyarı','Lütfen belirli bir temsilci seçin.','warning'); return; }
+    if(!title) { Swal.fire('Uyarı','Başlık zorunludur.','warning'); return; }
+    
+    Swal.fire({ title: 'Atanıyor...', didOpen: () => Swal.showLoading() });
+    
+    fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ 
+            action: "assignEducation", 
+            username: currentUser, 
+            token: getToken(),
+            targetAgent: agentSelect.value,
+            title: title,
+            desc: desc,
+            link: link
+        })
+    }).then(r => r.json()).then(d => {
+        if(d.result === "success") {
+            Swal.fire('Başarılı','Eğitim atandı.','success');
+            document.getElementById('edu-assign-title').value = '';
+            document.getElementById('edu-assign-desc').value = '';
+            loadEducationData();
+        }
+    });
+}
+function completeEducation(eduId) {
+    Swal.fire({
+        title: 'Eğitimi tamamladın mı?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Evet, Tamamladım'
+    }).then((res) => {
+        if(res.isConfirmed) {
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify({ action: "completeEducation", eduId: eduId })
+            }).then(r => r.json()).then(d => {
+                if(d.result === "success") {
+                    Swal.fire('Süper!', 'Eğitim tamamlandı olarak işaretlendi.', 'success');
+                    loadEducationData();
+                }
+            });
+        }
+    });
 }
