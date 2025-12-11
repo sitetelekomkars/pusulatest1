@@ -23,10 +23,10 @@ let allEvaluationsData = [];
 const MONTH_NAMES = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
 
 // ==========================================================
-// --- KALİTE PUANLAMA LOGİĞİ (ORTAK & DÜZELTİLMİŞ) ---
+// --- KALİTE PUANLAMA LOGİĞİ (CHAT & TELESATIŞ) ---
 // ==========================================================
 
-// CHAT İÇİN (BUTONLU)
+// CHAT İÇİN (BUTONLU SİSTEM)
 window.setButtonScore = function(index, score, max) {
     const row = document.getElementById(`row-${index}`);
     const badge = document.getElementById(`badge-${index}`);
@@ -49,7 +49,7 @@ window.setButtonScore = function(index, score, max) {
         row.style.background = '#fff5f5';
     } else {
         noteInput.style.display = 'none';
-        noteInput.value = ''; // Notu temizle
+        noteInput.value = ''; 
         badge.style.background = '#2e7d32'; // Yeşil
         row.style.borderColor = '#eee';
         row.style.background = '#fff';
@@ -57,7 +57,9 @@ window.setButtonScore = function(index, score, max) {
     window.recalcTotalScore();
 };
 
-// TELESATIŞ İÇİN (SLIDER)
+// TELESATIŞ İÇİN (SLIDER SİSTEMİ)
+window.updateRowScore = function(index, max) { window.updateRowSliderScore(index, max); }
+
 window.updateRowSliderScore = function(index, max) {
     const slider = document.getElementById(`slider-${index}`);
     const badge = document.getElementById(`badge-${index}`);
@@ -87,22 +89,23 @@ window.updateRowSliderScore = function(index, max) {
 
 window.recalcTotalScore = function() {
     let currentTotal = 0;
+    // Badge'lerden topla (Chat)
     const scoreBadges = document.querySelectorAll('.score-badge');
     scoreBadges.forEach(b => { currentTotal += parseInt(b.innerText) || 0; });
     
     const liveScoreEl = document.getElementById('live-score');
     if(liveScoreEl) liveScoreEl.innerText = currentTotal;
     
-    // Halka animasyonu (opsiyonel)
+    // Halka animasyonu
     const ringEl = document.getElementById('score-ring');
     if(ringEl) {
-        /* Basit bir renk değişimi */
         ringEl.style.borderColor = currentTotal >= 90 ? '#2e7d32' : (currentTotal >= 70 ? '#ed6c02' : '#d32f2f');
     }
 };
 
 window.recalcTotalSliderScore = function() {
     let currentTotal = 0;
+    // Sliderlardan topla (Telesatış)
     const sliders = document.querySelectorAll('.slider-input');
     sliders.forEach(s => { currentTotal += parseInt(s.value) || 0; });
     
@@ -116,17 +119,11 @@ function getFavs() { return JSON.parse(localStorage.getItem('sSportFavs') || '[]
 function toggleFavorite(title) {
     event.stopPropagation();
     let favs = getFavs();
-    if (favs.includes(title)) {
-        favs = favs.filter(t => t !== title);
-    } else {
-        favs.push(title);
-    }
+    if (favs.includes(title)) { favs = favs.filter(t => t !== title); } 
+    else { favs.push(title); }
     localStorage.setItem('sSportFavs', JSON.stringify(favs));
-    if (currentCategory === 'fav') {
-        filterCategory(document.querySelector('.btn-fav'), 'fav');
-    } else {
-        renderCards(activeCards);
-    }
+    if (currentCategory === 'fav') { filterCategory(document.querySelector('.btn-fav'), 'fav'); } 
+    else { renderCards(activeCards); }
 }
 function isFav(title) { return getFavs().includes(title); }
 function formatDateToDDMMYYYY(dateString) {
@@ -230,7 +227,7 @@ function girisYap() {
             localStorage.setItem("sSportRole", data.role);
             
             if (data.forceChange === true) {
-                Swal.fire({icon: 'warning', title: 'Güvenlik', text: 'İlk girişiniz. Şifrenizi değiştirin.', allowOutsideClick: false}).then(() => { changePasswordPopup(true); });
+                Swal.fire({icon: 'warning', title: 'Güvenlik', text: 'İlk girişiniz. Lütfen şifrenizi değiştirin.', allowOutsideClick: false}).then(() => { changePasswordPopup(true); });
             } else {
                 document.getElementById("login-screen").style.display = "none";
                 document.getElementById("user-display").innerText = currentUser;
@@ -274,6 +271,7 @@ function checkNewFeedbacks() {
                 let iconType = 'info';
                 let titleColor = '#0e1b42';
                 
+                // Renk ve ikon ayarı
                 if (data.score === 0 || data.score < 70) { iconType = 'warning'; titleColor = '#d32f2f'; }
                 else if (data.score >= 100) { iconType = 'success'; titleColor = '#2e7d32'; }
                 else if (data.score >= 70 && data.score < 100) { iconType = 'info'; titleColor = '#ed6c02'; }
@@ -365,8 +363,8 @@ function openUserMenu() {
         title: `Merhaba, ${currentUser}`,
         showCancelButton: true,
         showDenyButton: true,
-        confirmButtonText: '    🔑     Şifre Değiştir',
-        denyButtonText: '    🚪     Çıkış Yap',
+        confirmButtonText: '     🔑      Şifre Değiştir',
+        denyButtonText: '     🚪      Çıkış Yap',
         cancelButtonText: 'İptal'
     };
     Swal.fire(options).then((result) => {
@@ -388,15 +386,13 @@ async function changePasswordPopup(isMandatory = false) {
         }
     });
     if (formValues) {
-        Swal.fire({ title: 'İşleniyor...', didOpen: () => { Swal.showLoading() } });
         fetch(SCRIPT_URL, {
             method: 'POST',
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
             body: JSON.stringify({ action: "changePassword", username: currentUser, oldPass: CryptoJS.SHA256(formValues[0]).toString(), newPass: CryptoJS.SHA256(formValues[1]).toString(), token: getToken() })
         }).then(r=>r.json()).then(d=>{
-            if(d.result==="success") Swal.fire('Başarılı','Şifre değiştirildi.','success').then(()=>logout());
-            else Swal.fire('Hata', d.message, 'error').then(() => { if(isMandatory) changePasswordPopup(true); });
-        }).catch(err => { Swal.fire('Hata', 'Sunucu hatası.', 'error'); });
+            if(d.result==="success") Swal.fire('Başarılı','Giriş yapın.','success').then(()=>logout());
+            else Swal.fire('Hata', d.message, 'error');
+        });
     } else if (isMandatory) { changePasswordPopup(true); }
 }
 
@@ -432,23 +428,12 @@ function renderCards(data) {
         const editIcon = (isAdminMode && isEditingActive) ? `<i class="fas fa-pencil-alt edit-icon" onclick="editContent(${index})" style="display:block;"></i>` : '';
         const newBadge = isNew(item.date) ? '<span class="new-badge">YENİ</span>' : '';
         const favClass = isFav(item.title) ? 'fas fa-star active' : 'far fa-star';
-        let rawText = item.text || "";
-        let formattedText = rawText.replace(/\n/g, '<br>').replace(/\*(.*?)\*/g, '<b>$1</b>');
-        
-        let html = `<div class="card ${item.category}">${newBadge}
-            <div class="icon-wrapper">${editIcon}<i class="${favClass} fav-icon" onclick="toggleFavorite('${escapeForJsString(item.title)}')"></i></div>
-            <div class="card-header"><h3 class="card-title">${highlightText(item.title)}</h3><span class="badge">${item.category}</span></div>
-            <div class="card-content" onclick="showCardDetail('${escapeForJsString(item.title)}', '${escapeForJsString(item.text)}')"><div class="card-text-truncate">${highlightText(formattedText)}</div><div style="font-size:0.8rem;color:#999;text-align:right;">(Tamamını oku)</div></div>
-            <div class="script-box">${highlightText(item.script)}</div>
-            <div class="card-actions"><button class="btn btn-copy" onclick="copyText('${escapeForJsString(item.script)}')"><i class="fas fa-copy"></i> Kopyala</button>
-            ${item.code ? `<button class="btn btn-copy" style="background:var(--secondary);color:#333;" onclick="copyText('${escapeForJsString(item.code)}')">Kod</button>`:''}
-            ${item.link ? `<a href="${item.link}" target="_blank" class="btn btn-link"><i class="fas fa-external-link-alt"></i> Link</a>`:''}</div>
-        </div>`;
+        let html = `<div class="card ${item.category}">${newBadge}<div class="icon-wrapper">${editIcon}<i class="${favClass} fav-icon" onclick="toggleFavorite('${escapeForJsString(item.title)}')"></i></div><div class="card-header"><h3 class="card-title">${highlightText(item.title)}</h3><span class="badge">${item.category}</span></div><div class="card-content" onclick="showCardDetail('${escapeForJsString(item.title)}', '${escapeForJsString(item.text)}')"><div class="card-text-truncate">${highlightText(item.text)}</div></div><div class="script-box">${highlightText(item.script)}</div><div class="card-actions"><button class="btn btn-copy" onclick="copyText('${escapeForJsString(item.script)}')">Kopyala</button></div></div>`;
         container.innerHTML += html;
     });
 }
 function highlightText(text) { 
-    const term = document.getElementById('searchInput').value.toLocaleLowerCase('tr-TR').trim();
+    const term = document.getElementById('searchInput').value.trim();
     if(!term || !text) return text;
     try {
         return text.toString().replace(new RegExp(`(${term})`, "gi"), '<span class="highlight">$1</span>');
@@ -461,7 +446,7 @@ function filterCategory(btn, cat) {
     filterContent();
 }
 function filterContent() { 
-    const search = document.getElementById('searchInput').value.toLocaleLowerCase('tr-TR').trim();
+    const search = document.getElementById('searchInput').value.toLowerCase().trim();
     let filtered = database;
     if (currentCategory === 'fav') filtered = filtered.filter(i => isFav(i.title));
     else if (currentCategory !== 'all') filtered = filtered.filter(i => i.category === currentCategory);
@@ -469,40 +454,9 @@ function filterContent() {
     activeCards = filtered;
     renderCards(filtered);
 }
-function showCardDetail(title, text) { 
-    Swal.fire({ title: title, html: `<div style="text-align:left;font-size:1rem;line-height:1.6;">${text.replace(/\\n/g,'<br>')}</div>`, width: '600px', showCloseButton: true, showConfirmButton: false, background: '#f8f9fa' }); 
-}
-function toggleEditMode() {
-    if (!isAdminMode) return;
-    isEditingActive = !isEditingActive;
-    document.body.classList.toggle('editing', isEditingActive);
-    const btn = document.getElementById('dropdownQuickEdit');
-    if(isEditingActive) {
-        btn.classList.add('active'); btn.innerHTML = '<i class="fas fa-times" style="color:var(--accent);"></i> Düzenlemeyi Kapat';
-        Swal.fire({ icon: 'success', title: 'Düzenleme Modu AÇIK', timer: 1500, showConfirmButton: false });
-    } else {
-        btn.classList.remove('active'); btn.innerHTML = '<i class="fas fa-pen" style="color:var(--secondary);"></i> Düzenlemeyi Aç';
-    }
-    filterContent();
-    if(document.getElementById('guide-modal').style.display === 'flex') openGuide();
-    if(document.getElementById('sales-modal').style.display === 'flex') openSales();
-    if(document.getElementById('news-modal').style.display === 'flex') openNews();
-}
-function sendUpdate(o, c, v, t='card') {
-    if (!Swal.isVisible()) Swal.fire({ title: 'Kaydediliyor...', didOpen: () => { Swal.showLoading() } });
-    fetch(SCRIPT_URL, {
-        method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: "updateContent", title: o, column: c, value: v, type: t, originalText: o, username: currentUser, token: getToken() })
-    }).then(r => r.json()).then(data => {
-        if (data.result === "success") {
-            Swal.fire({icon: 'success', title: 'Başarılı', timer: 1500, showConfirmButton: false});
-            setTimeout(loadContentData, 1600);
-        } else { Swal.fire('Hata', 'Kaydedilemedi.', 'error'); }
-    }).catch(err => Swal.fire('Hata', 'Sunucu hatası.', 'error'));
-}
+function showCardDetail(title, text) { Swal.fire({ title: title, html: `<div style="text-align:left;font-size:1rem;line-height:1.6;">${text.replace(/\n/g,'<br>')}</div>`, width: '600px', showCloseButton: true, showConfirmButton: false, background: '#f8f9fa' }); }
 
-// --- CRUD OPERASYONLARI (KART EKLEME/DÜZENLEME) ---
-async function addNewCardPopup() {
+function addNewCardPopup() {
     const catSelectHTML = getCategorySelectHtml('Bilgi', 'swal-new-cat');
     const { value: formValues } = await Swal.fire({
         title: 'Yeni İçerik Ekle',
@@ -764,17 +718,41 @@ function populateMonthFilter() {
 }
 function openQualityArea() {
     document.getElementById('quality-modal').style.display = 'flex';
-    document.getElementById('admin-filters').style.display = isAdminMode ? 'flex' : 'none';
+    document.getElementById('admin-quality-controls').style.display = isAdminMode ? 'block' : 'none';
     populateMonthFilter();
     
+    // YENİ DASHBOARD ELEMENTLERİ (Hata Önlemi)
+    const dashAvg = document.getElementById('dash-avg-score');
+    const dashCount = document.getElementById('dash-eval-count');
+    const dashTarget = document.getElementById('dash-target-rate');
+    
+    // Varsa sıfırla, yoksa hata verme
+    if(dashAvg) dashAvg.innerText = "-";
+    if(dashCount) dashCount.innerText = "-";
+    if(dashTarget) dashTarget.innerText = "-%";
+    const monthSelect = document.getElementById('month-select-filter');
+    if (monthSelect) {
+        const newMonthSelect = monthSelect.cloneNode(true);
+        monthSelect.parentNode.replaceChild(newMonthSelect, monthSelect);
+        newMonthSelect.addEventListener('change', function() {
+            // Sadece fetch çağır, parametreler oradan okunacak
+            fetchEvaluationsForAgent();
+        });
+    }
     if (isAdminMode) {
         fetchUserListForAdmin().then(users => {
             const groupSelect = document.getElementById('group-select-admin');
             const agentSelect = document.getElementById('agent-select-admin');
             
             if(groupSelect && agentSelect) {
+                // Grupları Çek (Unique)
                 const groups = [...new Set(users.map(u => u.group))].sort();
-                groupSelect.innerHTML = `<option value="all">Tüm Gruplar</option>` + groups.map(g => `<option value="${g}">${g}</option>`).join('');
+                
+                // Grup Seçimini Doldur
+                groupSelect.innerHTML = `<option value="all">Tüm Gruplar</option>` + 
+                    groups.map(g => `<option value="${g}">${g}</option>`).join('');
+                
+                // İlk açılışta tüm temsilcileri doldur
                 updateAgentListBasedOnGroup();
             }
         });
@@ -783,7 +761,35 @@ function openQualityArea() {
     }
     switchHubTab('dashboard');
 }
-
+// YENİ FONKSİYON: Gruba Göre Temsilci Listesini Güncelleme
+function updateAgentListBasedOnGroup() {
+    const groupSelect = document.getElementById('group-select-admin');
+    const agentSelect = document.getElementById('agent-select-admin');
+    if(!groupSelect || !agentSelect) return;
+    const selectedGroup = groupSelect.value;
+    
+    // Mevcut listeyi temizle
+    agentSelect.innerHTML = '';
+    
+    let filteredUsers = adminUserList;
+    
+    if (selectedGroup !== 'all') {
+        filteredUsers = adminUserList.filter(u => u.group === selectedGroup);
+        // O grubun tamamını seçme seçeneği ekle
+        agentSelect.innerHTML = `<option value="all">-- Tüm ${selectedGroup} Ekibi --</option>`;
+    } else {
+        // Tüm gruplar seçiliyse, tüm temsilciler seçeneği
+        agentSelect.innerHTML = `<option value="all">-- Tüm Temsilciler --</option>`;
+    }
+    
+    // Kullanıcıları ekle
+    filteredUsers.forEach(u => {
+        agentSelect.innerHTML += `<option value="${u.name}">${u.name}</option>`;
+    });
+    
+    // Listeyi güncelledikten sonra otomatik veri çek
+    fetchEvaluationsForAgent(); 
+}
 function switchHubTab(tabId) {
     document.querySelectorAll('.hub-menu-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.hub-tab-content').forEach(t => t.classList.remove('active'));
@@ -798,309 +804,799 @@ function switchHubTab(tabId) {
     if(tabId === 'dashboard') fetchEvaluationsForAgent();
     if(tabId === 'education') loadEducationData();
 }
-
-function updateAgentListBasedOnGroup() { 
-    const groupSelect = document.getElementById('group-select-admin');
-    const agentSelect = document.getElementById('agent-select-admin');
-    if(!groupSelect || !agentSelect) return;
-    const selectedGroup = groupSelect.value;
-    agentSelect.innerHTML = '';
-    
-    let filteredUsers = adminUserList;
-    if (selectedGroup !== 'all') {
-        filteredUsers = adminUserList.filter(u => u.group === selectedGroup);
-        agentSelect.innerHTML = `<option value="all">-- Tüm ${selectedGroup} Ekibi --</option>`;
-    } else {
-        agentSelect.innerHTML = `<option value="all">-- Tüm Temsilciler --</option>`;
-    }
-    filteredUsers.forEach(u => { agentSelect.innerHTML += `<option value="${u.name}">${u.name}</option>`; });
-    fetchEvaluationsForAgent();
-}
 function hubAgentChanged() { 
     fetchEvaluationsForAgent();
     if(document.getElementById('tab-education').classList.contains('active')) loadEducationData();
 }
 async function fetchEvaluationsForAgent(forcedName) {
     const listEl = document.getElementById('evaluations-list');
-    const agentSelect = document.getElementById('agent-select-admin');
+    const loader = document.getElementById('quality-loader');
+    
+    const dashAvg = document.getElementById('dash-avg-score');
+    const dashCount = document.getElementById('dash-eval-count');
+    const dashTarget = document.getElementById('dash-target-rate');
+    listEl.innerHTML = '';
+    loader.style.display = 'block';
+    // Admin Panelindeki Seçimler
     const groupSelect = document.getElementById('group-select-admin');
+    const agentSelect = document.getElementById('agent-select-admin');
     
-    let targetAgent = forcedName || (isAdminMode && agentSelect ? agentSelect.value : currentUser);
-    let targetGroup = isAdminMode && groupSelect ? groupSelect.value : 'all';
-    
-    if (isAdminMode && targetAgent === 'all' && targetGroup === 'all') {
-        listEl.innerHTML = '<div style="padding:20px;text-align:center;">Lütfen bir seçim yapın.</div>';
+    let targetAgent = forcedName || currentUser;
+    let targetGroup = 'all';
+    if (isAdminMode) {
+        targetAgent = forcedName || (agentSelect ? agentSelect.value : currentUser);
+        targetGroup = groupSelect ? groupSelect.value : 'all';
+        
+        // "Tüm Temsilciler" seçiliyse ve Grup "Tüm Gruplar" ise uyarı ver (Çok veri)
+        if(targetAgent === 'all' && targetGroup === 'all') {
+            loader.innerHTML = '<div style="padding:20px; text-align:center; color:#1976d2;"><i class="fas fa-users fa-2x"></i><br><br><b>Tüm Şirket Verisi</b><br>Detaylı analiz için yukarıdaki "Rapor" butonunu kullanın.</div>';
+            if(dashAvg) dashAvg.innerText = "-";
+            if(dashCount) dashCount.innerText = "-";
+            if(dashTarget) dashTarget.innerText = "-%";
+            return;
+        }
+    }
+    if (!targetAgent) {
+        loader.innerHTML = '<span style="color:red;">Lütfen listeden bir temsilci seçimi yapın.</span>';
         return;
     }
-    
     const selectedMonth = document.getElementById('month-select-filter').value;
-    document.getElementById('quality-loader').style.display = 'block';
-    
     try {
         const response = await fetch(SCRIPT_URL, {
-            method: 'POST', headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({ action: "fetchEvaluations", targetAgent: targetAgent, targetGroup: targetGroup, username: currentUser, token: getToken() })
+            method: 'POST',
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({ 
+                action: "fetchEvaluations", 
+                targetAgent: targetAgent, 
+                targetGroup: targetGroup, // Backend'e grubu da gönderiyoruz
+                username: currentUser, 
+                token: getToken() 
+            })
         });
+        
         const data = await response.json();
-        document.getElementById('quality-loader').style.display = 'none';
-
+        loader.style.display = 'none';
         if (data.result === "success") {
             allEvaluationsData = data.evaluations;
-            let filteredEvals = allEvaluationsData.filter(e => e.date.substring(3) === selectedMonth);
-            
-            // Dashboard İstatistikleri
-            const totalScore = filteredEvals.reduce((sum, e) => sum + (parseFloat(e.score) || 0), 0);
-            const count = filteredEvals.length;
-            const avg = count > 0 ? (totalScore / count).toFixed(1) : "-";
-            const targetRate = count > 0 ? Math.round((filteredEvals.filter(e => e.score >= 90).length / count) * 100) : "-";
-            
-            if(document.getElementById('dash-avg-score')) document.getElementById('dash-avg-score').innerText = avg;
-            if(document.getElementById('dash-eval-count')) document.getElementById('dash-eval-count').innerText = count;
-            if(document.getElementById('dash-target-rate')) document.getElementById('dash-target-rate').innerText = "%" + targetRate;
-
-            listEl.innerHTML = '';
-            if (filteredEvals.length === 0) listEl.innerHTML = '<p style="text-align:center;color:#999;">Kayıt bulunamadı.</p>';
-            
-            filteredEvals.reverse().forEach((item, index) => {
-                const scoreColor = item.score >= 90 ? '#2e7d32' : (item.score >= 70 ? '#ed6c02' : '#d32f2f');
-                const displayCallDate = formatDateToDDMMYYYY(item.callDate);
-                const displayLogDate  = formatDateToDDMMYYYY(item.date);
-                let typeIcon = item.feedbackType === 'Manuel Log' ? '<i class="fas fa-bolt" title="Hızlı Feedback"></i>' : '<i class="fas fa-phone-alt"></i>';
-                let editBtn = isAdminMode ? `<i class="fas fa-pen" style="float:right; cursor:pointer; color:#aaa;" onclick="editEvaluation('${item.callId}')"></i>` : '';
-                let agentNameDisplay = (targetAgent === 'all' || targetAgent === targetGroup) ? `<span style="font-size:0.8rem; font-weight:bold; color:#555; background:#eee; padding:2px 6px; border-radius:4px; margin-left:10px;">${item.agent}</span>` : '';
+            let filteredEvals = allEvaluationsData.filter(evalItem => {
+                const evalDate = evalItem.date.substring(3);
+                return evalDate === selectedMonth;
+            });
+            const monthlyTotal = filteredEvals.reduce((sum, evalItem) => sum + (parseFloat(evalItem.score) || 0), 0);
+            const monthlyCount = filteredEvals.length;
+            const monthlyAvg = monthlyCount > 0 ? (monthlyTotal / monthlyCount) : 0;
+            const targetScore = 90;
+            const targetHitCount = filteredEvals.filter(e => (parseFloat(e.score) || 0) >= targetScore).length;
+            const targetRate = monthlyCount > 0 ? Math.round((targetHitCount / monthlyCount) * 100) : 0;
+            if(dashAvg) dashAvg.innerText = monthlyAvg % 1 === 0 ? monthlyAvg : monthlyAvg.toFixed(1);
+            if(dashCount) dashCount.innerText = monthlyCount;
+            if(dashTarget) dashTarget.innerText = `%${targetRate}`;
+            if (filteredEvals.length === 0) {
+                listEl.innerHTML = `<p style="text-align:center; color:#666; margin-top:20px;">Bu dönem için kayıt yok.</p>`;
+                return;
+            }
+            let html = '';
+            filteredEvals.reverse().forEach((evalItem, index) => {
+                const scoreColor = evalItem.score >= 90 ? '#2e7d32' : (evalItem.score >= 70 ? '#ed6c02' : '#d32f2f');
+                const displayCallDate = formatDateToDDMMYYYY(evalItem.callDate);
+                const displayLogDate  = formatDateToDDMMYYYY(evalItem.date);
+                let typeIcon = evalItem.feedbackType === 'Manuel Log' ? '<i class="fas fa-bolt" title="Hızlı Feedback"></i>' : '<i class="fas fa-phone-alt"></i>';
                 
                 let detailHtml = '';
                 try {
-                    const detailObj = JSON.parse(item.details);
+                    const detailObj = JSON.parse(evalItem.details);
                     detailHtml = '<table style="width:100%; font-size:0.85rem; border-collapse:collapse; margin-top:10px;">';
-                    detailObj.forEach(d_item => {
-                        let rowColor = d_item.score < d_item.max ? '#ffebee' : '#f9f9f9';
-                        let noteDisplay = d_item.note ? `<br><em style="color: #d32f2f; font-size:0.8rem;">(Not: ${d_item.note})</em>` : '';
-                        detailHtml += `<tr style="background:${rowColor}; border-bottom:1px solid #fff;"><td style="padding:8px; border-radius:4px;">${d_item.q}${noteDisplay}</td><td style="padding:8px; font-weight:bold; text-align:right;">${d_item.score}/${d_item.max}</td></tr>`;
+                    detailObj.forEach(item => {
+                        let rowColor = item.score < item.max ? '#ffebee' : '#f9f9f9';
+                        let noteDisplay = item.note ? `<br><em style="color: #d32f2f; font-size:0.8rem;">(Not: ${item.note})</em>` : '';
+                        detailHtml += `<tr style="background:${rowColor}; border-bottom:1px solid #fff;">
+                            <td style="padding:8px; border-radius:4px;">${item.q}${noteDisplay}</td>
+                            <td style="padding:8px; font-weight:bold; text-align:right;">${item.score}/${item.max}</td>
+                        </tr>`;
                     });
                     detailHtml += '</table>';
-                } catch (e) { detailHtml = `<p style="white-space:pre-wrap; margin:0; font-size:0.9rem;">${item.details}</p>`; }
-
-                listEl.innerHTML += `
-                <div class="evaluation-summary" onclick="toggleEvaluationDetail(${index})" id="eval-summary-${index}" style="position:relative; border:1px solid #eaedf2; border-left:4px solid ${scoreColor}; padding:15px; margin-bottom:10px; border-radius:8px; background:#fff; cursor:pointer; transition:all 0.2s ease;">
+                } catch (e) { detailHtml = `<p style="white-space:pre-wrap; margin:0; font-size:0.9rem;">${evalItem.details}</p>`; }
+                let editBtn = isAdminMode ? `<i class="fas fa-pen" style="font-size:1rem; color:#fabb00; cursor:pointer; margin-right:5px; padding:5px;" onclick="event.stopPropagation(); editEvaluation('${evalItem.callId}')" title="Kaydı Düzenle"></i>` : '';
+                // Eğer Toplu Gösterim modundaysak, her satırda Ajan adını da gösterelim ki karışmasın
+                let agentNameDisplay = (targetAgent === 'all' || targetAgent === targetGroup) ? `<span style="font-size:0.8rem; font-weight:bold; color:#555; background:#eee; padding:2px 6px; border-radius:4px; margin-left:10px;">${evalItem.agent}</span>` : '';
+                html += `<div class="evaluation-summary" id="eval-summary-${index}" style="position:relative; border:1px solid #eaedf2; border-left:4px solid ${scoreColor}; padding:15px; margin-bottom:10px; border-radius:8px; background:#fff; cursor:pointer; transition:all 0.2s ease;" onclick="toggleEvaluationDetail(${index})">
+                    
                     <div style="display:flex; justify-content:space-between; align-items:center;">
+                        
+                        <!-- SOL TARAFI (TARİHLER VE ID) -->
                         <div style="display:flex; flex-direction:column; gap:4px;">
-                            <div style="display:flex; align-items:center; gap:8px;">${typeIcon}<span style="font-weight:700; color:#2c3e50; font-size:1.05rem;">${displayCallDate}</span>${agentNameDisplay}</div>
-                            <div style="font-size:0.75rem; color:#94a3b8; margin-left:22px;"><span style="font-weight:500;">Log:</span> ${displayLogDate} <span style="margin:0 4px; color:#cbd5e0;">|</span> <span style="font-weight:500;">ID:</span> ${item.callId || '-'}</div>
+                            <!-- ÜST: ÇAĞRI TARİHİ + (Opsiyonel Ajan Adı) -->
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                ${typeIcon}
+                                <span style="font-weight:700; color:#2c3e50; font-size:1.05rem;">${displayCallDate}</span>
+                                ${agentNameDisplay}
+                            </div>
+                            
+                            <!-- ALT: LOG TARİHİ VE ID -->
+                            <div style="font-size:0.75rem; color:#94a3b8; margin-left:22px;">
+                                <span style="font-weight:500;">Log:</span> ${displayLogDate} 
+                                <span style="margin:0 4px; color:#cbd5e0;">|</span> 
+                                <span style="font-weight:500;">ID:</span> ${evalItem.callId || '-'}
+                            </div>
                         </div>
+                        <!-- SAĞ TARAFI (PUAN VE EDİT İKONU) -->
                         <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end;">
-                            <div style="display:flex; align-items:center;">${editBtn} <span style="font-weight:800; font-size:1.6rem; color:${scoreColor}; line-height:1;">${item.score}</span></div>
+                            <div style="display:flex; align-items:center;">
+                                ${editBtn} 
+                                <span style="font-weight:800; font-size:1.6rem; color:${scoreColor}; line-height:1;">${evalItem.score}</span>
+                            </div>
                             <span style="font-size:0.65rem; color:#a0aec0; letter-spacing:0.5px; font-weight:600;">PUAN</span>
                         </div>
                     </div>
-                    <div class="evaluation-details-content" id="eval-details-${index}" style="max-height:0; overflow:hidden;">
+                    <div class="evaluation-details-content" id="eval-details-${index}">
                         <hr style="border:none; border-top:1px dashed #eee; margin:12px 0;">
-                        ${item.feedbackType !== 'Manuel Log' ? detailHtml : ''}
+                        ${detailHtml}
                         <div style="margin-top:10px; background:#f8f9fa; padding:10px; border-radius:6px; border-left:3px solid #e2e8f0;">
                              <strong style="color:#4a5568; font-size:0.8rem;">Geri Bildirim:</strong>
-                             <p style="color:#2d3748; font-size:0.9rem; margin:5px 0 0 0; white-space: pre-wrap;">${item.feedback || 'Geri bildirim girilmedi.'}</p>
+                             <p style="color:#2d3748; font-size:0.9rem; margin:5px 0 0 0;">${evalItem.feedback || 'Geri bildirim girilmedi.'}</p>
                         </div>
                     </div>
                 </div>`;
             });
+            listEl.innerHTML = html;
+        } else {
+            listEl.innerHTML = `<p style="color:red; text-align:center;">Veri çekme hatası: ${data.message || 'Bilinmeyen Hata'}</p>`;
         }
     } catch(err) {
-        document.getElementById('quality-loader').style.display = 'none';
+        loader.style.display = 'none';
         listEl.innerHTML = `<p style="color:red; text-align:center;">Bağlantı hatası.</p>`;
     }
 }
+// --- YENİ RAPOR EXPORT FONKSİYONU ---
+async function exportEvaluations() {
+    if (!isAdminMode) {
+        Swal.fire('Hata', 'Bu işlem için yönetici yetkisi gereklidir.', 'error');
+        return;
+    }
+    const agentSelect = document.getElementById('agent-select-admin');
+    const groupSelect = document.getElementById('group-select-admin'); // Grup seçim elementini alıyoruz
+    
+    const targetAgent = agentSelect ? agentSelect.value : 'all';
+    const targetGroup = groupSelect ? groupSelect.value : 'all'; // Grup değerini alıyoruz (yoksa 'all' varsayıyoruz)
+    const agentName = targetAgent === 'all' ? (targetGroup === 'all' ? 'Tüm Şirket' : targetGroup + ' Ekibi') : targetAgent;
+    const { isConfirmed } = await Swal.fire({
+        icon: 'question',
+        title: 'Raporu Onayla',
+        html: `<strong>${agentName}</strong> için tüm değerlendirme kayıtları (kırılım detayları dahil) CSV formatında indirilecektir. Onaylıyor musunuz?`,
+        showCancelButton: true,
+        confirmButtonText: '<i class="fas fa-download"></i> İndir',
+        cancelButtonText: 'İptal'
+    });
+    if (!isConfirmed) return;
+    
+    Swal.fire({ title: 'Kırılım Raporu Hazırlanıyor...', didOpen: () => Swal.showLoading() });
+    
+    try {
+        const response = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+                action: "exportEvaluations",
+                targetAgent: targetAgent,
+                targetGroup: targetGroup, // <-- KRİTİK NOKTA: Buraya targetGroup eklendi
+                username: currentUser,
+                token: getToken()
+            })
+        });
+        
+        const data = await response.json();
+        if (data.result === "success" && data.csvData) {
+            const blob = new Blob(["\ufeff" + data.csvData], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", data.fileName);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                Swal.fire('Başarılı', `Rapor <strong>${data.fileName}</strong> adıyla indirildi.`, 'success');
+            } else {
+                Swal.fire('Hata', 'Tarayıcınız otomatik indirmeyi desteklemiyor.', 'error');
+            }
+        } else {
+            Swal.fire('Hata', data.message || 'Rapor verisi alınamadı.', 'error');
+        }
+    } catch (err) {
+        console.error("Export Error:", err);
+        Swal.fire('Hata', 'Sunucuya bağlanılamadı.', 'error');
+    }
+}
+function fetchUserListForAdmin() {
+    return new Promise((resolve) => {
+        fetch(SCRIPT_URL, {
+            method: 'POST',
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({ action: "getUserList", username: currentUser, token: getToken() })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.result === "success") {
+                const filteredUsers = data.users.filter(u => u.group !== 'Yönetim');
+                adminUserList = filteredUsers;
+                resolve(filteredUsers); 
+            } else
+                resolve([]);
+        }).catch(err => resolve([]));
+    });
+}
+function fetchCriteria(groupName) {
+    return new Promise((resolve) => {
+        fetch(SCRIPT_URL, {
+            method: 'POST',
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({ action: "getCriteria", group: groupName, username: currentUser, token: getToken() })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.result === "success")
+                resolve(data.criteria || []);
+            else
+                resolve([]);
+        }).catch(err => {
+            console.error(err);
+            resolve([]);
+        });
+    });
+}
+// --- GÜNCELLENMİŞ logEvaluationPopup FONKSİYONU ---
 async function logEvaluationPopup() {
     const agentSelect = document.getElementById('agent-select-admin');
     const agentName = agentSelect ? agentSelect.value : "";
     
-    if (!agentName || agentName === 'all') { Swal.fire('Uyarı', 'Lütfen bir temsilci seçin.', 'warning'); return; }
-    
-    let agentGroup = 'Genel';
-    const foundUser = adminUserList.find(u => u.name === agentName);
-    if(foundUser) agentGroup = foundUser.group;
-    
-    if (agentGroup.includes('Chat')) {
-        const { value: type } = await Swal.fire({ title: 'Form Tipi', input: 'radio', inputOptions: {'Chat-Normal':'Normal','Chat-Teknik':'Teknik'}, inputValidator: (v) => !v && 'Seçim yapmalısınız.' });
-        if(type) agentGroup = type; else return;
+    // Güvenlik: İsim seçili mi?
+    if (!agentName || agentName === 'all') {
+        Swal.fire('Uyarı', 'Lütfen işlem yapmak için listeden bir personel seçiniz.', 'warning');
+        return;
     }
     
-    Swal.fire({title:'Form Yükleniyor...', didOpen:()=>Swal.showLoading()});
-    const criteriaList = await fetchCriteria(agentGroup);
+    // 1. ADIM: Grubun Doğru Belirlenmesi (Chat/Telesatış/Genel)
+    let agentGroup = 'Genel';
+    const foundUser = adminUserList.find(u => u.name.toLowerCase() === agentName.toLowerCase());
+    if (foundUser && foundUser.group) {
+        agentGroup = foundUser.group;
+    }
+    
+    // Chat personeli için 'Chat' grubunu kullan, Telesatış için 'Telesatış'
+    const isChat = agentGroup.indexOf('Chat') > -1;
+    const isTelesatis = agentGroup.indexOf('Telesatış') > -1;
+    
+    if (isChat) agentGroup = 'Chat';
+    // Telesatış zaten "Telesatış" olarak kalmalı
+    
+    Swal.fire({ title: 'Değerlendirme Formu Hazırlanıyor...', didOpen: () => Swal.showLoading() });
+    
+    let criteriaList = [];
+    // 2. ADIM: Kriterleri Çekme
+    if(agentGroup && agentGroup !== 'Genel') { 
+        criteriaList = await fetchCriteria(agentGroup);
+    } 
     Swal.close();
     
-    const isChat = agentGroup.includes('Chat');
-    const today = new Date().toISOString().split('T')[0];
+    const todayISO = new Date().toISOString().substring(0, 10);
+    const isCriteriaBased = criteriaList.length > 0;
     
-    let html = `<div class="eval-modal-wrapper">
-        <div style="display:flex; gap:10px; margin-bottom:15px;">
-            <input id="eval-callid" class="swal2-input" placeholder="Call ID" style="flex:1;">
-            <input id="eval-calldate" type="date" class="swal2-input" value="${today}" style="flex:1;">
-        </div>
-        <div class="criteria-container">`;
-        
-    criteriaList.forEach((c, i) => {
-        let max = parseInt(c.points);
-        if (isChat) {
-            html += `<div class="criteria-row" id="row-${i}" data-max-score="${max}">
-                <div class="criteria-header"><span>${i+1}. ${c.text}</span><span>Max: ${max}</span></div>
-                <div class="eval-button-group">
-                    <button class="eval-button eval-good active" data-score="${max}" onclick="setButtonScore(${i}, ${max}, ${max})">İyi</button>
-                    <button class="eval-button eval-bad" data-score="0" onclick="setButtonScore(${i}, 0, ${max})">Kötü</button>
+    let criteriaFieldsHtml = '';
+    let manualScoreHtml = '';
+    
+    // 3. ADIM: Form Alanlarını Gruba Göre Oluşturma
+    if (isCriteriaBased) {
+        criteriaFieldsHtml += `<div class="criteria-container">`;
+        criteriaList.forEach((c, i) => {
+            let pts = parseInt(c.points) || 0;
+            let initialScore = pts; 
+            
+            if (pts === 0) return; // Pasif kriterleri atla
+            if (isChat) {
+                // CHAT: Butonlu Puanlama
+                let mPts = parseInt(c.mediumScore) || 0;
+                let bPts = parseInt(c.badScore) || 0;
+                
+                criteriaFieldsHtml += `
+                    <div class="criteria-row" id="row-${i}" data-max-score="${pts}">
+                        <div class="criteria-header">
+                            <span>${i+1}. ${c.text}</span>
+                            <span style="font-size:0.8rem; color:#999;">Max: ${pts}</span>
+                        </div>
+                        <div class="criteria-controls">
+                            <div class="eval-button-group">
+                                <button class="eval-button eval-good active" data-score="${pts}" onclick="setButtonScore(${i}, ${pts}, ${pts})">İyi (${pts})</button>
+                                ${mPts > 0 ? `<button class="eval-button eval-medium" data-score="${mPts}" onclick="setButtonScore(${i}, ${mPts}, ${pts})">Orta (${mPts})</button>` : ''}
+                                ${bPts > 0 ? `<button class="eval-button eval-bad" data-score="${bPts}" onclick="setButtonScore(${i}, ${bPts}, ${pts})">Kötü (${bPts})</button>` : ''}
+                            </div>
+                            <span class="score-badge" id="badge-${i}" style="margin-top: 8px; display:block; background:#2e7d32;">${initialScore}</span>
+                        </div>
+                        <input type="text" id="note-${i}" class="note-input" placeholder="Kırılım nedeni veya not ekle..." style="display:none;">
+                    </div>`;
+            } else if (isTelesatis) {
+                 // TELESATIŞ: Slider Puanlama (Eski mantık geri getirildi)
+                 criteriaFieldsHtml += `
+                    <div class="criteria-row" id="row-${i}" data-max-score="${pts}">
+                        <div class="criteria-header">
+                            <span>${i+1}. ${c.text}</span>
+                            <span style="font-size:0.8rem; color:#999;">Max: ${pts}</span>
+                        </div>
+                        <div class="criteria-controls" style="display: flex; align-items: center; gap: 15px; background: #f9f9f9; padding: 8px; border-radius: 6px;">
+                            <input type="range" class="custom-range slider-input" id="slider-${i}" min="0" max="${pts}" value="${pts}" data-index="${i}" oninput="updateRowSliderScore(${i}, ${pts})" style="flex-grow: 1;">
+                            <span class="score-badge" id="badge-${i}" style="background:#2e7d32;">${initialScore}</span>
+                        </div>
+                        <input type="text" id="note-${i}" class="note-input" placeholder="Kırılım nedeni veya not ekle..." style="display:none;">
+                    </div>`;
+            }
+        });
+        criteriaFieldsHtml += `</div>`;
+    } else {
+        // Manuel Puanlama (Kriter yoksa)
+        manualScoreHtml = `
+            <div style="padding:15px; border:1px dashed #ccc; background:#fff; border-radius:8px; text-align:center; margin-bottom:15px;">
+                <p style="color:#e65100;">(Bu grup için otomatik kriter bulunamadı)</p>
+                <label style="font-weight:bold;">Manuel Puan</label><br>
+                <input id="eval-manual-score" type="number" class="swal2-input" value="100" min="0" max="100" style="width:100px; text-align:center; font-size:1.5rem; font-weight:bold;">
+            </div>
+            <textarea id="eval-details" class="swal2-textarea" placeholder="Değerlendirme detayları..." style="margin-bottom:15px;"></textarea>
+        `;
+    }
+    
+    // HTML Yapısı
+    const contentHtml = `
+        <div class="eval-modal-wrapper">
+            <div class="score-dashboard">
+                <div>
+                    <div style="font-size:0.9rem; opacity:0.8;">Değerlendirilen</div>
+                    <div style="font-size:1.2rem; font-weight:bold; color:#fabb00;">${agentName}</div>
+                    <div style="font-size:0.8rem; opacity:0.7;">${agentGroup}</div>
                 </div>
-                <span id="badge-${i}" class="score-badge" style="display:none;">${max}</span>
-                <input id="note-${i}" class="note-input" placeholder="Hata detayı..." style="display:none;">
-            </div>`;
-        } else {
-            html += `<div class="criteria-row" id="row-${i}">
-                <div class="criteria-header"><span>${i+1}. ${c.text}</span><span>Max: ${max}</span></div>
-                <div class="criteria-controls" style="display:flex; align-items:center; gap:10px;">
-                    <input type="range" class="slider-input" id="slider-${i}" min="0" max="${max}" value="${max}" oninput="updateRowSliderScore(${i}, ${max})" style="flex:1;">
-                    <span id="badge-${i}" class="score-badge">${max}</span>
+                <div class="score-circle-outer" id="score-ring">
+                    <div class="score-circle-inner" id="live-score">${isCriteriaBased ? '100' : '100'}</div>
                 </div>
-                <input id="note-${i}" class="note-input" placeholder="Hata detayı..." style="display:none;">
-            </div>`;
+            </div>
+            <div class="eval-header-card">
+                <div>
+                    <label style="font-size:0.8rem; font-weight:bold; color:#555;">Call ID</label>
+                    <input id="eval-callid" class="swal2-input" style="height:35px; margin:0; width:100%; font-size:0.9rem;" placeholder="Call ID giriniz">
+                </div>
+                <div>
+                    <label style="font-size:0.8rem; font-weight:bold; color:#555;">Çağrı/Chat Tarihi</label>
+                    <input type="date" id="eval-calldate" class="swal2-input" style="height:35px; margin:0; width:100%; font-size:0.9rem;" value="${todayISO}">
+                </div>
+            </div>
+            ${manualScoreHtml}
+            ${criteriaFieldsHtml}
+            <div style="margin-top:15px; border:1px solid #f0f0f0; background:#fafafa; padding:10px; border-radius:8px;">
+                <label style="font-size:0.85rem; font-weight:bold; color:#333; display:block; margin-bottom:5px;">Geri Bildirim Tipi (Raporlama İçin)</label>
+                <select id="feedback-type" class="swal2-input" style="width:100%; height:40px; border:1px solid #ccc; border-radius:5px; margin:0;">
+                    <option value="Yok">Geri Bildirim Yok</option>
+                    <option value="Sözlü">Sözlü (Verbal)</option>
+                    <option value="Mail">Mail (E-posta)</option>
+                </select>
+            </div>
+            <div style="margin-top:15px;">
+                <label style="font-size:0.85rem; font-weight:bold; color:#333;">Genel Geri Bildirim</label>
+                <textarea id="eval-feedback" class="swal2-textarea" style="margin-top:5px; height:80px;" placeholder="Temsilciye iletilecek genel yorum..."></textarea>
+            </div>
+        </div>`;
+    
+    const { value: formValues } = await Swal.fire({
+        title: '',
+        html: contentHtml,
+        width: '600px',
+        padding: '0 0 20px 0',
+        showCancelButton: true,
+        confirmButtonText: '   💾    Kaydet',
+        cancelButtonText: 'İptal',
+        focusConfirm: false,
+        didOpen: () => {
+            if (isTelesatis) {
+                // Telesatış için slider skorunu başlat
+                window.recalcTotalSliderScore();
+            } else if (isChat) {
+                // Chat için buton skorunu başlat
+                window.recalcTotalScore();
+            }
+        },
+        preConfirm: () => {
+            const callId = document.getElementById('eval-callid').value;
+            const callDateRaw = document.getElementById('eval-calldate').value;
+            const feedback = document.getElementById('eval-feedback').value;
+            const feedbackType = document.getElementById('feedback-type').value; 
+            
+            if (!callId || !callDateRaw ) {
+                Swal.showValidationMessage('Lütfen Çağrı ID, Tarih  alanlarını doldurun.');
+                return false;
+            }
+            
+            const dateParts = callDateRaw.split('-');
+            const formattedCallDate = dateParts.length === 3 ? `${dateParts[2]}.${dateParts[1]}.${dateParts[0]}` : callDateRaw;
+            
+            if (isCriteriaBased) {
+                let total = 0;
+                let detailsArr = [];
+                for (let i = 0; i < criteriaList.length; i++) {
+                    const c = criteriaList[i];
+                    if (parseInt(c.points) === 0) continue; 
+                    
+                    let val;
+                    let note;
+                    
+                    if (isChat) {
+                         // CHAT: Butonlardan Oku
+                        val = parseInt(document.getElementById(`badge-${i}`).innerText) || 0;
+                        note = document.getElementById(`note-${i}`).value;
+                        // Kırılım Notu Zorunluluğu KALDIRILDI
+                        /*
+                        if (val < parseInt(c.points) && !note) {
+                            Swal.showValidationMessage(`'${c.text}' için kırılım nedeni zorunludur.`);
+                            return false;
+                        }
+                        */
+                    } else if (isTelesatis) {
+                         // TELESATIŞ: Slider'dan Oku
+                        val = parseInt(document.getElementById(`slider-${i}`).value) || 0;
+                        note = document.getElementById(`note-${i}`).value;
+                        
+                        // Kırılım Notu Zorunluluğu KALDIRILDI
+                        /*
+                        if (val < parseInt(c.points) && !note) {
+                            Swal.showValidationMessage(`'${c.text}' için kırılım nedeni zorunludur.`);
+                            return false;
+                        }
+                        */
+                    }
+                    total += val;
+                    detailsArr.push({ q: c.text, max: parseInt(c.points), score: val, note: note });
+                }
+                return { agentName, agentGroup, callId, callDate: formattedCallDate, score: total, details: JSON.stringify(detailsArr), feedback, feedbackType: feedbackType }; 
+            } else {
+                const score = document.getElementById('eval-manual-score').value;
+                const details = document.getElementById('eval-details').value;
+                if(score < 0 || score > 100) { Swal.showValidationMessage('Puan 0 ile 100 arasında olmalıdır.'); return false; }
+                return { agentName, agentGroup, callId, callDate: formattedCallDate, score: parseInt(score), details: details, feedback, feedbackType: feedbackType }; 
+            }
         }
     });
+    if (formValues) {
+        Swal.fire({ title: 'Kaydediliyor...', didOpen: () => { Swal.showLoading() } });
+        fetch(SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: "logEvaluation", username: currentUser, token: getToken(), ...formValues })
+        })
+        .then(r => r.json()).then(d => {
+            if (d.result === "success") {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Değerlendirme Kaydedildi',
+                    text: `${formValues.agentName} için ${formValues.score} puan verildi.`,
+                    timer: 2500,
+                    showConfirmButton: false
+                });
+                fetchEvaluationsForAgent(formValues.agentName);
+            }
+            else {
+                Swal.fire('Hata', d.message || 'Kaydedilemedi.', 'error');
+            }
+        }).catch(err => { Swal.fire('Hata', 'Sunucu hatası.', 'error'); });
+    }
+}
+// --- GÜNCELLENMİŞ editEvaluation FONKSİYONU ---
+async function editEvaluation(targetCallId) {
+    // 1. ID Kontrolü (Güçlendirilmiş - String Eşleşmesi)
+    const evalData = allEvaluationsData.find(item => String(item.callId).trim() === String(targetCallId).trim());
     
-    html += `</div>
-        <textarea id="eval-feedback" class="swal2-textarea" placeholder="Genel Geri Bildirim"></textarea>
-        <div style="text-align:center; font-size:2rem; font-weight:bold; color:#0e1b42; margin-top:10px;">TOPLAM: <span id="live-score">100</span></div>
+    if (!evalData) {
+        Swal.fire('Hata', 'Kayıt verisi bulunamadı.', 'error');
+        return;
+    }
+    
+    const agentName = evalData.agent || evalData.agentName;
+    // 2. Grup Kontrolü (Doğrudan Veriden Okuma)
+    const agentGroupRaw = evalData.group || 'Genel';
+    
+    // Grup tipini belirle
+    const isChat = agentGroupRaw.indexOf('Chat') > -1;
+    const isTelesatis = agentGroupRaw.indexOf('Telesatış') > -1;
+    const agentGroup = isChat ? 'Chat' : (isTelesatis ? 'Telesatış' : 'Genel');
+    
+    Swal.fire({ title: 'Kayıtlar İnceleniyor...', didOpen: () => Swal.showLoading() });
+    
+    let criteriaList = [];
+    if(agentGroup && agentGroup !== 'Genel') {
+        criteriaList = await fetchCriteria(agentGroup);
+    }
+    Swal.close();
+    
+    const isCriteriaBased = criteriaList.length > 0;
+    let oldDetails = [];
+    // JSON Parse Hatası Önlemi
+    try { oldDetails = JSON.parse(evalData.details || "[]"); } catch(e) { oldDetails = []; }
+    
+    let contentHtml = `
+    <div class="eval-modal-wrapper" style="border-top: 5px solid #1976d2;">
+    <div class="score-dashboard">
+    <div>
+    <div style="font-size:0.9rem; opacity:0.8;">DÜZENLENEN</div>
+    <div style="font-size:1.2rem; font-weight:bold; color:#1976d2;">${agentName}</div>
+    <div style="font-size:0.8rem; opacity:0.7;">(${agentGroupRaw})</div>
+    </div>
+    <div class="score-circle-outer" id="score-ring">
+    <div class="score-circle-inner" id="live-score">${evalData.score}</div>
+    </div>
+    </div>
+    <div class="eval-header-card">
+    <div>
+    <label style="font-size:0.8rem; font-weight:bold; color:#555;">Call ID</label>
+    <input id="eval-callid" class="swal2-input" style="height:35px; margin:0; width:100%; font-size:0.9rem; background:#eee;" value="${evalData.callId}" readonly>
+    </div>
+    <div>
+    <label style="font-size:0.8rem; font-weight:bold; color:#555;">Çağrı Tarihi</label>
+    <input type="text" class="swal2-input" style="height:35px; margin:0; width:100%; font-size:0.9rem; background:#eee;" value="${evalData.callDate}" readonly>
+    </div>
+    </div>
+    `;
+    if (isCriteriaBased) {
+        contentHtml += `<div class="criteria-container">`;
+        criteriaList.forEach((c, i) => {
+            let pts = parseInt(c.points) || 0;
+            let mPts = parseInt(c.mediumScore) || 0;
+            let bPts = parseInt(c.badScore) || 0;
+            if (pts === 0) return;
+            
+            // Eski Puan/Notu Bul
+            let oldItem = oldDetails.find(d => d.q === c.text);
+            if (!oldItem && oldDetails[i]) { oldItem = oldDetails[i]; }
+            if (!oldItem) { oldItem = { score: pts, note: '' }; }
+            let currentVal = parseInt(oldItem.score);
+            let currentNote = oldItem.note || '';
+            if (isChat) {
+                // CHAT: Butonlu Düzenleme
+                let goodActive = currentVal === pts ? 'active' : '';
+                let mediumActive = currentVal === mPts && mPts !== 0 ? 'active' : '';
+                let badActive = currentVal === bPts && bPts !== 0 ? 'active' : '';
+                
+                if (currentVal !== pts && currentVal !== mPts && currentVal !== bPts) {
+                    goodActive = mediumActive = badActive = '';
+                    if (currentVal === 0 && bPts === 0) badActive = 'active';
+                } else if (currentVal === 0 && bPts > 0) {
+                    goodActive = mediumActive = badActive = '';
+                }
+                contentHtml += `
+                <div class="criteria-row" id="row-${i}" data-max-score="${pts}">
+                    <div class="criteria-header"><span>${i+1}. ${c.text}</span><span style="font-size:0.8rem; color:#999;">Max: ${pts}</span></div>
+                    <div class="criteria-controls">
+                        <div class="eval-button-group">
+                            <button class="eval-button eval-good ${goodActive}" data-score="${pts}" onclick="setButtonScore(${i}, ${pts}, ${pts})">İyi (${pts})</button>
+                            ${mPts > 0 ? `<button class="eval-button eval-medium ${mediumActive}" data-score="${mPts}" onclick="setButtonScore(${i}, ${mPts}, ${pts})">Orta (${mPts})</button>` : ''}
+                            ${bPts > 0 ? `<button class="eval-button eval-bad ${badActive}" data-score="${bPts}" onclick="setButtonScore(${i}, ${bPts}, ${pts})">Kötü (${bPts})</button>` : ''}
+                        </div>
+                        <span class="score-badge" id="badge-${i}" style="margin-top: 8px; display:block;">${currentVal}</span>
+                    </div>
+                    <input type="text" id="note-${i}" class="note-input" placeholder="Kırılım nedeni..." value="${currentNote}" style="display:${currentVal < pts ? 'block' : 'none'};">
+                </div>`;
+            } else if (isTelesatis) {
+                // TELESATIŞ: Slider Düzenleme
+                 contentHtml += `
+                    <div class="criteria-row" id="row-${i}" data-max-score="${pts}">
+                        <div class="criteria-header">
+                            <span>${i+1}. ${c.text}</span>
+                            <span style="font-size:0.8rem; color:#999;">Max: ${pts}</span>
+                        </div>
+                        <div class="criteria-controls" style="display: flex; align-items: center; gap: 15px; background: #f9f9f9; padding: 8px; border-radius: 6px;">
+                            <input type="range" class="custom-range slider-input" id="slider-${i}" min="0" max="${pts}" value="${currentVal}" data-index="${i}" oninput="updateRowSliderScore(${i}, ${pts})" style="flex-grow: 1;">
+                            <span class="score-badge" id="badge-${i}" style="background:${currentVal < pts ? '#d32f2f' : '#2e7d32'};">${currentVal}</span>
+                        </div>
+                        <input type="text" id="note-${i}" class="note-input" placeholder="Kırılım nedeni..." value="${currentNote}" style="display:${currentVal < pts ? 'block' : 'none'};">
+                    </div>`;
+            }
+        });
+        contentHtml += `</div>`;
+    } else {
+        contentHtml += `
+        <div style="padding:15px; border:1px dashed #ccc; background:#fff; border-radius:8px; text-align:center;">
+        <label style="font-weight:bold;">Manuel Puan</label><br>
+        <input id="eval-manual-score" type="number" class="swal2-input" value="${evalData.score}" min="0" max="100" style="width:100px; text-align:center; font-size:1.5rem; font-weight:bold;">
+        </div>
+        <textarea id="eval-details" class="swal2-textarea" placeholder="Detaylar...">${typeof evalData.details === 'string' ? evalData.details : ''}</textarea>
+        `;
+    }
+    contentHtml += `
+    <div>
+    <label style="font-size:0.85rem; font-weight:bold; color:#333;">Revize Geri Bildirim</label>
+    <textarea id="eval-feedback" class="swal2-textarea" style="margin-top:5px; height:80px;"></textarea>
+    </div>
     </div>`;
     
     const { value: formValues } = await Swal.fire({
-        title: `${agentName} Değerlendirme`, html: html, width: '800px', showCancelButton: true, confirmButtonText: 'Kaydet',
+        html: contentHtml,
+        width: '600px',
+        showCancelButton: true,
+        confirmButtonText: '   💾    Güncelle',
+        cancelButtonText: 'İptal',
+        focusConfirm: false,
+        didOpen: () => {
+            document.getElementById('eval-feedback').value = evalData.feedback || '';
+            
+            // Edit açılırken tüm puanları güncelle
+            if(isTelesatis) {
+                // Sliderlar için total puanı hesapla ve slider event'ını tekrar bağla (gerekirse)
+                window.recalcTotalSliderScore();
+            } else if (isChat) {
+                // Butonlar için total puanı hesapla
+                window.recalcTotalScore();
+            }
+            
+        },
         preConfirm: () => {
             const callId = document.getElementById('eval-callid').value;
-            if(!callId) { Swal.showValidationMessage('Call ID gerekli.'); return false; }
-            let total = 0, details = [];
-            criteriaList.forEach((c, i) => {
-                let score = 0, note = "";
-                if(isChat) { score = parseInt(document.getElementById(`badge-${i}`).innerText); note = document.getElementById(`note-${i}`).value; }
-                else { score = parseInt(document.getElementById(`slider-${i}`).value); note = document.getElementById(`note-${i}`).value; }
-                total += score;
-                details.push({q:c.text, max:c.points, score:score, note:note});
-            });
-            return { agentName, agentGroup, callId, callDate: document.getElementById('eval-calldate').value, score: total, details: JSON.stringify(details), feedback: document.getElementById('eval-feedback').value, feedbackType: 'Yok' };
+            const feedback = document.getElementById('eval-feedback').value;
+            if (isCriteriaBased) {
+                let total = 0;
+                let detailsArr = [];
+                for (let i = 0; i < criteriaList.length; i++) {
+                    const c = criteriaList[i];
+                    if (parseInt(c.points) === 0) continue; 
+                    
+                    let val;
+                    let maxPoints = parseInt(c.points) || 0;
+                    let note = document.getElementById(`note-${i}`).value;
+                    if (isChat) {
+                         // CHAT: Butonlardan Oku
+                        val = parseInt(document.getElementById(`badge-${i}`).innerText) || 0;
+                        
+                        // Kırılım Notu Zorunluluğu KALDIRILDI
+                        /*
+                        if (val < maxPoints && !note) {
+                            Swal.showValidationMessage(`'${c.text}' için kırılım nedeni zorunludur.`);
+                            return false;
+                        }
+                        */
+                    } else if (isTelesatis) {
+                         // TELESATIŞ: Slider'dan Oku
+                        const slider = document.getElementById(`slider-${i}`);
+                        val = parseInt(slider.value) || 0;
+                        
+                        // Kırılım Notu Zorunluluğu KALDIRILDI
+                        /*
+                        if (val < maxPoints && !note) {
+                            Swal.showValidationMessage(`'${c.text}' için kırılım nedeni zorunludur.`);
+                            return false;
+                        }
+                        */
+                    } else {
+                        val = maxPoints; // Varsayılan
+                    }
+                    total += val;
+                    detailsArr.push({ q: c.text, max: maxPoints, score: val, note: note });
+                }
+                return { agentName, callId, score: total, details: JSON.stringify(detailsArr), feedback };
+            } else {
+                // Manuel Puanlama
+                const score = document.getElementById('eval-manual-score').value;
+                const details = document.getElementById('eval-details').value;
+                return { agentName, callId, score: parseInt(score), details: details, feedback };
+            }
         }
     });
-    
-    if(formValues) {
-        Swal.fire({title:'Kaydediliyor...', didOpen:()=>Swal.showLoading()});
+    if (formValues) {
+        Swal.fire({ title: 'Güncelleniyor...', didOpen: () => { Swal.showLoading() } });
         fetch(SCRIPT_URL, {
-            method:'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({action:"logEvaluation", username:currentUser, token:getToken(), ...formValues})
-        }).then(r=>r.json()).then(d=> {
-            if(d.result==="success") { Swal.fire('Başarılı','Kaydedildi','success'); fetchEvaluationsForAgent(); }
-            else Swal.fire('Hata', d.message, 'error');
-        });
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: "updateEvaluation", username: currentUser, token: getToken(), ...formValues })
+        })
+        .then(r => r.json()).then(d => {
+            if (d.result === "success") {
+                Swal.fire({ icon: 'success', title: 'Güncellendi', text: 'Puan ve detaylar revize edildi.', timer: 1500, showConfirmButton: false });
+                fetchEvaluationsForAgent(agentName);
+            }
+            else {
+                Swal.fire('Hata', d.message || 'Güncellenemedi.', 'error');
+            }
+        }).catch(err => { Swal.fire('Hata', 'Sunucu hatası.', 'error'); });
     }
 }
-async function editEvaluation(callId) {
-    const item = allEvaluationsData.find(e => e.callId == callId);
-    if(!item) return;
-    const { value: text } = await Swal.fire({ input: 'textarea', inputLabel: 'Feedback Düzenle', inputValue: item.feedback, showCancelButton: true });
-    if (text) {
-        // Burada basitçe feedback güncelliyoruz, istenirse tam form açılabilir.
-        Swal.fire('Bilgi', 'Şu an sadece feedback güncelleniyor. Tam düzenleme için logEvaluationPopup geliştirilebilir.', 'info');
+// --- PENALTY GAME FUNCTIONS ---
+let pScore=0, pBalls=10, pCurrentQ=null;
+function updateJokerButtons() {
+    document.getElementById('joker-call').disabled = jokers.call === 0;
+    document.getElementById('joker-half').disabled = jokers.half === 0;
+    document.getElementById('joker-double').disabled = jokers.double === 0 || firstAnswerIndex !== -1;
+    if (firstAnswerIndex !== -1) {
+        document.getElementById('joker-call').disabled = true;
+        document.getElementById('joker-half').disabled = true;
+        document.getElementById('joker-double').disabled = true;
     }
 }
-function saveManualFeedback() {
-    const agentSelect = document.getElementById('agent-select-admin');
-    const title = document.getElementById('mf-title').value;
-    const date = document.getElementById('mf-date').value;
-    const desc = document.getElementById('mf-desc').value;
-    const impact = document.getElementById('mf-impact').value;
-    const agentName = agentSelect ? agentSelect.value : currentUser;
+function useJoker(type) {
+    if (jokers[type] === 0 || (firstAnswerIndex !== -1 && type !== 'double')) return;
+    jokers[type] = 0;
+    updateJokerButtons();
+    const currentQ = pCurrentQ, correctAns = currentQ.a, btns = document.querySelectorAll('.penalty-btn');
     
-    if(!isAdminMode || !agentName || agentName==='all' || !title || !desc) { Swal.fire('Eksik Bilgi', 'Temsilci, Konu ve Açıklama zorunludur.', 'warning'); return; }
-    
-    let scoreVal = impact === 'N/A' ? 'Bilgi' : parseInt(impact);
-    let agentGroup = 'Genel';
-    const foundUser = adminUserList.find(u => u.name === agentName);
-    if(foundUser) agentGroup = foundUser.group;
-
-    fetch(SCRIPT_URL, {
-        method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: "logEvaluation", username: currentUser, token: getToken(), agentName: agentName, agentGroup: agentGroup, callId: "MANUEL-" + Math.floor(Math.random()*100000), callDate: date, score: scoreVal, details: JSON.stringify([{ q: title, note: desc, score: scoreVal }]), feedback: desc, feedbackType: "Manuel Log" })
-    }).then(r => r.json()).then(d => {
-        if(d.result === "success") { Swal.fire('Başarılı','Feedback gönderildi.','success'); document.getElementById('mf-desc').value = ''; fetchEvaluationsForAgent(); }
-    });
-}
-function loadEducationData() {
-    const listEl = document.getElementById('education-list');
-    const agentSelect = document.getElementById('agent-select-admin');
-    const target = isAdminMode ? (agentSelect ? agentSelect.value : 'all') : currentUser;
-    document.getElementById('admin-edu-panel').style.display = isAdminMode ? 'block' : 'none';
-    listEl.innerHTML = 'Yükleniyor...';
-    
-    fetch(SCRIPT_URL, {
-        method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: "getEducation", username: currentUser, token: getToken(), targetAgent: target })
-    }).then(r => r.json()).then(data => {
-        listEl.innerHTML = '';
-        if(data.result === "success" && data.data) {
-            if(data.data.length === 0) listEl.innerHTML = 'Atanmış eğitim yok.';
-            data.data.forEach(edu => {
-                let isDone = edu.status === 'Tamamlandı';
-                let btn = isDone ? `<span style="color:green;float:right;">✔ ${edu.completedDate}</span>` : `<button class="edu-btn" onclick="completeEducation('${edu.id}')">Tamamla</button>`;
-                let link = edu.link ? `<a href="${edu.link}" target="_blank" style="display:block;margin-bottom:10px;color:#007bff;">Eğitime Git</a>` : '';
-                listEl.innerHTML += `<div class="edu-card ${isDone?'done':''}"><span class="edu-title">${edu.title}</span><p class="edu-desc">${edu.desc}</p>${link}${btn}</div>`;
-            });
+    if (type === 'call') {
+        const experts = ["Umut Bey", "Doğuş Bey", "Deniz Bey", "Esra Hanım"];
+        const expert = experts[Math.floor(Math.random() * experts.length)];
+        let guess = correctAns;
+        if (Math.random() > 0.8 && currentQ.opts.length > 1) {
+            let incorrectOpts = currentQ.opts.map((_, i) => i).filter(i => i !== correctAns);
+            guess = incorrectOpts[Math.floor(Math.random() * incorrectOpts.length)] || correctAns;
         }
-    });
+        Swal.fire({ icon: 'info', title: '   📞    Telefon Jokeri', html: `${expert} soruyu cevaplıyor...<br><br>"Benim tahminim kesinlikle **${String.fromCharCode(65 + guess)}** şıkkı. Bundan ${Math.random() < 0.8 ? "çok eminim" : "emin değilim"}."`, confirmButtonText: 'Kapat' });
+    } else if (type === 'half') {
+        let incorrectOpts = currentQ.opts.map((_, i) => i).filter(i => i !== correctAns).sort(() => Math.random() - 0.5).slice(0, 2);
+        incorrectOpts.forEach(idx => {
+            btns[idx].disabled = true;
+            btns[idx].style.textDecoration = 'line-through';
+            btns[idx].style.opacity = '0.4';
+        });
+        Swal.fire({ icon: 'success', title: '   ✂️    Yarı Yarıya Kullanıldı', text: 'İki yanlış şık elendi!', toast: true, position: 'top', showConfirmButton: false, timer: 1500 });
+    } else if (type === 'double') {
+        doubleChanceUsed = true;
+        Swal.fire({ icon: 'warning', title: '2️  Çift Cevap', text: 'Bu soruda bir kez yanlış cevap verme hakkınız var. İlk cevabınız yanlışsa, ikinci kez deneyebilirsiniz.', toast: true, position: 'top', showConfirmButton: false, timer: 2500 });
+    }
 }
-function assignEducation() {
-    const title = document.getElementById('edu-assign-title').value;
-    const link = document.getElementById('edu-assign-link').value;
-    const desc = document.getElementById('edu-assign-desc').value;
-    const agent = document.getElementById('agent-select-admin').value;
-    if(!agent || agent === 'all' || !title) return Swal.fire('Uyarı', 'Kişi ve Başlık seçin.', 'warning');
+function openPenaltyGame() {
+    document.getElementById('penalty-modal').style.display = 'flex';
+    showLobby();
+}
+function showLobby() {
+    document.getElementById('penalty-lobby').style.display = 'flex';
+    document.getElementById('penalty-game-area').style.display = 'none';
+    fetchLeaderboard();
+}
+function startGameFromLobby() {
+    document.getElementById('penalty-lobby').style.display = 'none';
+    document.getElementById('penalty-game-area').style.display = 'block';
+    startPenaltySession();
+}
+function fetchLeaderboard() {
+    const tbody = document.getElementById('leaderboard-body'),
+    loader = document.getElementById('leaderboard-loader'),
+    table = document.getElementById('leaderboard-table');
+    tbody.innerHTML = '';
+    loader.style.display = 'block';
+    table.style.display = 'none';
     
     fetch(SCRIPT_URL, {
-        method:'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action:"assignEducation", username:currentUser, token:getToken(), targetAgent:agent, title, link, desc })
-    }).then(r=>r.json()).then(d=>{ if(d.result==="success") { Swal.fire('Atandı','','success'); loadEducationData(); } });
-}
-function completeEducation(id) {
-    Swal.fire({title:'Tamamladın mı?', showCancelButton:true, confirmButtonText:'Evet'}).then(res=>{
-        if(res.isConfirmed) fetch(SCRIPT_URL, { method:'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action:"completeEducation", eduId:id }) }).then(()=>loadEducationData());
-    });
-}
-function fetchUserListForAdmin() { 
-    return fetch(SCRIPT_URL, { method: 'POST', headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "getUserList", username: currentUser, token: getToken() }) })
-    .then(r=>r.json()).then(d => { adminUserList = d.users || []; return adminUserList; });
-}
-function fetchCriteria(group) { 
-    return fetch(SCRIPT_URL, { method: 'POST', headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "getCriteria", group: group }) })
-    .then(r=>r.json()).then(d => d.criteria || []);
-}
-
-// --- PENALTY GAME ---
-function openPenaltyGame() { document.getElementById('penalty-modal').style.display='flex'; showLobby(); }
-function showLobby() { document.getElementById('penalty-lobby').style.display='flex'; document.getElementById('penalty-game-area').style.display='none'; fetchLeaderboard(); }
-function startGameFromLobby() { document.getElementById('penalty-lobby').style.display='none'; document.getElementById('penalty-game-area').style.display='block'; startPenaltySession(); }
-function fetchLeaderboard() {
-    const tbody = document.getElementById('leaderboard-body'), loader = document.getElementById('leaderboard-loader'), table = document.getElementById('leaderboard-table');
-    tbody.innerHTML = ''; loader.style.display = 'block'; table.style.display = 'none';
-    fetch(SCRIPT_URL, { method: 'POST', headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "getLeaderboard" }) }).then(response => response.json()).then(data => {
+        method: 'POST',
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "getLeaderboard" })
+    }).then(response => response.json())
+    .then(data => {
         loader.style.display = 'none';
         if (data.result === "success") {
             table.style.display = 'table';
             let html = '';
-            if(data.leaderboard.length === 0) { html = '<tr><td colspan="4" style="text-align:center; color:#666;">Henüz maç yapılmadı.</td></tr>'; } 
-            else {
+            if(data.leaderboard.length === 0) {
+                html = '<tr><td colspan="4" style="text-align:center; color:#666;">Henüz maç yapılmadı.</td></tr>';
+            } else {
                 data.leaderboard.forEach((u, i) => {
-                    let medal = i===0 ? '    🥇    ' : (i===1 ? '    🥈    ' : (i===2 ? '    🥉    ' : `<span class="rank-badge">${i+1}</span>`));
+                    let medal = i===0 ? '   🥇   ' : (i===1 ? '   🥈   ' : (i===2 ? '   🥉   ' : `<span class="rank-badge">${i+1}</span>`));
                     let bgStyle = (u.username === currentUser) ? 'background:rgba(250, 187, 0, 0.1);' : '';
                     html += `<tr style="${bgStyle}"><td>${medal}</td><td style="text-align:left;">${u.username}</td><td>${u.games}</td><td>${u.average}</td></tr>`;
                 });
             }
             tbody.innerHTML = html;
-        } else { loader.innerText = "Yüklenemedi."; loader.style.display = 'block'; }
+        } else {
+            loader.innerText = "Yüklenemedi.";
+            loader.style.display = 'block';
+        }
+    }).catch(err => {
+        console.error(err);
+        loader.innerText = "Bağlantı hatası.";
     });
 }
 function startPenaltySession() {
-    pScore = 0; pBalls = 10; jokers = { call: 1, half: 1, double: 1 };
-    doubleChanceUsed = false; firstAnswerIndex = -1;
+    pScore = 0;
+    pBalls = 10;
+    jokers = { call: 1, half: 1, double: 1 };
+    doubleChanceUsed = false;
+    firstAnswerIndex = -1;
     updateJokerButtons();
     document.getElementById('p-score').innerText = pScore;
     document.getElementById('p-balls').innerText = pBalls;
@@ -1110,11 +1606,19 @@ function startPenaltySession() {
     loadPenaltyQuestion();
 }
 function loadPenaltyQuestion() {
-    if (pBalls <= 0) { finishPenaltyGame(); return; }
-    if (quizQuestions.length === 0) { Swal.fire('Hata', 'Soru yok!', 'warning'); return; }
+    if (pBalls <= 0) {
+        finishPenaltyGame();
+        return;
+    }
+    if (quizQuestions.length === 0) {
+        Swal.fire('Hata', 'Soru yok!', 'warning');
+        return;
+    }
     pCurrentQ = quizQuestions[Math.floor(Math.random() * quizQuestions.length)];
     document.getElementById('p-question-text').innerText = pCurrentQ.q;
-    doubleChanceUsed = false; firstAnswerIndex = -1; updateJokerButtons();
+    doubleChanceUsed = false;
+    firstAnswerIndex = -1;
+    updateJokerButtons();
     let html = '';
     pCurrentQ.opts.forEach((opt, index) => {
         const letter = String.fromCharCode(65 + index);
@@ -1123,66 +1627,110 @@ function loadPenaltyQuestion() {
     document.getElementById('p-options').innerHTML = html;
 }
 function shootBall(idx) {
-    const btns = document.querySelectorAll('.penalty-btn'), isCorrect = (idx === pCurrentQ.a);
+    const btns = document.querySelectorAll('.penalty-btn'),
+    isCorrect = (idx === pCurrentQ.a);
     if (!isCorrect && doubleChanceUsed && firstAnswerIndex === -1) {
-        firstAnswerIndex = idx; btns[idx].classList.add('wrong-first-try'); btns[idx].disabled = true;
+        firstAnswerIndex = idx;
+        btns[idx].classList.add('wrong-first-try');
+        btns[idx].disabled = true;
         Swal.fire({ toast: true, position: 'top', icon: 'info', title: 'İlk Hata! Kalan Hakkınız: 1', showConfirmButton: false, timer: 1500, background: '#ffc107' });
-        updateJokerButtons(); return;
+        updateJokerButtons();
+        return;
     }
     btns.forEach(b => b.disabled = true);
-    const ballWrap = document.getElementById('ball-wrap'), keeperWrap = document.getElementById('keeper-wrap'), shooterWrap = document.getElementById('shooter-wrap'), goalMsg = document.getElementById('goal-msg');
+    
+    const ballWrap = document.getElementById('ball-wrap'),
+    keeperWrap = document.getElementById('keeper-wrap'),
+    shooterWrap = document.getElementById('shooter-wrap'),
+    goalMsg = document.getElementById('goal-msg');
+    
     const shotDir = Math.floor(Math.random() * 4);
     shooterWrap.classList.add('shooter-run');
     
     setTimeout(() => {
         if(isCorrect) {
-            if(shotDir === 0 || shotDir === 2) keeperWrap.classList.add('keeper-dive-right'); else keeperWrap.classList.add('keeper-dive-left');
+            if(shotDir === 0 || shotDir === 2) keeperWrap.classList.add('keeper-dive-right');
+            else keeperWrap.classList.add('keeper-dive-left');
         } else {
-            if(shotDir === 0 || shotDir === 2) keeperWrap.classList.add('keeper-dive-left'); else keeperWrap.classList.add('keeper-dive-right');
+            if(shotDir === 0 || shotDir === 2) keeperWrap.classList.add('keeper-dive-left');
+            else keeperWrap.classList.add('keeper-dive-right');
         }
+        
         if (isCorrect) {
             if(shotDir === 0) ballWrap.classList.add('ball-shoot-left-top');
             else if(shotDir === 1) ballWrap.classList.add('ball-shoot-right-top');
             else if(shotDir === 2) ballWrap.classList.add('ball-shoot-left-low');
             else ballWrap.classList.add('ball-shoot-right-low');
+            
             setTimeout(() => {
-                goalMsg.innerText = "GOL!!!"; goalMsg.style.color = "#fabb00"; goalMsg.classList.add('show');
-                pScore++; document.getElementById('p-score').innerText = pScore;
+                goalMsg.innerText = "GOL!!!";
+                goalMsg.style.color = "#fabb00";
+                goalMsg.classList.add('show');
+                pScore++;
+                document.getElementById('p-score').innerText = pScore;
                 Swal.fire({ toast: true, position: 'top', icon: 'success', title: 'Mükemmel Şut!', showConfirmButton: false, timer: 1000, background: '#a5d6a7' });
             }, 500);
         } else {
             if(Math.random() > 0.5) {
-                ballWrap.style.bottom = "160px"; ballWrap.style.left = (shotDir === 0 || shotDir === 2) ? "40%" : "60%"; ballWrap.style.transform = "scale(0.6)";
+                ballWrap.style.bottom = "160px";
+                ballWrap.style.left = (shotDir === 0 || shotDir === 2) ? "40%" : "60%";
+                ballWrap.style.transform = "scale(0.6)";
                 setTimeout(() => {
-                    goalMsg.innerText = "KURTARDI!"; goalMsg.style.color = "#ef5350"; goalMsg.classList.add('show');
+                    goalMsg.innerText = "KURTARDI!";
+                    goalMsg.style.color = "#ef5350";
+                    goalMsg.classList.add('show');
                     Swal.fire({ icon: 'error', title: 'Kaçırdın!', text: `Doğru cevap: ${String.fromCharCode(65 + pCurrentQ.a)}. ${pCurrentQ.opts[pCurrentQ.a]}`, showConfirmButton: true, timer: 2500, background: '#ef9a9a' });
                 }, 500);
             } else {
                 ballWrap.classList.add(Math.random() > 0.5 ? 'ball-miss-left' : 'ball-miss-right');
                 setTimeout(() => {
-                    goalMsg.innerText = "DIŞARI!"; goalMsg.style.color = "#ef5350"; goalMsg.classList.add('show');
+                    goalMsg.innerText = "DIŞARI!";
+                    goalMsg.style.color = "#ef5350";
+                    goalMsg.classList.add('show');
                     Swal.fire({ icon: 'error', title: 'Kaçırdın!', text: `Doğru cevap: ${String.fromCharCode(65 + pCurrentQ.a)}. ${pCurrentQ.opts[pCurrentQ.a]}`, showConfirmButton: true, timer: 2500, background: '#ef9a9a' });
                 }, 500);
             }
         }
     }, 300);
-    pBalls--; document.getElementById('p-balls').innerText = pBalls;
-    setTimeout(() => { resetField(); loadPenaltyQuestion(); }, 2500);
+    
+    pBalls--;
+    document.getElementById('p-balls').innerText = pBalls;
+    setTimeout(() => {
+        resetField();
+        loadPenaltyQuestion();
+    }, 2500);
 }
 function resetField() {
-    const ballWrap = document.getElementById('ball-wrap'), keeperWrap = document.getElementById('keeper-wrap'), shooterWrap = document.getElementById('shooter-wrap'), goalMsg = document.getElementById('goal-msg');
-    ballWrap.className = 'ball-wrapper'; ballWrap.style = ""; keeperWrap.className = 'keeper-wrapper'; shooterWrap.className = 'shooter-wrapper'; goalMsg.classList.remove('show');
+    const ballWrap = document.getElementById('ball-wrap'),
+    keeperWrap = document.getElementById('keeper-wrap'),
+    shooterWrap = document.getElementById('shooter-wrap'),
+    goalMsg = document.getElementById('goal-msg');
+    
+    ballWrap.className = 'ball-wrapper';
+    ballWrap.style = "";
+    keeperWrap.className = 'keeper-wrapper';
+    shooterWrap.className = 'shooter-wrapper';
+    goalMsg.classList.remove('show');
+    
     document.querySelectorAll('.penalty-btn').forEach(b => {
-        b.classList.remove('wrong-first-try'); b.style.textDecoration = ''; b.style.opacity = ''; b.style.background = '#fabb00'; b.style.color = '#0e1b42'; b.style.borderColor = '#f0b500'; b.disabled = false;
+        b.classList.remove('wrong-first-try');
+        b.style.textDecoration = '';
+        b.style.opacity = '';
+        b.style.background = '#fabb00';
+        b.style.color = '#0e1b42';
+        b.style.borderColor = '#f0b500';
+        b.disabled = false;
     });
 }
 function finishPenaltyGame() {
-    let title = pScore >= 8 ? "EFSANE!    🏆   " : (pScore >= 5 ? "İyi Maçtı!    👏   " : "Antrenman Lazım    🤕   ");
+    let title = pScore >= 8 ? "EFSANE!   🏆  " : (pScore >= 5 ? "İyi Maçtı!   👏  " : "Antrenman Lazım   🤕  ");
     document.getElementById('p-question-text').innerHTML = `<span style="font-size:1.5rem; color:#fabb00;">MAÇ BİTTİ!</span><br>${title}<br>Toplam Skor: ${pScore}/10`;
     document.getElementById('p-options').style.display = 'none';
     document.getElementById('p-restart-btn').style.display = 'block';
+    
     fetch(SCRIPT_URL, {
-        method: 'POST', headers: { "Content-Type": "text/plain;charset=utf-8" },
+        method: 'POST',
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({ action: "logQuiz", username: currentUser, token: getToken(), score: pScore * 10, total: 100 })
     });
 }
@@ -1193,49 +1741,100 @@ function openWizard(){
         Swal.fire({ title: 'İade Asistanı Verisi Yükleniyor...', didOpen: () => Swal.showLoading() });
         loadWizardData().then(() => {
             Swal.close();
-            if (wizardStepsData && wizardStepsData['start']) { renderStep('start'); } 
-            else { document.getElementById('wizard-body').innerHTML = '<h2 style="color:red;">Asistan verisi eksik.</h2>'; }
-        }).catch(() => { Swal.close(); document.getElementById('wizard-body').innerHTML = '<h2 style="color:red;">Veri çekme hatası.</h2>'; });
-    } else { renderStep('start'); }
+            if (wizardStepsData && wizardStepsData['start']) {
+                renderStep('start');
+            } else {
+                document.getElementById('wizard-body').innerHTML = '<h2 style="color:red;">Asistan verisi eksik veya hatalı. Lütfen yöneticinizle iletişime geçin.</h2>';
+            }
+        }).catch(() => {
+            Swal.close();
+            document.getElementById('wizard-body').innerHTML = '<h2 style="color:red;">Sunucudan veri çekme hatası oluştu.</h2>';
+        });
+    } else {
+        renderStep('start');
+    }
 }
 function renderStep(k){
     const s = wizardStepsData[k];
-    if (!s) { document.getElementById('wizard-body').innerHTML = `<h2 style="color:red;">HATA: Adım ID'si (${k}) bulunamadı.</h2>`; return; }
+    if (!s) {
+        document.getElementById('wizard-body').innerHTML = `<h2 style="color:red;">HATA: Adım ID'si (${k}) bulunamadı. Lütfen yöneticinizle iletişime geçin.</h2>`;
+        return;
+    }
     const b = document.getElementById('wizard-body');
     let h = `<h2 style="color:var(--primary);">${s.title || ''}</h2>`;
+    
     if(s.result) {
-        let i = s.result === 'red' ? '    🛑    ' : (s.result === 'green' ? '    ✅    ' : '    ⚠️    ');
+        let i = s.result === 'red' ? '   🛑   ' : (s.result === 'green' ? '   ✅   ' : '   ⚠️   ');
         let c = s.result === 'red' ? 'res-red' : (s.result === 'green' ? 'res-green' : 'res-yellow');
         h += `<div class="result-box ${c}"><div style="font-size:3rem;margin-bottom:10px;">${i}</div><h3>${s.title}</h3><p>${s.text}</p>${s.script ? `<div class="script-box">${s.script}</div>` : ''}</div><button class="restart-btn" onclick="renderStep('start')"><i class="fas fa-redo"></i> Başa Dön</button>`;
     } else {
         h += `<p>${s.text}</p><div class="wizard-options">`;
-        s.options.forEach(o => { h += `<button class="option-btn" onclick="renderStep('${o.next}')"><i class="fas fa-chevron-right"></i> ${o.text}</button>`; });
+        s.options.forEach(o => {
+            h += `<button class="option-btn" onclick="renderStep('${o.next}')"><i class="fas fa-chevron-right"></i> ${o.text}</button>`;
+        });
         h += `</div>`;
-        if(k !== 'start') h += `<button class="restart-btn" onclick="renderStep('start')" style="background:#eee;color:#333;margin-top:15px;">Başa Dön</button>`;
+        if(k !== 'start')
+            h += `<button class="restart-btn" onclick="renderStep('start')" style="background:#eee;color:#333;margin-top:15px;">Başa Dön</button>`;
     }
     b.innerHTML = h;
 }
-// --- TEKNİK SİHİRBAZ ---
+// --- TEKNİK SİHİRBAZ MODÜLÜ (DİNAMİK VERİ İLE) ---
+// State Yönetimi
+const twState = {
+    currentStep: 'start',
+    history: []
+};
+// Modal Açma Fonksiyonu
 function openTechWizard() {
     document.getElementById('tech-wizard-modal').style.display = 'flex';
+    // Eğer veri henüz yüklenmediyse tekrar dene
     if (Object.keys(techWizardData).length === 0) {
         Swal.fire({ title: 'Veriler Yükleniyor...', didOpen: () => Swal.showLoading() });
-        loadTechWizardData().then(() => { Swal.close(); twResetWizard(); });
-    } else { twRenderStep(); }
+        loadTechWizardData().then(() => {
+            Swal.close();
+            twResetWizard();
+        });
+    } else {
+        twRenderStep();
+    }
 }
+// Navigasyon ve Render Mantığı
 function twRenderStep() {
     const contentDiv = document.getElementById('tech-wizard-content');
     const backBtn = document.getElementById('tw-btn-back');
     const stepData = techWizardData[twState.currentStep];
-    if (twState.history.length > 0) backBtn.style.display = 'block'; else backBtn.style.display = 'none';
-    if (!stepData) { contentDiv.innerHTML = `<div class="alert" style="color:red;">Hata: Adım bulunamadı (${twState.currentStep}).</div>`; return; }
-    let html = `<div class="tech-step-title">${stepData.title || ''}</div>`;
-    if (stepData.text) html += `<p style="font-size:1rem; margin-bottom:15px;">${stepData.text}</p>`;
-    if (stepData.script) {
-        const safeScript = encodeURIComponent(stepData.script);
-        html += `<div class="tech-script-box"><span class="tech-script-label">Müşteriye iletilecek:</span>"${stepData.script}"<div style="margin-top:10px; text-align:right;"><button class="btn btn-copy" style="font-size:0.8rem; padding:5px 10px;" onclick="copyScriptContent('${safeScript}')"><i class="fas fa-copy"></i> Kopyala</button></div></div>`;
+    // Geri butonu kontrolü
+    if (twState.history.length > 0) backBtn.style.display = 'block';
+    else backBtn.style.display = 'none';
+    if (!stepData) {
+        contentDiv.innerHTML = `<div class="alert" style="color:red;">Hata: Adım bulunamadı (${twState.currentStep}). Lütfen tabloyu kontrol edin.</div>`;
+        return;
     }
-    if (stepData.alert) html += `<div class="tech-alert">${stepData.alert}</div>`;
+    let html = `<div class="tech-step-title">${stepData.title || ''}</div>`;
+    // Metin (Varsa)
+    if (stepData.text) {
+        html += `<p style="font-size:1rem; margin-bottom:15px;">${stepData.text}</p>`;
+    }
+    // Script Kutusu (Varsa) - GÜVENLİ KOPYALAMA BUTONU EKLENDİ
+    if (stepData.script) {
+        // Encode URI Component ile metni güvenli hale getiriyoruz (Tırnak ve satır hatalarını önler)
+        const safeScript = encodeURIComponent(stepData.script);
+        html += `
+        <div class="tech-script-box">
+            <span class="tech-script-label">Müşteriye iletilecek:</span>
+            "${stepData.script}"
+            <div style="margin-top:10px; text-align:right;">
+                <button class="btn btn-copy" style="font-size:0.8rem; padding:5px 10px;" onclick="copyScriptContent('${safeScript}')">
+                    <i class="fas fa-copy"></i> Kopyala
+                </button>
+            </div>
+        </div>`;
+    }
+    // Uyarı/Alert (Varsa)
+    if (stepData.alert) {
+        html += `<div class="tech-alert">${stepData.alert}</div>`;
+    }
+    // Butonlar
     if (stepData.buttons && stepData.buttons.length > 0) {
         html += `<div class="tech-buttons-area">`;
         stepData.buttons.forEach(btn => {
@@ -1246,6 +1845,217 @@ function twRenderStep() {
     }
     contentDiv.innerHTML = html;
 }
-function twChangeStep(newStep) { twState.history.push(twState.currentStep); twState.currentStep = newStep; twRenderStep(); }
-function twGoBack() { if (twState.history.length > 0) { twState.currentStep = twState.history.pop(); twRenderStep(); } }
-function twResetWizard() { twState.currentStep = 'start'; twState.history = []; twRenderStep(); }
+// Navigasyon Fonksiyonları
+function twChangeStep(newStep) {
+    // Özel komutlar (Eski hardcoded mantıktan kalanlar varsa buraya eklenebilir ama şu an hepsi tabloda)
+    twState.history.push(twState.currentStep);
+    twState.currentStep = newStep;
+    twRenderStep();
+}
+function twGoBack() {
+    if (twState.history.length > 0) {
+        twState.currentStep = twState.history.pop();
+        twRenderStep();
+    }
+}
+function twResetWizard() {
+    twState.currentStep = 'start';
+    twState.history = [];
+    twRenderStep();
+}
+// --- MANUEL FEEDBACK (HIZLI LOG) ---
+function saveManualFeedback() {
+    const agentSelect = document.getElementById('agent-select-admin');
+    const title = document.getElementById('mf-title').value;
+    const date = document.getElementById('mf-date').value;
+    const desc = document.getElementById('mf-desc').value;
+    const impact = document.getElementById('mf-impact').value;
+    const agentName = agentSelect ? agentSelect.value : currentUser; // Admin değilse kendi
+    
+    if(!isAdminMode) { Swal.fire('Hata','Yetkiniz yok.','error'); return; }
+    if(!agentName || agentName === 'all') { Swal.fire('Hata','Lütfen bir temsilci seçin.','warning'); return; }
+    if(!title || !desc) { Swal.fire('Eksik','Konu ve detay zorunludur.','warning'); return; }
+    
+    Swal.fire({ title: 'Kaydediliyor...', didOpen: () => Swal.showLoading() });
+    
+    let scoreVal = impact === 'N/A' ? 'Bilgi' : parseInt(impact);
+    
+    // Grup bilgisini bul
+    let agentGroup = 'Genel';
+    const foundUser = adminUserList.find(u => u.name === agentName);
+    if(foundUser) agentGroup = foundUser.group;
+
+    fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ 
+            action: "logEvaluation", 
+            username: currentUser, 
+            token: getToken(),
+            agentName: agentName,
+            agentGroup: agentGroup,
+            callId: "MANUEL-" + Math.floor(Math.random()*100000), // Rastgele ID
+            callDate: date,
+            score: scoreVal,
+            details: JSON.stringify([{ q: title, note: desc, score: scoreVal }]), // Detay formatına uydurma
+            feedback: desc,
+            feedbackType: "Manuel Log"
+        })
+    })
+    .then(r => r.json()).then(d => {
+        if(d.result === "success") {
+            Swal.fire('Başarılı','Feedback kaydedildi.','success');
+            document.getElementById('mf-desc').value = '';
+            document.getElementById('mf-title').value = '';
+            fetchEvaluationsForAgent(); // Listeyi güncelle
+        } else {
+            Swal.fire('Hata', d.message, 'error');
+        }
+    });
+}
+// --- EĞİTİM MODÜLÜ ---
+function loadEducationData() {
+    const listEl = document.getElementById('education-list');
+    const loader = document.getElementById('education-loader');
+    const agentSelect = document.getElementById('agent-select-admin');
+    const targetAgent = isAdminMode ? (agentSelect ? agentSelect.value : 'all') : currentUser;
+    
+    // Admin panel görünürlüğü
+    document.getElementById('admin-edu-panel').style.display = isAdminMode ? 'block' : 'none';
+    
+    listEl.innerHTML = '';
+    loader.style.display = 'block';
+    
+    fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "getEducation", username: currentUser, token: getToken(), targetAgent: targetAgent })
+    })
+    .then(r => r.json()).then(data => {
+        loader.style.display = 'none';
+        if(data.result === "success") {
+            if(data.data.length === 0) { listEl.innerHTML = '<p style="color:#999;">Atanmış eğitim yok.</p>'; return; }
+            
+            data.data.forEach(edu => {
+                let isDone = edu.status === 'Tamamlandı';
+                let btnHtml = isDone 
+                    ? `<span style="color:green; font-weight:bold; float:right;"><i class="fas fa-check"></i> ${edu.completedDate}</span>` 
+                    : `<button class="edu-btn" onclick="completeEducation('${edu.id}')">Tamamla</button>`;
+                
+                let linkHtml = edu.link ? `<a href="${edu.link}" target="_blank" style="color:#0288d1; font-size:0.85rem; display:block; margin-bottom:10px;"><i class="fas fa-link"></i> Eğitime Git</a>` : '';
+                
+                listEl.innerHTML += `
+                <div class="edu-card ${isDone ? 'done' : ''}">
+                    <span class="edu-title">${edu.title}</span>
+                    <span style="font-size:0.7rem; color:#aaa;">Atayan: ${edu.assigner} | ${edu.date}</span>
+                    <p class="edu-desc">${edu.desc}</p>
+                    ${linkHtml}
+                    ${btnHtml}
+                </div>`;
+            });
+        }
+    });
+}
+function assignEducation() {
+    const title = document.getElementById('edu-assign-title').value;
+    const link = document.getElementById('edu-assign-link').value;
+    const desc = document.getElementById('edu-assign-desc').value;
+    const agentSelect = document.getElementById('agent-select-admin');
+    
+    if(!agentSelect || agentSelect.value === 'all') { Swal.fire('Uyarı','Lütfen belirli bir temsilci seçin.','warning'); return; }
+    if(!title) { Swal.fire('Uyarı','Başlık zorunludur.','warning'); return; }
+    
+    Swal.fire({ title: 'Atanıyor...', didOpen: () => Swal.showLoading() });
+    
+    fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ 
+            action: "assignEducation", 
+            username: currentUser, 
+            token: getToken(),
+            targetAgent: agentSelect.value,
+            title: title,
+            desc: desc,
+            link: link
+        })
+    }).then(r => r.json()).then(d => {
+        if(d.result === "success") {
+            Swal.fire('Başarılı','Eğitim atandı.','success');
+            document.getElementById('edu-assign-title').value = '';
+            document.getElementById('edu-assign-desc').value = '';
+            loadEducationData();
+        }
+    });
+}
+function completeEducation(eduId) {
+    Swal.fire({
+        title: 'Eğitimi tamamladın mı?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Evet, Tamamladım'
+    }).then((res) => {
+        if(res.isConfirmed) {
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify({ action: "completeEducation", eduId: eduId })
+            }).then(r => r.json()).then(d => {
+                if(d.result === "success") {
+                    Swal.fire('Süper!', 'Eğitim tamamlandı olarak işaretlendi.', 'success');
+                    loadEducationData();
+                }
+            });
+        }
+    });
+}
+// --- BİLDİRİM KONTROLÜ ---
+function checkNewFeedbacks() {
+    const agentName = localStorage.getItem("sSportUser");
+    if (!agentName || isAdminMode) return; 
+    
+    fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "checkNotifications", username: agentName })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.result === "success" && data.hasFeedback) {
+            const lastSeenId = localStorage.getItem('lastSeenFeedbackId');
+            
+            if (lastSeenId !== String(data.id)) {
+                let iconType = 'info';
+                let titleColor = '#0e1b42';
+                
+                if (data.score === 0 || data.score < 70) { iconType = 'warning'; titleColor = '#d32f2f'; }
+                else if (data.score >= 100) { iconType = 'success'; titleColor = '#2e7d32'; }
+                else if (data.score >= 70 && data.score < 100) { iconType = 'info'; titleColor = '#ed6c02'; }
+                
+                Swal.fire({
+                    title: `<span style="color:${titleColor}">🔔 Yeni Geri Bildirim!</span>`,
+                    html: `
+                        <div style="text-align:left; font-size:0.95rem; line-height:1.6;">
+                            <p><strong>Tarih:</strong> ${data.date}</p>
+                            <p><strong>Tür:</strong> ${data.type}</p>
+                            <p><strong>Puan:</strong> <span style="font-weight:bold; font-size:1.1rem; color:${titleColor}">${data.score}</span></p>
+                            <div style="background:#f8f9fa; padding:15px; border-left:5px solid ${titleColor}; border-radius:4px; margin-top:10px; font-style:italic; color:#555; white-space: pre-wrap;">
+                                "${data.feedback}"
+                            </div>
+                        </div>
+                    `,
+                    icon: iconType,
+                    confirmButtonText: 'Okudum, Anlaşıldı',
+                    confirmButtonColor: titleColor,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    backdrop: `rgba(0,0,123,0.4)`
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        localStorage.setItem('lastSeenFeedbackId', data.id);
+                    }
+                });
+            }
+        }
+    });
+}
