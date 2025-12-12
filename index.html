@@ -28,9 +28,9 @@
     <!-- BAKIM EKRANI -->
     <div id="maintenance-screen">
         <div class="maintenance-content" style="text-align:center; color:white;">
-            <span style="font-size: 4rem;">👨‍🏫</span>
+            <span style="font-size: 4rem;">   👨‍🏫   </span>
             <h1>Sistem Mola Verdi!</h1>
-            <p>Bakım çalışması sürüyor... 🚀</p>
+            <p>Bakım çalışması sürüyor...    🚀   </p>
         </div>
     </div>
 
@@ -91,13 +91,10 @@
                         <a href="https://www.ssportplus.com/yayin-akisi/" target="_blank" class="filter-btn link-btn"><i class="fas fa-calendar-alt"></i> Yayın Akışı</a>
                         <button class="filter-btn link-btn" onclick="openGuide()"><i class="fas fa-book"></i> Spor Rehberi</button>
                         <button class="filter-btn link-btn" onclick="openWizard()"><i class="fas fa-robot"></i> İade Asistanı</button>
-                        
-                        <!-- TEKNİK SİHİRBAZ -->
                         <button class="filter-btn link-btn" onclick="openTechWizard()"><i class="fas fa-magic"></i> Teknik Sihirbaz</button>
-                        
                         <button class="filter-btn link-btn" onclick="openSales()"><i class="fas fa-headset"></i> TeleSatış</button>
                         <button class="filter-btn link-btn" onclick="openPenaltyGame()"><i class="fas fa-futbol"></i> Oyun</button>
-                        <button class="filter-btn link-btn" onclick="openQualityArea()"><i class="fas fa-chart-pie"></i> Kalite Hub</button>
+                        <button class="filter-btn link-btn" onclick="openQualityArea()"><i class="fas fa-chart-pie"></i> Kalite</button>
                     </div>
                 </div>
             </div>
@@ -124,7 +121,7 @@
     <div id="news-modal" class="modal-overlay">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal('news-modal')">&times;</span>
-            <h2 style="color:var(--primary);">📢 Duyurular</h2>
+            <h2 style="color:var(--primary);">   📢    Duyurular</h2>
             <div id="news-container"></div>
         </div>
     </div>
@@ -141,12 +138,12 @@
     <div id="tech-wizard-modal" class="modal-overlay">
         <div class="modal-content" style="max-width: 900px; padding: 0; overflow: hidden; display: flex; flex-direction: column;">
             <div style="background-color: #0e1b42; color: #fabb00; padding: 20px; text-align: center; font-size: 1.4rem; font-weight: 800; border-bottom: 5px solid #fabb00; position: relative;">
-                📺 S Sport Plus - Teknik Çözüm Sihirbazı
+                  📺   S Sport Plus - Teknik Çözüm Sihirbazı
                 <span class="close-modal" onclick="closeModal('tech-wizard-modal')" style="color: white; top: 15px; right: 20px;">&times;</span>
             </div>
             <div style="background-color: #eaeaea; padding: 10px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ccc;">
-                <button id="tw-btn-back" class="btn btn-copy" style="background:#6c757d; color:white; display:none;" onclick="twGoBack()">⬅ Önceki Adım</button>
-                <button class="btn btn-copy" style="background:#d32f2f; color:white;" onclick="twResetWizard()">↻ Başa Dön</button>
+                <button id="tw-btn-back" class="btn btn-copy" style="background:#6c757d; color:white; display:none;" onclick="twGoBack()">  ⬅   Önceki Adım</button>
+                <button class="btn btn-copy" style="background:#d32f2f; color:white;" onclick="twResetWizard()">  ↻   Başa Dön</button>
             </div>
             <div id="tech-wizard-content" style="padding: 30px; overflow-y: auto; max-height: 60vh;"></div>
         </div>
@@ -156,7 +153,7 @@
     <div id="guide-modal" class="modal-overlay">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal('guide-modal')">&times;</span>
-            <h2 style="text-align:center; color:var(--primary);">📖 Spor Terimleri & İçerik Rehberi</h2>
+            <h2 style="text-align:center; color:var(--primary);">   📖    Spor Terimleri & İçerik Rehberi</h2>
             <div class="guide-grid" id="guide-grid"></div>
         </div>
     </div>
@@ -165,7 +162,7 @@
     <div id="sales-modal" class="modal-overlay">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal('sales-modal')">&times;</span>
-            <h2 style="text-align:center; color:var(--sales);">📞 Satış Scriptleri</h2>
+            <h2 style="text-align:center; color:var(--sales);">   📞    Satış Scriptleri</h2>
             <div class="sales-grid" id="sales-grid"></div>
         </div>
     </div>
@@ -174,15 +171,15 @@
     <div id="penalty-modal" class="modal-overlay">
         <div class="modal-content" style="max-width: 650px; background: #1a1a1a; border: 1px solid #333; min-height:600px; display:flex; flex-direction:column;">
             <span class="close-modal" onclick="closeModal('penalty-modal')">&times;</span>
-            <h2 style="text-align:center; color:#fabb00; margin-top:0;">⚽ S Sport Arena</h2>
+            <h2 style="text-align:center; color:#fabb00; margin-top:0;">   ⚽    S Sport Arena</h2>
             <div id="penalty-lobby" style="text-align:center; padding:20px; flex-grow:1; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-                <h3 style="color:white; margin-bottom:15px;">🏆 Liderlik Tablosu (Top 5)</h3>
+                <h3 style="color:white; margin-bottom:15px;">   🏆    Liderlik Tablosu (Top 5)</h3>
                 <div id="leaderboard-loader" style="color:#aaa;">Yükleniyor...</div>
                 <table id="leaderboard-table" style="width:100%; color:#eee; border-collapse:collapse; margin-bottom:30px; display:none;">
                     <thead><tr style="border-bottom:1px solid #555; color:#fabb00;"><th style="padding:10px;">#</th><th style="padding:10px;">Temsilci</th><th style="padding:10px;">Maç</th><th style="padding:10px;">Ort.</th></tr></thead>
                     <tbody id="leaderboard-body"></tbody>
                 </table>
-                <button class="penalty-btn" style="width:200px; background:#2e7d32; color:white; border-color:#1b5e20;" onclick="startGameFromLobby()">MAÇA BAŞLA 🏃‍♂️⚽</button>
+                <button class="penalty-btn" style="width:200px; background:#2e7d32; color:white; border-color:#1b5e20;" onclick="startGameFromLobby()">MAÇA BAŞLA    🏃‍♂️⚽   </button>
             </div>
             <div id="penalty-game-area" style="display:none;">
                 <div class="penalty-stats"><span>SKOR: <span id="p-score">0</span></span><span>TOP: <span id="p-balls">10</span></span></div>
@@ -193,153 +190,109 @@
                 </div>
                 <div style="margin-top:15px; color:#ddd; min-height:50px; font-weight:500; text-align:center; padding:10px; background:rgba(255,255,255,0.05); border-radius:8px;" id="p-question-text">Soru yükleniyor...</div>
                 <div id="joker-container" style="display: flex; justify-content: space-around; margin: 15px 0;">
-                    <button id="joker-call" class="joker-btn" onclick="useJoker('call')" title="Telefon Jokeri">📞 Telefon</button>
-                    <button id="joker-half" class="joker-btn" onclick="useJoker('half')" title="Yarı Yarıya Joker">✂️ 50:50</button>
+                    <button id="joker-call" class="joker-btn" onclick="useJoker('call')" title="Telefon Jokeri">   📞    Telefon</button>
+                    <button id="joker-half" class="joker-btn" onclick="useJoker('half')" title="Yarı Yarıya Joker">   ✂️    50:50</button>
                     <button id="joker-double" class="joker-btn" onclick="useJoker('double')" title="Çift Cevap Hakkı">2️⃣ Çift Cevap</button>
                 </div>
                 <div class="penalty-options" id="p-options"></div>
-                <button id="p-restart-btn" class="restart-btn" style="display:none; width:100%; background:#fabb00; color:black; font-weight:bold;" onclick="showLobby()">LOBİYE DÖN 🏠</button>
+                <button id="p-restart-btn" class="restart-btn" style="display:none; width:100%; background:#fabb00; color:black; font-weight:bold;" onclick="showLobby()">LOBİYE DÖN    🏠   </button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL: KALİTE & GELİŞİM HUB (YENİ TAM EKRAN TASARIM) -->
+    <!-- YENİ MODAL: KALİTE & GELİŞİM (SIDEBAR'LI) -->
     <div id="quality-modal" class="modal-overlay">
-        <div class="quality-hub-container">
+        <div class="modal-content quality-modal-layout" style="padding:0; max-width: 1100px; height: 80vh; display: flex; overflow: hidden;">
+            
             <!-- SOL SIDEBAR MENÜ -->
-            <div class="hub-sidebar">
-                <div class="hub-brand">
-                    <i class="fas fa-chart-line"></i> Kalite & Gelişim
+            <div class="quality-sidebar">
+                <div class="q-sidebar-header">
+                    <i class="fas fa-chart-pie"></i> Kalite & Gelişim
                 </div>
-                
-                <div class="hub-menu">
-                    <button class="hub-menu-btn active" onclick="switchHubTab('dashboard')">
+                <ul class="q-menu">
+                    <li onclick="switchQualityTab('dashboard')" id="tab-dashboard" class="active">
                         <i class="fas fa-tachometer-alt"></i> Özet (Dashboard)
-                    </button>
-                    <button class="hub-menu-btn" id="btn-eval-tab" onclick="switchHubTab('evaluation')">
+                    </li>
+                    <li onclick="switchQualityTab('evaluations')" id="tab-evaluations">
                         <i class="fas fa-headset"></i> Çağrı Değerlendirme
-                    </button>
-                    <button class="hub-menu-btn" id="btn-feedback-tab" onclick="switchHubTab('manual-feedback')">
-                        <i class="fas fa-comment-dots"></i> Hızlı Feedback
-                    </button>
-                    <button class="hub-menu-btn" onclick="switchHubTab('education')">
+                    </li>
+                    <li onclick="switchQualityTab('feedback')" id="tab-feedback">
+                        <i class="fas fa-comments"></i> Hızlı Feedback
+                    </li>
+                    <li onclick="switchQualityTab('training')" id="tab-training">
                         <i class="fas fa-graduation-cap"></i> Eğitimlerim
-                    </button>
-                </div>
-                
-                <div class="hub-footer">
-                    <button class="btn-close-hub" onclick="closeModal('quality-modal')">
-                        <i class="fas fa-times"></i> Kapat
-                    </button>
+                    </li>
+                </ul>
+                <div class="q-sidebar-footer">
+                     <button onclick="closeModal('quality-modal')" class="q-close-btn"><i class="fas fa-times"></i> Kapat</button>
                 </div>
             </div>
 
             <!-- SAĞ İÇERİK ALANI -->
-            <div class="hub-content">
-                <!-- Global Filtreler -->
-                <div class="hub-top-bar" id="admin-filters" style="display:none;">
-                    <div class="filter-group">
-                        <label>Ekip</label>
-                        <select id="group-select-admin" class="hub-select" onchange="updateAgentListBasedOnGroup()"></select>
-                    </div>
-                    <div class="filter-group">
-                        <label>Temsilci</label>
-                        <select id="agent-select-admin" class="hub-select" onchange="hubAgentChanged()"></select>
-                    </div>
-                    <div class="filter-group">
-                        <label>Dönem</label>
-                        <select id="month-select-filter" class="hub-select" onchange="fetchEvaluationsForAgent()"></select>
-                    </div>
-                    <div class="filter-group" style="margin-left: auto;">
-                        <label>&nbsp;</label>
-                        <button class="hub-action-btn" onclick="exportEvaluations()" title="Rapor İndir"><i class="fas fa-file-csv"></i> Rapor</button>
+            <div class="quality-main-content">
+                
+                <!-- ÜST BAR: FİLTRELER -->
+                <div class="q-top-bar">
+                    <h3 id="page-title">Dashboard</h3>
+                    <div class="q-filters">
+                        <!-- Admin ise Personel Seçimi Görünür -->
+                        <div id="admin-filters" style="display:none; gap:10px;">
+                             <select id="group-select-admin" class="q-select" onchange="updateAgentListBasedOnGroup()"></select>
+                             <select id="agent-select-admin" class="q-select" onchange="refreshQualityData()"></select>
+                        </div>
+                        <!-- Tarih Filtresi -->
+                        <select id="month-select-filter" class="q-select" onchange="refreshQualityData()"></select>
                     </div>
                 </div>
 
-                <!-- TAB 1: DASHBOARD & GEÇMİŞ -->
-                <div id="tab-dashboard" class="hub-tab-content active">
+                <!-- İÇERİK 1: DASHBOARD -->
+                <div id="view-dashboard" class="q-view active">
                     <div class="q-stats-grid">
                         <div class="q-stat-card card-blue">
                             <div class="q-card-title">ORTALAMA PUAN</div>
                             <div class="q-card-value" id="dash-avg-score">-</div>
+                            <div class="q-card-icon-bg"><i class="fas fa-chart-bar"></i></div>
                         </div>
                         <div class="q-stat-card card-green">
                             <div class="q-card-title">TOPLAM İŞLEM</div>
                             <div class="q-card-value" id="dash-eval-count">-</div>
+                            <div class="q-card-icon-bg"><i class="fas fa-check-circle"></i></div>
                         </div>
                         <div class="q-stat-card card-orange">
                             <div class="q-card-title">HEDEF TUTMA</div>
                             <div class="q-card-value" id="dash-target-rate">-%</div>
+                            <div class="q-card-icon-bg"><i class="fas fa-bullseye"></i></div>
                         </div>
                     </div>
-                    <div class="list-section-title">Geri Bildirim & Değerlendirme Geçmişi</div>
-                    <div id="quality-loader" style="display:none; text-align:center; padding:20px; color:#999;">Yükleniyor...</div>
-                    <div id="evaluations-list" class="timeline-list"></div>
-                </div>
-
-                <!-- TAB 2: ÇAĞRI DEĞERLENDİRME (FORM) -->
-                <div id="tab-evaluation" class="hub-tab-content">
-                    <div class="form-header" style="margin-bottom:20px;">
-                        <h3 style="color:var(--primary); margin:0;"><i class="fas fa-clipboard-check"></i> Yeni Çağrı Değerlendirme</h3>
-                        <p style="color:#666; margin:5px 0;">Dinlenen çağrı veya chat için detaylı kalite formu başlatın.</p>
-                    </div>
-                    <div style="text-align:center; margin-top:50px;">
-                        <i class="fas fa-arrow-up" style="font-size:2rem; color:#ccc; margin-bottom:10px;"></i>
-                        <p style="color:#666;">Lütfen yukarıdan temsilci seçin ve aşağıdaki butonu kullanın.</p>
-                        <button class="hub-action-btn" onclick="logEvaluationPopup()" style="font-size:1.1rem; padding:15px 30px;">
-                            <i class="fas fa-plus"></i> Formu Başlat
-                        </button>
+                    <div style="margin-top:20px; padding:40px; background:#f8f9fa; border-radius:8px; text-align:center; color:#777;">
+                        <i class="fas fa-chart-line fa-3x" style="opacity:0.2;"></i>
+                        <p style="margin-top:15px;">Detaylı grafikler ve analizler yakında eklenecek.</p>
                     </div>
                 </div>
 
-                <!-- TAB 3: HIZLI FEEDBACK (MANUEL LOG) -->
-                <div id="tab-manual-feedback" class="hub-tab-content">
-                    <div class="form-header" style="margin-bottom:20px;">
-                        <h3 style="color:var(--primary); margin:0;"><i class="fas fa-bolt"></i> Hızlı Feedback (Manuel Log)</h3>
-                        <p style="color:#666; margin:5px 0;">Çağrı dinlemeden, anlık tespitler için kayıt oluşturun.</p>
+                <!-- İÇERİK 2: ÇAĞRI DEĞERLENDİRME -->
+                <div id="view-evaluations" class="q-view">
+                    <div class="view-actions" id="eval-admin-actions" style="display:none; margin-bottom:15px; text-align:right;">
+                        <button class="btn btn-copy" onclick="logEvaluationPopup()"><i class="fas fa-plus"></i> Yeni Değerlendirme</button>
+                        <button class="btn btn-copy" style="background:var(--primary);" onclick="exportEvaluations()"><i class="fas fa-file-csv"></i> Rapor İndir</button>
                     </div>
-                    <div class="manual-fb-container">
-                        <label style="font-weight:bold; color:#555;">Konu / Başlık</label>
-                        <input id="mf-title" class="hub-input" placeholder="Örn: Hatalı Chat Kapanışı" style="width:100%; box-sizing:border-box;">
-                        
-                        <label style="font-weight:bold; color:#555;">Tarih</label>
-                        <input type="date" id="mf-date" class="hub-input" style="width:100%; box-sizing:border-box;">
-                        
-                        <label style="font-weight:bold; color:#555;">Feedback Detayı</label>
-                        <textarea id="mf-desc" class="hub-textarea" placeholder="Tespit edilen durum ve personele iletilen not..."></textarea>
-                        
-                        <label style="font-weight:bold; color:#555;">Etki Puanı (Opsiyonel)</label>
-                        <select id="mf-impact" class="hub-select" style="width:100%; box-sizing:border-box;">
-                            <option value="N/A">Puana Etkisi Yok (Sadece Bilgi)</option>
-                            <option value="0">Kritik Hata (0 Puan)</option>
-                            <option value="100">Örnek Davranış (Bonus 100)</option>
-                        </select>
-                        
-                        <button class="hub-save-btn" onclick="saveManualFeedback()">
-                            <i class="fas fa-paper-plane"></i> Kaydet ve Gönder
-                        </button>
-                    </div>
+                    <div id="evaluations-list" class="scrollable-list"></div>
                 </div>
 
-                <!-- TAB 4: EĞİTİM (ASSIGN & VIEW) -->
-                <div id="tab-education" class="hub-tab-content">
-                    <div class="education-layout">
-                        <!-- Admin Atama Paneli -->
-                        <div id="admin-edu-panel" style="display:none; margin-bottom:20px; padding:20px; background:#e3f2fd; border-radius:8px; border:1px solid #bbdefb;">
-                            <h4 style="margin-top:0; color:#1565c0;"><i class="fas fa-tasks"></i> Eğitim Ata</h4>
-                            <div class="edu-assign-grid">
-                                <input id="edu-assign-title" class="hub-input" placeholder="Eğitim Başlığı">
-                                <input id="edu-assign-link" class="hub-input" placeholder="Link / Dosya Yolu">
-                                <textarea id="edu-assign-desc" class="hub-textarea" placeholder="Açıklama" style="grid-column:1/-1; height:60px;"></textarea>
-                                <button class="hub-action-btn" onclick="assignEducation()" style="grid-column:1/-1; background:#1565c0;">Atama Yap</button>
-                            </div>
-                        </div>
-
-                        <!-- Eğitim Listesi -->
-                        <h4 style="color:#333; border-bottom:1px solid #eee; padding-bottom:10px;">Eğitim Listesi</h4>
-                        <div id="education-loader" style="display:none; text-align:center; color:#999;">Yükleniyor...</div>
-                        <div id="education-list" class="edu-card-grid"></div>
+                <!-- İÇERİK 3: FEEDBACK -->
+                <div id="view-feedback" class="q-view">
+                     <div class="view-actions" id="fb-admin-actions" style="display:none; margin-bottom:15px; text-align:right;">
+                        <button class="btn btn-copy" style="background:var(--warning); color:#333;" onclick="openManualFeedbackPopup()"><i class="fas fa-comment-medical"></i> Feedback Ekle</button>
                     </div>
+                    <div id="feedback-list" class="scrollable-list"></div>
+                </div>
+
+                <!-- İÇERİK 4: EĞİTİMLER -->
+                <div id="view-training" class="q-view">
+                     <div class="view-actions" id="train-admin-actions" style="display:none; margin-bottom:15px; text-align:right;">
+                        <button class="btn btn-copy" style="background:var(--info);" onclick="openAssignTrainingPopup()"><i class="fas fa-plus-circle"></i> Eğitim Ata</button>
+                    </div>
+                    <div id="training-list" class="scrollable-list"></div>
                 </div>
 
             </div>
@@ -369,6 +322,9 @@
                 }
             }
         });
+        window.openUserMenu = function() {
+            toggleUserDropdown();
+        };
     </script>
 </body>
 </html>
