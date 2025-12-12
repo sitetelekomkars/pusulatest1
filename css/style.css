@@ -398,18 +398,21 @@ body.editing .edit-icon { display: block !important; }
     white-space: nowrap; /* Metnin sığmasını sağla */
 }
 .eval-button:hover:not(.active) { border-color: var(--primary); background: #f0f4ff; }
+
 /* İyi Puan: Yeşil */
 .eval-good { border-color: #2e7d32; color: #1b5e20; background: #e8f5e9; }
 .eval-good.active {
     background: #2e7d32; color: white; border-color: #1b5e20;
     box-shadow: 0 2px 4px rgba(46, 125, 50, 0.3);
 }
+
 /* Orta Puan: Turuncu */
 .eval-medium { border-color: #ed6c02; color: #e65100; background: #fff3e0; }
 .eval-medium.active {
     background: #ed6c02; color: white; border-color: #e65100;
     box-shadow: 0 2px 4px rgba(237, 108, 2, 0.3);
 }
+
 /* Kötü Puan: Kırmızı */
 .eval-bad { border-color: #d32f2f; color: #b71c1c; background: #ffebee; }
 .eval-bad.active {
@@ -506,6 +509,14 @@ body.editing .edit-icon { display: block !important; }
     margin-bottom: 5px;
 }
 .card-blue .q-card-value { color: #1e293b; }
+.q-card-footer {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+/* İkon - Daha silik ve küçük */
 .q-card-icon-bg {
     position: absolute;
     right: -5px;
@@ -643,220 +654,4 @@ body.editing .edit-icon { display: block !important; }
     color: #856404;
     border-radius: 6px;
     margin-bottom: 20px;
-}
-
-/* --- YENİ TAM EKRAN KALİTE YAPISI --- */
-.quality-full-page-wrapper {
-    display: flex;
-    position: fixed; 
-    /* Header yüksekliğine göre ayarlandı, ticker da dahil edilmeli */
-    top: 96px; 
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 999; 
-    background: var(--bg);
-}
-.quality-sidebar {
-    width: 250px;
-    background: var(--primary); /* #0e1b42 */
-    color: white;
-    padding: 20px 0;
-    box-shadow: 4px 0 15px rgba(0,0,0,0.15);
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-}
-.quality-sidebar .sidebar-header {
-    padding: 0 20px 20px 20px;
-    font-size: 1.1rem;
-    font-weight: 700;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-.quality-sidebar .sidebar-nav {
-    flex-grow: 1;
-    overflow-y: auto;
-}
-.quality-sidebar .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 20px;
-    color: rgba(255,255,255,0.7);
-    text-decoration: none;
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: all 0.2s;
-    border-left: 4px solid transparent;
-}
-.quality-sidebar .nav-item:hover {
-    background: rgba(255,255,255,0.05);
-    color: white;
-}
-.quality-sidebar .nav-item.active {
-    background: rgba(255,255,255,0.1);
-    color: var(--secondary);
-    border-left-color: var(--secondary);
-    font-weight: 700;
-}
-.quality-sidebar .nav-item i {
-    width: 20px;
-    text-align: center;
-}
-.quality-content-area {
-    flex-grow: 1;
-    padding: 25px;
-    overflow-y: auto;
-    background: #fcfcfc;
-}
-
-/* Kalite İçerik Alanı Başlık */
-.q-content-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 25px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #eee;
-}
-.q-content-header h2 {
-    font-size: 1.6rem;
-    color: var(--primary);
-    margin: 0;
-    font-weight: 800;
-}
-.q-content-header .q-actions button {
-    background: var(--accent);
-    color: white;
-    padding: 8px 15px;
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s;
-    border: none;
-}
-.q-content-header .q-actions button:hover {
-    background: #a11616;
-}
-
-/* Eğitim Alanı Stilleri */
-.training-item {
-    background: #fff;
-    border: 1px solid #e0e0e0;
-    border-left: 5px solid var(--info);
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.training-item.completed {
-    border-left-color: var(--success);
-    opacity: 0.7;
-    background: #f8fff8;
-}
-.training-title {
-    font-weight: 700;
-    color: var(--primary);
-    font-size: 1.1rem;
-    margin-bottom: 5px;
-}
-.training-meta {
-    font-size: 0.85rem;
-    color: #777;
-}
-.training-actions button, .training-actions a {
-    padding: 8px 15px;
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
-    margin-left: 10px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    border: none;
-    transition: all 0.2s;
-}
-.training-actions .btn-complete {
-    background: var(--success);
-    color: white;
-}
-.training-actions .btn-download {
-    background: var(--info);
-    color: white;
-}
-.training-actions .btn-complete:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-}
-
-/* Çağrı Dinleme Tablosu */
-.listening-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
-    background: white;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-.listening-table th, .listening-table td {
-    padding: 12px;
-    border-bottom: 1px solid #f1f1f1;
-    text-align: left;
-    font-size: 0.9rem;
-}
-.listening-table th {
-    background: #f0f4f7;
-    color: var(--primary);
-    font-weight: 700;
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    letter-spacing: 0.5px;
-}
-.listening-table tr:hover {
-    background: #f8f9fa;
-}
-.listening-table .score-badge-sm {
-    padding: 3px 8px;
-    border-radius: 4px;
-    color: white;
-    font-weight: 700;
-    font-size: 0.75rem;
-    display: inline-block;
-}
-
-/* Admin Controls for Quality Full Page */
-#quality-admin-filters {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-    padding: 10px;
-    background: #f0f4ff;
-    border: 1px solid #d0d8f0;
-    border-radius: 8px;
-    margin-bottom: 20px;a
-}
-#quality-admin-filters .filter-item {
-    display: flex;
-    flex-direction: column;
-}
-#quality-admin-filters label {
-    font-size: 0.7rem;
-    color: #888;
-    margin-bottom: 3px;
-    font-weight: 600;
-}
-#quality-admin-filters select {
-    padding: 5px 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 0.85rem;
-    height: 35px;
-    min-width: 150px;
 }
