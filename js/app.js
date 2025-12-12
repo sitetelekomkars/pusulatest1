@@ -1,6 +1,6 @@
 const BAKIM_MODU = false;
 // Apps Script URL'si
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3kd04k2u9XdVDD1-vdbQQAsHNW6WLIn8bNYxTlVCL3U1a0WqZo6oPp9zfBWIpwJEinQ/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3kd04k2u9XdVDD1-vdbQQAsHNW6WLIn8bNYzTlVCL3U1a0WqZo6oPp9zfBWIpwJEinQ/exec";
 // Oyun Değişkenleri
 let jokers = { call: 1, half: 1, double: 1 };
 let doubleChanceUsed = false;
@@ -261,7 +261,7 @@ function girisYap() {
             const savedRole = data.role;
             if (data.forceChange === true) {
                 Swal.fire({
-                    icon: 'warning', title: ' ⚠️  Güvenlik Uyarısı',
+                    icon: 'warning', title: '  ⚠️   Güvenlik Uyarısı',
                     text: 'İlk girişiniz. Lütfen şifrenizi değiştirin.',
                     allowOutsideClick: false, allowEscapeKey: false, confirmButtonText: 'Şifremi Değiştir'
                 }).then(() => { changePasswordPopup(true); });
@@ -556,11 +556,11 @@ async function addNewCardPopup() {
         <div style="margin-bottom:15px; text-align:left;">
             <label style="font-weight:bold; font-size:0.9rem;">Ne Ekleyeceksin?</label>
             <select id="swal-type-select" class="swal2-input" style="width:100%; margin-top:5px; height:35px; font-size:0.9rem;" onchange="toggleAddFields()">
-                <option value="card">  📌   Bilgi Kartı</option>
-                <option value="news">  📢   Duyuru</option>
-                <option value="sales">  📞   Telesatış Scripti</option>
-                <option value="sport">  🏆   Spor İçeriği</option>
-                <option value="quiz">  ❓   Quiz Sorusu</option>
+                <option value="card">   📌    Bilgi Kartı</option>
+                <option value="news">   📢    Duyuru</option>
+                <option value="sales">   📞    Telesatış Scripti</option>
+                <option value="sport">   🏆    Spor İçeriği</option>
+                <option value="quiz">   ❓    Quiz Sorusu</option>
             </select>
         </div>
         <div id="preview-card" class="card Bilgi" style="text-align:left; box-shadow:none; border:1px solid #e0e0e0; margin-top:10px;">
@@ -832,7 +832,7 @@ function openGuide() {
     const grid = document.getElementById('guide-grid');
     grid.innerHTML = '';
     sportsData.forEach((s, index) => {
-        let pronHtml = s.pronunciation ? `<div class="pronunciation-badge"> 🗣️  ${s.pronunciation}</div>` : '';
+        let pronHtml = s.pronunciation ? `<div class="pronunciation-badge">  🗣️   ${s.pronunciation}</div>` : '';
         let editBtn = (isAdminMode && isEditingActive) ? `<i class="fas fa-pencil-alt edit-icon" style="top:5px; right:5px; z-index:50;" onclick="event.stopPropagation(); editSport('${escapeForJsString(s.title)}')"></i>` : '';
         grid.innerHTML += `<div class="guide-item" onclick="showSportDetail(${index})">${editBtn}<i class="fas ${s.icon} guide-icon"></i><span class="guide-title">${s.title}</span>${pronHtml}<div class="guide-desc">${s.desc}</div><div class="guide-tip"><i class="fas fa-lightbulb"></i> ${s.tip}</div><div style="font-size:0.8rem; color:#999; margin-top:5px;">(Detay için tıkla)</div></div>`;
     });
@@ -840,7 +840,7 @@ function openGuide() {
 function showSportDetail(index) {
     const sport = sportsData[index];
     const detailText = sport.detail ? sport.detail.replace(/\n/g,'<br>') : "Bu içerik için henüz detay eklenmemiş.";
-    const pronDetail = sport.pronunciation ? `<div style="color:#e65100; font-weight:bold; margin-bottom:15px;"> 🗣️  Okunuşu: ${sport.pronunciation}</div>` : '';
+    const pronDetail = sport.pronunciation ? `<div style="color:#e65100; font-weight:bold; margin-bottom:15px;">  🗣️   Okunuşu: ${sport.pronunciation}</div>` : '';
     Swal.fire({
         title: `<i class="fas ${sport.icon}" style="color:#0e1b42;"></i> ${sport.title}`,
         html: `${pronDetail}<div style="text-align:left; font-size:1rem; line-height:1.6;">${detailText}</div>`,
@@ -888,14 +888,14 @@ function useJoker(type) {
             let incorrectOpts = currentQ.opts.map((_, i) => i).filter(i => i !== correctAns);
             guess = incorrectOpts[Math.floor(Math.random() * incorrectOpts.length)] || correctAns;
         }
-        Swal.fire({ icon: 'info', title: ' 📞  Telefon Jokeri', html: `${expert} soruyu cevaplıyor...<br><br>"Benim tahminim kesinlikle **${String.fromCharCode(65 + guess)}** şıkkı. Bundan ${Math.random() < 0.8 ? "çok eminim" : "emin değilim"}."`, confirmButtonText: 'Kapat' });
+        Swal.fire({ icon: 'info', title: '  📞   Telefon Jokeri', html: `${expert} soruyu cevaplıyor...<br><br>"Benim tahminim kesinlikle **${String.fromCharCode(65 + guess)}** şıkkı. Bundan ${Math.random() < 0.8 ? "çok eminim" : "emin değilim"}."`, confirmButtonText: 'Kapat' });
     } else if (type === 'half') {
         let incorrectOpts = currentQ.opts.map((_, i) => i).filter(i => i !== correctAns).sort(() => Math.random() - 0.5).slice(0, 2);
         incorrectOpts.forEach(idx => { btns[idx].disabled = true; btns[idx].style.textDecoration = 'line-through'; btns[idx].style.opacity = '0.4'; });
-        Swal.fire({ icon: 'success', title: ' ✂️  Yarı Yarıya', text: 'İki yanlış şık elendi!', toast: true, position: 'top', showConfirmButton: false, timer: 1500 });
+        Swal.fire({ icon: 'success', title: '  ✂️   Yarı Yarıya', text: 'İki yanlış şık elendi!', toast: true, position: 'top', showConfirmButton: false, timer: 1500 });
     } else if (type === 'double') {
         doubleChanceUsed = true;
-        Swal.fire({ icon: 'warning', title: '2️ ⃣  Çift Cevap', text: 'Bir kez yanlış cevap hakkınız var.', toast: true, position: 'top', showConfirmButton: false, timer: 2500 });
+        Swal.fire({ icon: 'warning', title: '2️  ⃣    Ç ift Cevap', text: 'Bir kez yanl ış  cevap hakk ı n ı z var.', toast: true, position: 'top', showConfirmButton: false, timer: 2500 });
     }
 }
 function openPenaltyGame() { document.getElementById('penalty-modal').style.display = 'flex'; showLobby(); }
@@ -913,7 +913,7 @@ function fetchLeaderboard() {
             if(data.leaderboard.length === 0) { html = '<tr><td colspan="4" style="text-align:center;">Henüz maç yapılmadı.</td></tr>'; } 
             else {
                 data.leaderboard.forEach((u, i) => {
-                    let medal = i===0 ? ' 🥇 ' : (i===1 ? ' 🥈 ' : (i===2 ? ' 🥉 ' : `<span class="rank-badge">${i+1}</span>`));
+                    let medal = i===0 ? '  🥇  ' : (i===1 ? '  🥈  ' : (i===2 ? '  🥉  ' : `<span class="rank-badge">${i+1}</span>`));
                     let bgStyle = (u.username === currentUser) ? 'background:rgba(250, 187, 0, 0.1);' : '';
                     html += `<tr style="${bgStyle}"><td>${medal}</td><td>${u.username}</td><td>${u.games}</td><td>${u.average}</td></tr>`;
                 });
@@ -986,7 +986,7 @@ function resetField() {
     document.querySelectorAll('.penalty-btn').forEach(b => { b.classList.remove('wrong-first-try'); b.style.textDecoration = ''; b.style.opacity = ''; b.style.background = '#fabb00'; b.style.color = '#0e1b42'; b.style.borderColor = '#f0b500'; b.disabled = false; });
 }
 function finishPenaltyGame() {
-    let title = pScore >= 8 ? "EFSANE!  🏆 " : (pScore >= 5 ? "İyi Maçtı!  👏 " : "Antrenman Lazım  🤕 ");
+    let title = pScore >= 8 ? "EFSANE!   🏆  " : (pScore >= 5 ? "İyi Maçtı!   👏  " : "Antrenman Lazım   🤕  ");
     document.getElementById('p-question-text').innerHTML = `<span style="font-size:1.5rem; color:#fabb00;">MAÇ BİTTİ!</span><br>${title}<br>Toplam Skor: ${pScore}/10`;
     document.getElementById('p-options').style.display = 'none'; document.getElementById('p-restart-btn').style.display = 'block';
     fetch(SCRIPT_URL, { method: 'POST', headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "logQuiz", username: currentUser, token: getToken(), score: pScore * 10, total: 100 }) });
@@ -1006,7 +1006,7 @@ function renderStep(k){
     const b = document.getElementById('wizard-body');
     let h = `<h2 style="color:var(--primary);">${s.title || ''}</h2>`;
     if(s.result) {
-        let i = s.result === 'red' ? ' 🛑 ' : (s.result === 'green' ? ' ✅ ' : ' ⚠️ ');
+        let i = s.result === 'red' ? '  🛑  ' : (s.result === 'green' ? '  ✅  ' : '  ⚠️  ');
         let c = s.result === 'red' ? 'res-red' : (s.result === 'green' ? 'res-green' : 'res-yellow');
         h += `<div class="result-box ${c}"><div style="font-size:3rem;margin-bottom:10px;">${i}</div><h3>${s.title}</h3><p>${s.text}</p>${s.script ? `<div class="script-box">${s.script}</div>` : ''}</div><button class="restart-btn" onclick="renderStep('start')"><i class="fas fa-redo"></i> Başa Dön</button>`;
     } else {
@@ -1097,7 +1097,6 @@ function openQualityArea() {
         // Admin değilse filtreleri gizle
         const dashFilterArea = document.querySelector('#view-dashboard .q-view-header > div');
         if(dashFilterArea && dashFilterArea.style.display !== 'none') {
-             // Sadece dönem kalsın, diğerlerini gizleyebiliriz veya disable edebiliriz.
              // Burada basitçe dashboard filtre fonksiyonu admin kontrolü yapıyor.
              populateDashboardFilters(); 
         }
@@ -1164,7 +1163,6 @@ function populateMonthFilterFull() {
 function populateDashboardFilters() {
     const groupSelect = document.getElementById('q-dash-group');
     const agentSelect = document.getElementById('q-dash-agent');
-
     if(!isAdminMode) {
         if(groupSelect) groupSelect.style.display = 'none';
         if(agentSelect) agentSelect.style.display = 'none';
@@ -1301,7 +1299,6 @@ function renderDashboardChart(data) {
             }
         });
     }
-
     // İstatistikleri diziye çevirip başarı oranına göre sırala
     let statsArray = Object.keys(questionStats).map(key => {
         let s = questionStats[key];
@@ -1317,7 +1314,6 @@ function renderDashboardChart(data) {
     let topIssues = statsArray.slice(0, 6); 
     let chartLabels = topIssues.map(i => i.label);
     let chartData = topIssues.map(i => i.value.toFixed(1));
-
     dashboardChart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -1389,16 +1385,21 @@ function loadTrainingData() {
                     ? `<a href="${t.docLink}" target="_blank" class="t-doc-link"><i class="fas fa-file-download"></i> Dökümanı İndir</a>` 
                     : '';
                 
+                // GÜNCELLENMİŞ KART YAPISI (Tarih ve Süre Eklendi)
                 listEl.innerHTML += `
                 <div class="t-card">
                     <div class="t-card-header">
                         <span>${t.title}</span>
-                        <span class="t-status-badge">${t.date}</span>
+                        <span class="t-status-badge">Atanma: ${t.date}</span>
                     </div>
                     <div class="t-card-body">
                         ${t.desc}
                         ${docHtml}
-                        <div style="margin-top:10px; font-size:0.8rem; color:#999;">Atayan: ${t.creator}</div>
+                        <div style="margin-top:10px; display:flex; justify-content:space-between; font-size:0.8rem; color:#666; padding-top:10px; border-top:1px dashed #eee;">
+                            <div><strong>Süre:</strong> ${t.duration || 'Belirtilmedi'}</div>
+                            <div><strong>Başlangıç:</strong> ${t.startDate || 'N/A'} - <strong>Bitiş:</strong> ${t.endDate || 'N/A'}</div>
+                        </div>
+                        <div style="font-size:0.8rem; color:#999; margin-top:5px;">Atayan: ${t.creator}</div>
                     </div>
                     <div class="t-card-footer">
                         ${statusHtml}
@@ -1453,23 +1454,50 @@ async function assignTrainingPopup() {
             <textarea id="swal-t-desc" class="swal2-textarea" style="height:100px" placeholder="Eğitim açıklaması veya talimatlar..."></textarea>
             <input id="swal-t-link" class="swal2-input" placeholder="Video/Eğitim Linki (URL)">
             <input id="swal-t-doc" class="swal2-input" placeholder="Döküman Linki (Drive/PDF URL) (İsteğe Bağlı)">
-            <select id="swal-t-target" class="swal2-input">
-                <option value="Genel">Herkese</option>
+            <div style="display:flex; gap:10px; margin-bottom:10px;">
+                <input type="date" id="swal-t-start" class="swal2-input" style="flex:1;" value="${new Date().toISOString().substring(0, 10)}">
+                <input type="date" id="swal-t-end" class="swal2-input" style="flex:1;">
+                <input id="swal-t-duration" class="swal2-input" placeholder="Süre (Örn: 20dk)" style="width:100px;">
+            </div>
+            <select id="swal-t-target" class="swal2-input" onchange="updateTrainingTarget(this.value)">
+                <option value="Genel">Herkese (Tüm Ekip)</option>
                 <option value="Telesatış">Telesatış Ekibi</option>
                 <option value="Chat">Chat Ekibi</option>
+                <option value="Individual">Kişiye Özel</option>
             </select>
+            <select id="swal-t-agent" class="swal2-input" style="display:none; width:100%;"></select>
         `,
         focusConfirm: false,
         showCancelButton: true,
         confirmButtonText: 'Ata',
+        didOpen: () => {
+            window.updateTrainingTarget = function(val) {
+                const agentSelect = document.getElementById('swal-t-agent');
+                agentSelect.style.display = val === 'Individual' ? 'block' : 'none';
+                if (val === 'Individual') {
+                    agentSelect.innerHTML = adminUserList.map(u => `<option value="${u.name}">${u.name}</option>`).join('');
+                }
+            };
+            updateTrainingTarget('Genel');
+        },
         preConfirm: () => {
+            const target = document.getElementById('swal-t-target').value;
+            const agent = target === 'Individual' ? document.getElementById('swal-t-agent').value : '';
+            if (!document.getElementById('swal-t-title').value || (!target && !agent)) {
+                Swal.showValidationMessage('Başlık ve Atama Alanı boş bırakılamaz');
+                return false;
+            }
             return {
                 title: document.getElementById('swal-t-title').value,
                 desc: document.getElementById('swal-t-desc').value,
                 link: document.getElementById('swal-t-link').value,
-                docLink: document.getElementById('swal-t-doc').value || 'N/A', // Yeni alan
-                target: document.getElementById('swal-t-target').value,
-                creator: currentUser
+                docLink: document.getElementById('swal-t-doc').value || 'N/A',
+                target: target,
+                targetAgent: agent, // Kişiye özel atama için
+                creator: currentUser,
+                startDate: formatDateToDDMMYYYY(document.getElementById('swal-t-start').value), 
+                endDate: formatDateToDDMMYYYY(document.getElementById('swal-t-end').value), 
+                duration: document.getElementById('swal-t-duration').value 
             }
         }
     });
@@ -1493,30 +1521,36 @@ function loadFeedbackList() {
     // Admin butonunu göster/gizle
     const manualBtn = document.getElementById('manual-feedback-admin-btn');
     if(manualBtn) manualBtn.style.display = isAdminMode ? 'flex' : 'none';
-
-    if(allEvaluationsData.length === 0) {
+    
+    // Yalnızca feedback içeren veya yönetici modunda olan verileri filtrele
+    const feedbackItems = allEvaluationsData.filter(e => isAdminMode || (e.feedback && e.feedback.length > 2));
+    
+    if(feedbackItems.length === 0) {
         listEl.innerHTML = '<div style="padding:20px; text-align:center; color:#888;">Görüntülenecek geri bildirim yok.</div>';
         return;
     }
-    allEvaluationsData.forEach(e => {
-        if(e.feedback && e.feedback.length > 2) {
-            // Geliştirme: Çağrı Tarihi ve ID eklendi
-            listEl.innerHTML += `
-            <div style="background:white; padding:15px; border-radius:8px; margin-bottom:15px; border-left:4px solid #1976d2; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
-                <div style="display:flex; justify-content:space-between; margin-bottom:10px; border-bottom:1px solid #f0f0f0; padding-bottom:5px;">
-                    <span style="font-weight:bold; color:#0e1b42;">${e.agent}</span>
-                    <div style="font-size:0.75rem; color:#888; text-align:right;">
-                        <span style="display:block;">Değerleyen: ${e.evaluator}</span>
-                        <span style="display:block;">ID: ${e.callId}</span>
-                        <span style="display:block;">Çağrı: ${e.callDate}</span>
+    
+    feedbackItems.forEach(e => {
+        // Geliştirme: Çağrı Tarihi ve ID eklendi (Gelişmiş Kart Tasarımı)
+        const feedbackClass = e.feedbackType === 'Sözlü' ? '#2196f3' : (e.feedbackType === 'Mail' ? '#e65100' : '#10b981');
+        
+        listEl.innerHTML += `
+            <div class="feedback-card" style="border-left-color: ${feedbackClass};">
+                <div class="feedback-header">
+                    <div style="font-weight:bold; color:#0e1b42;">${e.agent}</div>
+                    <div class="feedback-info-right">
+                        <span><i class="fas fa-user-check"></i> Değerleyen: ${e.evaluator}</span>
+                        <span><i class="fas fa-id-badge"></i> ID: ${e.callId}</span>
+                        <span><i class="fas fa-calendar-alt"></i> Çağrı: ${e.callDate}</span>
                     </div>
                 </div>
-                <div style="color:#555; line-height:1.5; font-size:0.95rem;">${e.feedback}</div>
-                <div style="margin-top:10px; display:flex; justify-content:flex-end; align-items:center;">
-                     <span style="font-size:0.75rem; background:#eee; padding:3px 8px; border-radius:4px;">Tip: ${e.feedbackType}</span>
+                <div class="feedback-body">
+                    <div style="color:#555; line-height:1.5; font-size:0.95rem;">${e.feedback}</div>
+                </div>
+                <div class="feedback-footer">
+                     <span class="feedback-tag" style="background:${feedbackClass}; color:white;">${e.feedbackType}</span>
                 </div>
             </div>`;
-        }
     });
 }
 // Adminler için manuel geri bildirim ekleme (Çağrı dışı konular için)
@@ -1529,18 +1563,19 @@ async function addManualFeedbackPopup() {
         await fetchUserListForAdmin();
         Swal.close();
     }
-
+    
+    // Modalı görüntüdeki gibi düzenledik (Agent Select ve sade alanlar)
     const { value: formValues } = await Swal.fire({
         title: 'Manuel Geri Bildirim Yaz',
         html: `
-            <select id="manual-q-agent" class="swal2-input" style="width:100%"></select>
-            <input id="manual-q-topic" class="swal2-input" placeholder="Konu / Başlık">
-            <textarea id="manual-q-feedback" class="swal2-textarea" placeholder="Geri bildirim detayları..."></textarea>
-            <select id="manual-q-type" class="swal2-input"><option value="Sözlü">Sözlü</option><option value="Mail">Mail</option><option value="Özel">Özel Konu</option></select>
+            <select id="manual-q-agent" class="swal2-input" style="width:100%; margin-bottom:10px;"></select>
+            <input id="manual-q-topic" class="swal2-input" placeholder="Konu / Başlık" style="margin-bottom:10px;">
+            <textarea id="manual-q-feedback" class="swal2-textarea" placeholder="Geri bildirim detayları..." style="margin-bottom:10px;"></textarea>
+            <select id="manual-q-type" class="swal2-input" style="width:100%;"><option value="Sözlü">Sözlü</option><option value="Mail">Mail</option><option value="Özel">Özel Konu</option></select>
         `,
         width: '500px',
         showCancelButton: true,
-        confirmButtonText: ' 💾  Kaydet',
+        confirmButtonText: '  💾   Kaydet',
         didOpen: () => {
             const sel = document.getElementById('manual-q-agent');
             adminUserList.forEach(u => sel.innerHTML += `<option value="${u.name}">${u.name}</option>`);
@@ -1550,12 +1585,10 @@ async function addManualFeedbackPopup() {
             const topic = document.getElementById('manual-q-topic').value;
             const feedback = document.getElementById('manual-q-feedback').value;
             const feedbackType = document.getElementById('manual-q-type').value;
-
             if (!agentName || !feedback) {
                  Swal.showValidationMessage('Temsilci ve Geri Bildirim alanı boş bırakılamaz.'); 
                  return false;
             }
-
             return {
                 agentName,
                 // MANUEL geri bildirimler için CallID ve CallDate özel değerler alır
@@ -1569,7 +1602,6 @@ async function addManualFeedbackPopup() {
             };
         }
     });
-
     if (formValues) {
         Swal.fire({ title: 'Kaydediliyor...', didOpen: () => Swal.showLoading() });
         fetch(SCRIPT_URL, { 
@@ -1580,7 +1612,8 @@ async function addManualFeedbackPopup() {
         .then(r => r.json()).then(d => {
             if (d.result === "success") { 
                 Swal.fire({ icon: 'success', title: 'Kaydedildi', timer: 1500, showConfirmButton: false });
-                loadFeedbackList(); 
+                // Tüm değerlendirmeleri tekrar çek ki yeni feedback listeye eklensin
+                fetchEvaluationsForAgent(formValues.agentName);
             } else { 
                 Swal.fire('Hata', d.message, 'error'); 
             }
@@ -1797,7 +1830,7 @@ async function logEvaluationPopup() {
         </div>`;
     
     const { value: formValues } = await Swal.fire({
-        html: contentHtml, width: '600px', showCancelButton: true, confirmButtonText: ' 💾  Kaydet',
+        html: contentHtml, width: '600px', showCancelButton: true, confirmButtonText: '  💾   Kaydet',
         didOpen: () => { if (isTelesatis) window.recalcTotalSliderScore(); else if (isChat) window.recalcTotalScore(); },
         preConfirm: () => {
             const callId = document.getElementById('eval-callid').value;
@@ -1816,7 +1849,7 @@ async function logEvaluationPopup() {
                 }
                 return { agentName, agentGroup, callId, callDate: formattedCallDate, score: total, details: JSON.stringify(detailsArr), feedback: document.getElementById('eval-feedback').value, feedbackType: document.getElementById('feedback-type').value };
             } else {
-                return { agentName, agentGroup, callId, callDate: formattedCallDate, score: parseInt(document.getElementById('eval-manual-score').value), details: document.getElementById('eval-details').value, feedback: document.getElementById('eval-feedback').value, feedbackType: document.getElementById('feedback-type').value };
+                return { agentName, agentGroup, callId, callDate: formattedCallDate, score: parseInt(document.getElementById('eval-manual-score').value), details: document.getElementById('eval-details').value, feedback: document.getElementById('feedback-type').value };
             }
         }
     });
@@ -1863,7 +1896,6 @@ async function editEvaluation(targetCallId) {
             
             // Geliştirme: Puan başlığı üstüne gelince tam metin gösterilmesi için title eklendi
             const fullText = escapeForJsString(c.text); 
-
             if (isChat) {
                 let gAct = cVal === pts ? 'active' : ''; let mAct = (cVal===mPts && mPts!==0) ? 'active' : ''; let bAct = (cVal===bPts && bPts!==0) ? 'active' : '';
                 if(cVal===0 && bPts===0) bAct = 'active'; else if (cVal===0 && bPts>0) { gAct=''; mAct=''; bAct=''; }
@@ -1879,7 +1911,7 @@ async function editEvaluation(targetCallId) {
     contentHtml += `<div><label>Revize Feedback</label><textarea id="eval-feedback" class="swal2-textarea">${evalData.feedback||''}</textarea></div></div>`;
     
     const { value: formValues } = await Swal.fire({
-        html: contentHtml, width: '600px', showCancelButton: true, confirmButtonText: ' 💾  Güncelle',
+        html: contentHtml, width: '600px', showCancelButton: true, confirmButtonText: '  💾   Güncelle',
         didOpen: () => { if (isTelesatis) window.recalcTotalSliderScore(); else if (isChat) window.recalcTotalScore(); },
         preConfirm: () => {
             const callId = document.getElementById('eval-callid').value;
