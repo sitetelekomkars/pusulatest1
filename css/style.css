@@ -1,4 +1,4 @@
-:root { 
+:root {
     --primary: #0e1b42; 
     --secondary: #fabb00; 
     --bg: #f4f6f8; 
@@ -336,6 +336,7 @@ body.editing .edit-icon { display: block !important; }
 .leg.left { left: 5px; transform: rotate(8deg) translateZ(2px); } .leg.right { right: 5px; transform: rotate(-8deg) translateZ(2px); }
 .sock { width: 100%; height: 22px; background: linear-gradient(to bottom, #fff, #eee); position: absolute; bottom: 0; border-radius: 0 0 8px 8px; border-top: 2px solid #ddd; box-shadow: inset 0 0 3px rgba(0,0,0,0.1); }
 .shoe { width: 22px; height: 14px; background: linear-gradient(to right, #d32f2f, #c62828); position: absolute; bottom: -12px; left: -3px; border-radius: 6px 6px 3px 3px; box-shadow: 0 3px 6px rgba(0,0,0,0.4), inset -3px -3px 4px rgba(0,0,0,0.4); transform: translateZ(8px); }
+.keeper-shadow { width: 50px; height: 10px; background: rgba(0,0,0,0.5); border-radius: 50%; margin: -5px auto 0 auto; filter: blur(4px); }
 .shooter-wrapper { position: absolute; bottom: -50px; left: 45%; transform: translateX(-50%) scale(1.4); z-index: 20; transition: all 0.3s ease-in; width: 70px; height: 130px; perspective: 500px; }
 .shooter-wrapper .head { background: radial-gradient(circle at 10px 10px, #3e2723, #000); box-shadow: inset 0 -3px 5px rgba(0,0,0,0.4), 0 2px 5px rgba(0,0,0,0.4); }
 .shooter-wrapper .head::before { display: none; }
@@ -446,212 +447,6 @@ body.editing .edit-icon { display: block !important; }
 .sales-title { font-weight: 800; color: #065f46; font-size: 1.1rem; margin: 0; padding-right: 25px; }
 .sales-text { display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #a7f3d0; font-size: 1rem; color: #374151; line-height: 1.6; animation: fadeIn 0.4s ease-in; }
 .sales-item.active .sales-text { display: block; }
-/* --- KOMPAKT KALİTE DASHBOARD STİLLERİ --- */
-/* Başlık Alanı - Daha az boşluk */
-.q-dashboard-header {
-    margin-bottom: 15px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
-}
-.q-dashboard-header h3 {
-    font-size: 1.2rem;
-    color: var(--primary);
-    margin: 0;
-    font-weight: 700;
-}
-.q-dashboard-header p {
-    font-size: 0.8rem;
-    color: #888;
-    margin: 2px 0 0 0;
-}
-/* Grid Yapısı - Boşluklar azaltıldı */
-.q-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr); /* Mobilde taşarsa auto-fit yaparız */
-    gap: 12px;
-    margin-bottom: 15px;
-}
-/* Kart Genel Yapısı - Daha alçak ve kompakt */
-.q-stat-card {
-    background: #fff;
-    border-radius: 8px;
-    padding: 12px 15px;
-    position: relative;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-    border: 1px solid #eaedf2;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-height: 80px; /* Yüksekliği azalttık */
-}
-/* Sol Kenar Çizgileri */
-.card-blue { border-left: 4px solid #0288d1; }
-.card-green { border-left: 4px solid #2e7d32; }
-.card-orange { border-left: 4px solid #ed6c02; }
-/* Kart İçerikleri - Fontlar küçültüldü */
-.q-card-title {
-    font-size: 0.65rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: #64748b;
-    letter-spacing: 0.5px;
-    margin-bottom: 5px;
-}
-.q-card-value {
-    font-size: 1.6rem; /* 2.5rem'den düşürüldü */
-    font-weight: 800;
-    line-height: 1;
-    color: #0e1b42;
-    margin-bottom: 5px;
-}
-.card-blue .q-card-value { color: #1e293b; }
-.q-card-footer {
-    font-size: 0.75rem;
-    color: #94a3b8;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-/* İkon - Daha silik ve küçük */
-.q-card-icon-bg {
-    position: absolute;
-    right: -5px;
-    bottom: -5px; /* Ortadan alta aldık */
-    top: auto;
-    transform: none;
-    font-size: 3.5rem; /* 5rem'den düşürüldü */
-    opacity: 0.08;
-    pointer-events: none;
-}
-.card-blue .q-card-icon-bg { color: #0288d1; }
-.card-green .q-card-icon-bg { color: #2e7d32; }
-.card-orange .q-card-icon-bg { color: #ed6c02; }
-/* Select Box */
-.minimal-select {
-    border: none;
-    background: transparent;
-    font-weight: 700;
-    color: #0e1b42;
-    font-size: 0.75rem;
-    cursor: pointer;
-    padding: 0;
-    margin: 0;
-    outline: none;
-    border-bottom: 1px dashed #ccc;
-    height: auto;
-}
-.minimal-select:hover { border-bottom-color: #0e1b42; }
-/* Liste Alanı Başlığı */
-.list-section-title {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: #333;
-    margin: 10px 0;
-    padding-left: 5px;
-    border-left: 3px solid #ccc;
-}
-/* --- TEKNİK SİHİRBAZ STİLLERİ --- */
-.tech-step-title {
-    font-size: 1.4rem;
-    margin-bottom: 25px;
-    font-weight: 700;
-    color: var(--primary); /* Mevcut tema rengi */
-    border-left: 6px solid var(--secondary); /* Mevcut sarı renk */
-    padding-left: 20px;
-}
-/* Mevcut .script-box ile çakışmaması için özelleştirildi */
-.tech-script-box {
-    background-color: #e3f2fd;
-    border-left: 5px solid #2196f3;
-    padding: 20px;
-    margin: 20px 0;
-    border-radius: 0 8px 8px 0;
-    font-size: 1.05rem;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-}
-.tech-script-label {
-    font-weight: 900;
-    font-size: 0.8rem;
-    color: #2196f3;
-    display: block;
-    margin-bottom: 8px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-.tech-steps-list {
-    list-style-type: none;
-    padding: 0;
-    counter-reset: step-counter;
-}
-.tech-steps-list li {
-    position: relative;
-    padding-left: 45px;
-    margin-bottom: 15px;
-}
-.tech-steps-list li::before {
-    content: counter(step-counter);
-    counter-increment: step-counter;
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 30px;
-    height: 30px;
-    background-color: var(--primary);
-    color: white;
-    border-radius: 50%;
-    text-align: center;
-    line-height: 30px;
-    font-weight: bold;
-    font-size: 0.9rem;
-}
-.tech-code-block {
-    background-color: #2d2d2d;
-    color: #76ff03;
-    padding: 15px;
-    border-radius: 6px;
-    font-family: 'Consolas', monospace;
-    font-size: 0.95rem;
-    overflow-x: auto;
-    margin: 10px 0;
-    border: 1px solid #444;
-}
-.tech-buttons-area {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-    margin-top: 30px;
-    padding-top: 20px;
-    border-top: 1px solid #eee;
-}
-.tech-btn {
-    padding: 14px 28px;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    cursor: pointer;
-    font-weight: 600;
-    transition: 0.2s;
-}
-.tech-btn-primary {
-    background-color: var(--primary);
-    color: #fff;
-}
-.tech-btn-primary:hover { background-color: #2c3e50; }
-.tech-btn-option {
-    background-color: #fff;
-    color: #333;
-    border: 2px solid #ddd;
-}
-.tech-btn-option:hover { background-color: #f1f1f1; }
-.tech-alert {
-    padding: 15px;
-    background-color: #fff3cd;
-    border: 1px solid #ffeeba;
-    color: #856404;
-    border-radius: 6px;
-    margin-bottom: 20px;
-}
 /* --- FULL SCREEN QUALITY LMS STYLES --- */
 .quality-fullscreen-wrapper {
     position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -729,10 +524,33 @@ body.editing .edit-icon { display: block !important; }
 .simple-item { padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
 .simple-item:last-child { border: none; }
 .q-period-selector select { padding: 5px 10px; border-radius: 4px; border: 1px solid #ccc; font-size: 0.9rem; }
-/* EĞİTİM KARTLARI */
+/* --- EĞİTİM KARTLARI --- */
 .q-training-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-.t-card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border: 1px solid #eee; display: flex; flex-direction: column; }
-.t-card-header { padding: 15px; background: #0e1b42; color: white; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+.t-card { 
+    background: #ffffff; 
+    border-radius: 8px; 
+    overflow: hidden; 
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08); 
+    border: 1px solid #eee; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: space-between;
+    border-top: 4px solid var(--secondary); /* GÜNCEL STİL: Üstte sarı çizgi */
+    transition: all 0.3s ease; 
+}
+.t-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+}
+.t-card-header { 
+    padding: 18px; 
+    background: var(--primary); 
+    color: white; 
+    font-weight: bold; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+}
 .t-card-body { padding: 15px; flex-grow: 1; color: #555; font-size: 0.95rem; line-height: 1.5; }
 .t-card-footer { padding: 15px; background: #f8f9fa; border-top: 1px solid #eee; text-align: right; }
 .t-status-badge { font-size: 0.7rem; padding: 3px 8px; border-radius: 12px; background: rgba(255,255,255,0.2); }
@@ -740,40 +558,6 @@ body.editing .edit-icon { display: block !important; }
 .t-btn-start { background: #fabb00; color: #0e1b42; }
 .t-btn-start:hover { background: #ffc107; }
 .t-btn-done { background: #2e7d32; color: white; cursor: default; }
-/* --- EKLENEN YENİ STİLLER (Gelişmiş Eğitim Kartı, Değerlendirme Geçmişi, Manuel Geri Bildirim) --- */
-
-/* --- Gelişmiş Eğitim Kartı Stilleri Güncelleme/Ekleme --- */
-
-/* Mevcut .t-card stilini üzerine yazmak yerine daha gelişmiş hale getiriyorum. */
-/* Kullanıcının istediği stil tanımı ile mevcut stilin birleşimi */
-/* NOT: Mevcut .t-card'ın üzerine yazılacağı için, mevcut stilin bazı özelliklerini (border, box-shadow) burada yeni haliyle tanımlıyorum. */
-.t-card {
-    background: #ffffff;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08); 
-    border: 1px solid #eee;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between; /* Yeni eklenen: İçeriği alta ve üste yaymak için */
-    border-top: 4px solid var(--secondary); /* Kullanıcının istediği stil */
-    transition: all 0.3s ease; /* Kullanıcının istediği stil */
-}
-
-.t-card:hover {
-    transform: translateY(-5px); /* Kullanıcının istediği stil */
-    box-shadow: 0 10px 20px rgba(0,0,0,0.12); /* Kullanıcının istediği stil */
-}
-
-.t-card-header {
-    padding: 18px !important; /* Kullanıcının istediği stil */
-    background: var(--primary) !important; /* Kullanıcının istediği stil */
-    color: white; 
-    font-weight: bold; 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-}
 
 .t-doc-link {
     display: inline-flex;
@@ -788,93 +572,60 @@ body.editing .edit-icon { display: block !important; }
     background: #e3f2fd;
     border-radius: 4px;
 }
-
 .t-doc-link:hover {
     background: #bbdefb;
 }
 
-/* --- Değerlendirme Geçmişi Tarih İkonları --- */
-.eval-date-info {
+/* --- GERİ BİLDİRİM KARTLARI --- */
+.feedback-card {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border-left: 4px solid #1976d2; /* Renk, JS tarafından overwrite edilir */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: all 0.2s;
+}
+.feedback-card:hover {
+    background: #fcfcfc;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+.feedback-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 8px;
+}
+.feedback-info-right {
     font-size: 0.75rem;
-    color: #666;
-    display: flex;
-    gap: 15px;
-    margin-top: 5px;
-}
-
-.eval-date-info i {
-    color: var(--primary);
-    width: 14px;
-}
-
-/* --- Manuel Geri Bildirim Butonu --- */
-.add-manual-feedback-btn {
-    background: var(--secondary);
-    color: var(--primary);
-    border: none;
-    padding: 8px 15px;
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.85rem;
-}
-
-.add-manual-feedback-btn:hover {
-    background: #e0a800;
-}
-
-/* Css.style.docx, 2979. satır civarı */
-/* --- EKLENEN YENİ STİLLER (Gelişmiş Eğitim Kartı, Değerlendirme Geçmişi, Manuel Geri Bildirim) --- */
-/* (Mevcut stillerin altında) */
-
-/* --- Gelişmiş Eğitim Kartı Stilleri Güncelleme/Ekleme --- */
-/* Mevcut .t-card stilini üzerine yazmak yerine daha gelişmiş hale getiriyorum. */
-.t-card {
-    background: #ffffff;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    border: 1px solid #eee;
+    color: #888;
+    text-align: right;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    border-top: 4px solid var(--secondary);
-    transition: all 0.3s ease;
+    gap: 3px;
 }
-.t-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+.feedback-info-right span i {
+    width: 14px;
+    color: var(--primary);
+    margin-right: 3px;
 }
-.t-card-header {
-    padding: 18px !important;
-    background: var(--primary) !important;
-    color: white;
-    font-weight: bold;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.t-doc-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--info);
-    text-decoration: none;
-    font-size: 0.85rem;
-    font-weight: 600;
+.feedback-footer {
     margin-top: 10px;
-    padding: 5px 10px;
-    background: #e3f2fd;
-    border-radius: 4px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
 }
-.t-doc-link:hover {
-    background: #bbdefb;
+.feedback-tag {
+    font-size: 0.75rem;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    min-width: 60px;
+    text-align: center;
 }
 
-/* --- Değerlendirme Geçmişi Tarih İkonları --- */
+/* --- Değerlendirme Geçmişi Tarih İkonları (Evaluation List) --- */
 .eval-date-info {
     font-size: 0.75rem;
     color: #666;
