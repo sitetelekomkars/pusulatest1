@@ -1546,7 +1546,15 @@ function loadFeedbackList() {
         const cleanCallId = String(e.callId).toUpperCase().startsWith('MANUEL-') ? String(e.callId).substring(7) : e.callId;
         
         // Konu/Başlık bilgisi 'details' alanından gelir (Manuel geri bildirim için)
-        const feedbackTopic = String(e.details).startsWith('[') ? (e.feedbackType === 'Mail' ? 'Değerlendirme Detayları' : 'Genel Konu') : e.details;
+        // Eğer detay alanı JSON ise (yani normal değerlendirme) veya boşsa varsayılan metin kullan
+        const isEvaluationDetail = String(e.details).startsWith('[');
+        const feedbackTopic = isEvaluationDetail ? 'Değerlendirme Konusu' : (e.details || 'Belirtilmemiş');
+        
+        // Dönem, Kanal ve Tipi belirle (Manuel kayıtlarda bu bilgileri eklemiyoruz, varsayılan değerleri kullanıyoruz)
+        const isManual = String(e.callId).toUpperCase().startsWith('MANUEL-');
+        const channel = isManual ? (e.feedbackType === 'Mail' ? 'E-posta' : 'Yok') : (e.group.indexOf('Chat') > -1 ? 'Canlı Destek' : 'Telefon');
+        const period = e.date.substring(3); // MM.YYYY
+        const infoType = e.feedbackType || 'Yok';
         
         listEl.innerHTML += `
             <div class="feedback-card" style="border-left-color: ${feedbackClass};">
@@ -1559,11 +1567,16 @@ function loadFeedbackList() {
                     </div>
                 </div>
                 <div class="feedback-body">
-                    <div style="font-weight:bold; color:#333; margin-bottom:5px;">Konu: ${feedbackTopic}</div>
+                    <div style="font-weight:bold; color:#333; margin-bottom:5px;">Konu/Açıklama: ${feedbackTopic}</div>
                     <div style="color:#555; line-height:1.5; font-size:0.95rem;">${e.feedback}</div>
                 </div>
                 <div class="feedback-footer">
-                     <span class="feedback-tag" style="background:${feedbackClass}; color:white;">${e.feedbackType}</span>
+                     <div style="display:flex; gap:10px; font-size:0.7rem; color:#666; font-weight:600; margin-right:10px;">
+                        <span><i class="fas fa-calendar-week"></i> Dönem: ${period}</span>
+                        <span><i class="fas fa-comment-alt"></i> Kanal: ${channel}</span>
+                        <span><i class="fas fa-tag"></i> Tip: ${infoType}</span>
+                     </div>
+                     <span class="feedback-tag" style="background:${feedbackClass}; color:white;">${isManual ? 'MANUEL' : 'MAİL'}</span>
                 </div>
             </div>`;
     });
@@ -1591,7 +1604,13 @@ async function addManualFeedbackPopup() {
                 <input type="date" id="manual-q-date" class="swal2-input" style="flex:1;" value="${new Date().toISOString().substring(0, 10)}">
             </div>
             <textarea id="manual-q-feedback" class="swal2-textarea" placeholder="Geri bildirim detayları..." style="margin-bottom:10px;"></textarea>
-            <select id="manual-q-type" class="swal2-input" style="width:100%;"><option value="Sözlü">Sözlü</option><option value="Mail">Mail</option><option value="Özel">Özel Konu</option></select>
+            <select id="manual-q-type" class="swal2-input" style="width:100%;">
+                <option value="Sözlü">Sözlü</option>
+                <option value="Mail">Mail</option>
+                <option value="Özel">Özel Konu</option>
+                <option value="Bilgilendirme">Bilgilendirme</option>
+                <option value="Feedback">Feedback</option>
+            </select>
         `,
         width: '500px',
         showCancelButton: true,
