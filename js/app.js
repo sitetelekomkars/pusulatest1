@@ -1540,7 +1540,7 @@ function loadFeedbackList() {
     
     feedbackItems.forEach(e => {
         // Geliştirme: Çağrı Tarihi ve ID eklendi (Gelişmiş Kart Tasarımı)
-        const feedbackClass = e.feedbackType === 'Sözlü' ? '#2196f3' : (e.feedbackType === 'Mail' ? '#e65100' : '#10b981');
+        const feedbackClass = e.feedbackType === 'Sözlü' ? '#2196f3' : (e.feedbackType === 'Mail' ? '#e65100' : (e.feedbackType === 'Bilgilendirme' ? '#0288d1' : (e.feedbackType === 'Feedback' ? '#2e7d32' : '#10b981')));
         
         // MANUEL CallID'den ön eki temizle
         const cleanCallId = String(e.callId).toUpperCase().startsWith('MANUEL-') ? String(e.callId).substring(7) : e.callId;
@@ -1552,7 +1552,12 @@ function loadFeedbackList() {
         
         // Dönem, Kanal ve Tipi belirle (Manuel kayıtlarda bu bilgileri eklemiyoruz, varsayılan değerleri kullanıyoruz)
         const isManual = String(e.callId).toUpperCase().startsWith('MANUEL-');
-        const channel = isManual ? (e.feedbackType === 'Mail' ? 'E-posta' : 'Yok') : (e.group.indexOf('Chat') > -1 ? 'Canlı Destek' : 'Telefon');
+        // Manuel kayıtta grup Chat/Telesatis ise kanal oradan gelir. Değilse Genel/Yok.
+        let channel = 'Yok';
+        if (e.group.indexOf('Chat') > -1) channel = 'Canlı Destek';
+        else if (e.group.indexOf('Telesatış') > -1) channel = 'Telefon';
+        else if (isManual && e.feedbackType === 'Mail') channel = 'E-posta'; // Manuel ve Mail ise
+        
         const period = e.date.substring(3); // MM.YYYY
         const infoType = e.feedbackType || 'Yok';
         
@@ -1576,7 +1581,7 @@ function loadFeedbackList() {
                         <span><i class="fas fa-comment-alt"></i> Kanal: ${channel}</span>
                         <span><i class="fas fa-tag"></i> Tip: ${infoType}</span>
                      </div>
-                     <span class="feedback-tag" style="background:${feedbackClass}; color:white;">${isManual ? 'MANUEL' : 'MAİL'}</span>
+                     <span class="feedback-tag" style="background:${feedbackClass}; color:white;">${isManual ? 'MANUEL' : 'OTOMATİK'}</span>
                 </div>
             </div>`;
     });
@@ -1591,6 +1596,19 @@ async function addManualFeedbackPopup() {
         await fetchUserListForAdmin();
         Swal.close();
     }
+
+    // Dönem filtre seçeneklerini oluştur
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    let monthOptions = '';
+    for (let i = 0; i < 6; i++) {
+        let month = (currentMonth - i + 12) % 12;
+        let year = currentYear - (currentMonth - i < 0 ? 1 : 0);
+        const text = `${MONTH_NAMES[month]} ${year}`;
+        const isCurrent = (i === 0);
+        monthOptions += `<option value="${text}" ${isCurrent ? 'selected' : ''}>${text}</option>`;
+    }
     
     // Modalı görüntüdeki gibi düzenledik (Agent Select ve sade alanlar)
     const { value: formValues } = await Swal.fire({
@@ -1598,18 +1616,30 @@ async function addManualFeedbackPopup() {
         html: `
             <select id="manual-q-agent" class="swal2-input" style="width:100%; margin-bottom:10px;"></select>
             <input id="manual-q-topic" class="swal2-input" placeholder="Geri Bildirim Konusu / Başlık" style="margin-bottom:10px;">
-            <!-- YENİ ALANLAR: Çağrı ID, Tarih -->
-            <div style="display:flex; gap:10px; margin-bottom:10px;">
+            <!-- YENİ ALANLAR: Çağrı ID, Tarih, Kanal, Dönem -->
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
                 <input id="manual-q-callid" class="swal2-input" placeholder="Çağrı ID (Zorunlu)" style="flex:1;">
                 <input type="date" id="manual-q-date" class="swal2-input" style="flex:1;" value="${new Date().toISOString().substring(0, 10)}">
             </div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+                <select id="manual-q-channel" class="swal2-input" style="width:100%;">
+                    <option value="Telefon">Telefon</option>
+                    <option value="Canlı Destek">Canlı Destek</option>
+                    <option value="E-posta">E-posta</option>
+                    <option value="Sosyal Medya">Sosyal Medya</option>
+                    <option value="Yok">Yok/Diğer</option>
+                </select>
+                <select id="manual-q-period" class="swal2-input" style="width:100%;">
+                    ${monthOptions}
+                </select>
+            </div>
             <textarea id="manual-q-feedback" class="swal2-textarea" placeholder="Geri bildirim detayları..." style="margin-bottom:10px;"></textarea>
             <select id="manual-q-type" class="swal2-input" style="width:100%;">
+                <option value="Feedback">Feedback</option>
+                <option value="Bilgilendirme">Bilgilendirme</option>
                 <option value="Sözlü">Sözlü</option>
                 <option value="Mail">Mail</option>
                 <option value="Özel">Özel Konu</option>
-                <option value="Bilgilendirme">Bilgilendirme</option>
-                <option value="Feedback">Feedback</option>
             </select>
         `,
         width: '500px',
@@ -1624,6 +1654,8 @@ async function addManualFeedbackPopup() {
             const topic = document.getElementById('manual-q-topic').value;
             const feedback = document.getElementById('manual-q-feedback').value;
             const feedbackType = document.getElementById('manual-q-type').value;
+            const channel = document.getElementById('manual-q-channel').value;
+            const period = document.getElementById('manual-q-period').value;
             
             // YENİ ZORUNLU KONTROLLER
             const callId = document.getElementById('manual-q-callid').value.trim();
@@ -1634,13 +1666,19 @@ async function addManualFeedbackPopup() {
                  Swal.showValidationMessage('Temsilci, Geri Bildirim, Çağrı ID ve Tarih alanları boş bırakılamaz.'); 
                  return false;
             }
+            
+            // Konu alanına Dönem ve Kanal bilgilerini ekleyerek tek bir alandan gönderim yapıyoruz
+            // Bu bilgileri backend'de details alanına JSON olarak kaydetmek daha doğru olurdu,
+            // Ancak mevcut backend yapısına uygun olarak (details=Konu) bilgileri birleştiriyoruz.
+            const fullTopic = `${topic || 'Belirtilmemiş'} (Dönem: ${period}, Kanal: ${channel})`;
+
             return {
                 agentName,
                 // Backend'de ayrı loglama için CallID'yi MANUEL ile başlatıyoruz.
                 callId: "MANUEL-" + callId, 
                 callDate: callDate,
                 score: 100, // Manuel olduğu için tam puan
-                details: topic, // Konuyu 'details' (CallID dolu olmadığı için) olarak gönderiyoruz.
+                details: fullTopic, // Konu/Dönem/Kanal bilgisini details alanına gönder
                 feedback,
                 feedbackType,
                 agentGroup: "Genel" // Manuel olduğu için Genel Grup olarak kaydedilir.
