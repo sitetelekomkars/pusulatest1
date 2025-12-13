@@ -1537,7 +1537,7 @@ function loadFeedbackList() {
     
     feedbackItems.forEach(e => {
         // Geliştirme: Çağrı Tarihi ve ID eklendi (Gelişmiş Kart Tasarımı)
-        const feedbackClass = e.feedbackType === 'Sözlü' ? '#2196f3' : (e.feedbackType === 'Mail' ? '#e65100' : '#10b981');
+        const feedbackClass = e.feedbackType === 'Sözlü' ? '#2196f3' : (e.feedbackType && e.feedbackType.toLowerCase() === 'mail' ? '#e65100' : '#10b981');
         
         listEl.innerHTML += `
             <div class="feedback-card" style="border-left-color: ${feedbackClass};">
@@ -1628,6 +1628,7 @@ async function addManualFeedbackPopup() {
 
             return {
                 agentName,
+                // Eğer Call ID girilmediyse, Konu/Başlık kullanarak MANUEL bir ID oluştur.
                 callId: (callId === 'N/A' && topic) ? `MANUAL-${topic.substring(0, 5).toUpperCase()}` : (callId === 'N/A' ? 'MANUAL-GENEL' : callId),
                 callDate: formattedDate,
                 score: 100, // Manuel olduğu için tam puan
@@ -1929,7 +1930,8 @@ async function logEvaluationPopup() {
         })
         .then(r => r.json()).then(d => {
             if (d.result === "success") { Swal.fire({ icon: 'success', title: 'Kaydedildi', timer: 1500, showConfirmButton: false }); fetchEvaluationsForAgent(formValues.agentName); } 
-            else { Swal.fire('Hata', d.message, 'error'); }
+            else { Swal.fire('Hata', d.message, 'error'); 
+            }
         });
     }
 }
@@ -1980,16 +1982,7 @@ async function editEvaluation(targetCallId) {
     
     const { value: formValues } = await Swal.fire({
         html: contentHtml, width: '600px', showCancelButton: true, confirmButtonText: '  💾   Güncelle',
-        didOpen: () => { 
-            if (isTelesatis) window.recalcTotalSliderScore(); 
-            else if (isChat) window.recalcTotalScore(); 
-            // Call ID inputunu seçip odaklanma ve stilini ayarlama
-            const callIdInput = document.getElementById('eval-callid');
-            if(callIdInput) {
-                callIdInput.style.border = '1px solid #e0e0e0'; // Düzenleme modalında zorunlu değil
-                callIdInput.style.boxShadow = 'none';
-            }
-        },
+        didOpen: () => { if (isTelesatis) window.recalcTotalSliderScore(); else if (isChat) window.recalcTotalScore(); },
         preConfirm: () => {
             const callId = document.getElementById('eval-callid').value;
             const feedback = document.getElementById('eval-feedback').value;
