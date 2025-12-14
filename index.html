@@ -96,7 +96,7 @@
                         <button class="filter-btn link-btn" onclick="openTechWizard()"><i class="fas fa-magic"></i> Teknik Sihirbaz</button>
                         
                         <button class="filter-btn link-btn" onclick="openSales()"><i class="fas fa-headset"></i> TeleSatış</button>
-                        <button class="filter-btn link-btn" onclick="openQualityHunt()"><i class="fas fa-gamepad"></i> Oyun</button>
+                        <button class="filter-btn link-btn" onclick="openPenaltyGame()"><i class="fas fa-futbol"></i> Oyun</button>
                         <button class="filter-btn link-btn" onclick="openQualityArea()"><i class="fas fa-chart-pie"></i> Kalite</button>
                     </div>
                 </div>
@@ -172,7 +172,25 @@
         </div>
     </div>
     <!-- MODAL: PENALTI OYUNU -->
-<div class="shorts"></div><div class="legs"><div class="leg left"></div><div class="leg right"></div></div></div><div class="keeper-shadow"></div></div></div>
+    <div id="penalty-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 650px; background: #1a1a1a; border: 1px solid #333; min-height:600px; display:flex; flex-direction:column;">
+            <span class="close-modal" onclick="closeModal('penalty-modal')">&times;</span>
+            <h2 style="text-align:center; color:#fabb00; margin-top:0;">    ⚽     S Sport Arena</h2>
+            <div id="penalty-lobby" style="text-align:center; padding:20px; flex-grow:1; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                <h3 style="color:white; margin-bottom:15px;">    🏆     Liderlik Tablosu (Top 5)</h3>
+                <div id="leaderboard-loader" style="color:#aaa;">Yükleniyor...</div>
+                <table id="leaderboard-table" style="width:100%; color:#eee; border-collapse:collapse; margin-bottom:30px; display:none;">
+                    <thead><tr style="border-bottom:1px solid #555; color:#fabb00;"><th style="padding:10px;">#</th><th style="padding:10px;">Temsilci</th><th style="padding:10px;">Maç</th><th style="padding:10px;">Ort.</th></tr></thead>
+                    <tbody id="leaderboard-body"></tbody>
+                </table>
+                <button class="penalty-btn" style="width:200px; background:#2e7d32; color:white; border-color:#1b5e20;" onclick="startGameFromLobby()">MAÇA BAŞLA     🏃    ‍    ♂️⚽    </button>
+            </div>
+            <div id="penalty-game-area" style="display:none;">
+                <div class="penalty-stats"><span>SKOR: <span id="p-score">0</span></span><span>TOP: <span id="p-balls">10</span></span></div>
+<div id="double-indicator" class="double-indicator" style="display:none;">2. ŞANS AKTİF</div>
+                <div class="penalty-field">
+                    <div class="stadium-stands"></div><div class="grass-stripes"></div>
+                    <div class="goal-container"><div class="goal-net"></div><div class="goal-top-bar"></div><div class="goal-post-left"></div><div class="goal-post-right"></div><div id="keeper-wrap" class="keeper-wrapper"><div class="player-figure"><div class="head"></div><div class="torso"></div><div class="arms"><div class="arm left"><div class="gloves"></div></div><div class="arm right"><div class="gloves"></div></div></div><div class="shorts"></div><div class="legs"><div class="leg left"></div><div class="leg right"></div></div></div><div class="keeper-shadow"></div></div></div>
                     <div class="goal-message" id="goal-msg">GOL!</div><div class="penalty-area"></div><div class="penalty-spot-mark"></div><div id="ball-wrap" class="ball-wrapper"><div class="football"></div><div class="ball-shadow"></div></div><div id="shooter-wrap" class="shooter-wrapper"><div class="player-figure"><div class="head"></div><div class="torso"></div><div class="arms"><div class="arm left"></div><div class="arm right"></div></div><div class="shorts"></div><div class="legs"><div class="leg left"><div class="sock"></div><div class="shoe"></div></div><div class="leg right"><div class="sock"></div><div class="shoe"></div></div></div></div></div>
                 </div>
                 <div style="margin-top:15px; color:#ddd; min-height:50px; font-weight:500; text-align:center; padding:10px; background:rgba(255,255,255,0.05); border-radius:8px;" id="p-question-text">Soru yükleniyor...</div>
@@ -291,8 +309,19 @@
             
             <!-- GÜNCELLENEN ALAN: view-feedback section (Manuel Ekle butonu eklendi) -->
             <div id="view-feedback" class="q-view-section">
-                <div class="q-view-header">
+                <div class="q-view-header" style="flex-wrap: wrap; gap:10px;">
                     <h2>Geri Bildirimler</h2>
+
+                    <!-- YENİ: Admin temsilci/grup filtreleri (Dashboard ile aynı mantık) -->
+                    <div id="feedback-filters" style="display:none; gap:10px; margin-left:auto; align-items:center; flex-wrap:wrap;">
+                        <select id="q-feedback-group" onchange="updateFeedbackAgentList()" class="minimal-select" style="max-width: 120px;">
+                            <option value="all">Tüm Gruplar</option>
+                        </select>
+                        <select id="q-feedback-agent" onchange="refreshFeedbackData()" class="minimal-select" style="max-width: 130px;">
+                            <option value="all">Tüm Temsilciler</option>
+                        </select>
+                    </div>
+
                     <!-- YENİ BUTON: Sadece yöneticilere görünecek şekilde style:display:none eklendi -->
                     <button id="manual-feedback-admin-btn" class="add-manual-feedback-btn" style="display:none;" onclick="addManualFeedbackPopup()">
                         <i class="fas fa-plus-circle"></i> Manuel Geri Bildirim Ekle
@@ -339,65 +368,5 @@
             toggleUserDropdown();
         };
     </script>
-
-    <!-- MODAL: KALİTE AVI -->
-    <div id="hunt-modal" class="modal-overlay" style="display:none;">
-        <div class="modal-content hunt-modal">
-            <span class="close-modal" onclick="closeModal('hunt-modal')">&times;</span>
-
-            <div id="hunt-lobby" class="hunt-lobby">
-                <h2 style="margin:0; color:var(--primary);">🎯 Kalite Avı</h2>
-                <p style="margin:8px 0 14px; color:#666; line-height:1.4;">
-                    Kısa senaryolarla doğru aksiyonu seç. Her turda süre sınırlı. Doğru karar = puan!
-                </p>
-
-                <div class="hunt-lobby-grid">
-                    <div class="hunt-card">
-                        <div class="hunt-card-title">Nasıl Oynanır?</div>
-                        <ul class="hunt-ul">
-                            <li>Toplam <b>10 tur</b>.</li>
-                            <li>Her tur <b>15 saniye</b>.</li>
-                            <li>Seçimler: <b>0 / 5 / 10</b> puan.</li>
-                            <li>Tur sonunda kısa açıklama görürsün.</li>
-                        </ul>
-                        <button class="btn btn-copy" onclick="startHuntFromLobby()" style="width:100%; justify-content:center; margin-top:10px;">🚀 Başla</button>
-                    </div>
-
-                    <div class="hunt-card">
-                        <div class="hunt-card-title">🏆 En İyiler</div>
-                        <div id="hunt-leaderboard-loader" style="color:#999; font-size:0.9rem;">Yükleniyor...</div>
-                        <table id="hunt-leaderboard-table" class="leaderboard-table" style="display:none; width:100%;">
-                            <thead><tr><th>#</th><th>Kullanıcı</th><th>Maç</th><th>Ort.</th></tr></thead>
-                            <tbody id="hunt-leaderboard-body"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <div id="hunt-game" class="hunt-game" style="display:none;">
-                <div class="hunt-topbar">
-                    <div class="hunt-stat">Tur: <span id="hunt-round">1</span>/10</div>
-                    <div class="hunt-stat">Puan: <span id="hunt-score">0</span></div>
-                    <div class="hunt-stat">Süre: <span id="hunt-time">15</span>s</div>
-                </div>
-
-                <div class="hunt-timerbar"><div id="hunt-timerfill" class="hunt-timerfill"></div></div>
-
-                <div class="hunt-scenario">
-                    <div class="hunt-scenario-title" id="hunt-title">Senaryo</div>
-                    <div class="hunt-scenario-text" id="hunt-text"></div>
-                    <div class="hunt-question" id="hunt-question"></div>
-                </div>
-
-                <div id="hunt-options" class="hunt-options"></div>
-
-                <div class="hunt-bottom">
-                    <button class="btn btn-link" onclick="showHuntLobby()">← Lobi</button>
-                    <button id="hunt-restart" class="btn btn-copy" style="display:none;" onclick="startHuntSession()">↻ Yeniden Başlat</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
 </body>
 </html>
