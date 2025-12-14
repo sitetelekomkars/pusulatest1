@@ -853,60 +853,160 @@ async function fetchBroadcastFlow() {
 }
 
 async function openBroadcastFlow() {
-    Swal.fire({
-        title: "Yayın Akışı",
-        didOpen: () => Swal.showLoading(),
-        showConfirmButton: false
+  Swal.fire({
+    title: "Yayın Akışı",
+    didOpen: () => Swal.showLoading(),
+    showConfirmButton: false
+  });
+
+  try {
+    const itemsRaw = await fetchBroadcastFlow();
+
+    if (!itemsRaw || !itemsRaw.length) {
+      Swal.fire("Yayın Akışı", "Kayıt bulunamadı.", "info");
+      return;
+    }
+
+    // ✅ Sıralama (epoch varsa kesin, yoksa tarih+saate göre)
+    const items = [...itemsRaw].sort((a, b) => {
+      const ae = Number(a?.startEpoch || 0);
+      const be = Number(b?.startEpoch || 0);
+      if (ae && be) return ae - be;
+
+      const ak = String(a?.dateISO || a?.date || "") + " " + String(a?.time || "");
+      const bk = String(b?.dateISO || b?.date || "") + " " + String(b?.time || "");
+      return ak.localeCompare(bk);
     });
 
-    try {
-        const items = await fetchBroadcastFlow();
+    const now = Date.now();
 
-        if (!items.length) {
-            Swal.fire("Yayın Akışı", "Kayıt bulunamadı.", "info");
-            return;
+    // ✅ Tarihe göre grupla (dateISO)
+    const byDate = {};
+    const dateLabelByKey = {};
+    items.forEach(it => {
+      const key = String(it?.dateISO || it?.date || "Tarih Yok");
+      if (!byDate[key]) byDate[key] = [];
+      byDate[key].push(it);
+
+      if (!dateLabelByKey[key]) {
+        dateLabelByKey[key] = String(it?.dateLabelTr || "");
+      }
+    });
+
+    // ✅ Popup CSS (Swal içi)
+    const css = `
+      <style>
+        .ba-wrap{ text-align:left; max-height:62vh; overflow:auto; padding-right:6px; }
+        .ba-day{ margin:14px 0 8px; font-weight:900; color:#0e1b42; display:flex; align-items:center; gap:10px; }
+
+        .ba-section{ margin:16px 0 8px; font-weight:900; color:#0e1b42; font-size:1rem; }
+        .ba-divider{ margin:14px 0; height:1px; background:#e9e9e9; }
+        .ba-empty{ padding:10px 12px; border:1px dashed #ddd; border-radius:12px; background:#fafafa; color:#666; margin:10px 0; font-weight:700; }
+        .ba-badge{ font-size:.75rem; padding:4px 8px; border-radius:999px; border:1px solid #e9e9e9; background:#f8f8f8; color:#444; }
+        .ba-grid{ display:grid; gap:8px; }
+        .ba-row{
+          border:1px solid #eee;
+          border-left:4px solid var(--secondary);
+          border-radius:12px;
+          padding:10px 12px;
+          background:#fff;
         }
+        .ba-row.past{
+          border-left-color:#d9534f;
+          background:#fff5f5;
+        }
+        .ba-top{ display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
+        .ba-title{ font-weight:900; color:#222; line-height:1.25; }
+        .ba-time{ font-weight:900; color:#0e1b42; white-space:nowrap; }
+        .ba-sub{ margin-top:6px; font-size:.86rem; color:#666; display:flex; gap:14px; flex-wrap:wrap; }
+        .ba-legend{ display:flex; gap:10px; flex-wrap:wrap; margin:6px 0 10px; }
+        .ba-dot{ display:inline-flex; align-items:center; gap:6px; font-size:.8rem; color:#444; }
+        .ba-dot i{ width:10px; height:10px; border-radius:50%; display:inline-block; }
+        .ba-dot .up{ background:var(--secondary); }
+        .ba-dot .pa{ background:#d9534f; }
+      </style>
+    `;
 
-        // Tarihe göre grupla
-        const byDate = {};
-        items.forEach(it => {
-            const k = String(it.dateISO || it.date || "Tarih Yok");
-            if (!byDate[k]) byDate[k] = [];
-            byDate[k].push(it);
-        });
+    let html = `${css}<div class="ba-wrap">`;
+    html += `
+      <div class="ba-legend">
+        <span class="ba-dot"><i class="up"></i> Yaklaşan / Gelecek</span>
+        <span class="ba-dot"><i class="pa"></i> Tarihi Geçmiş</span>
+      </div>
+    `;
 
-        let html = `<div style="text-align:left; max-height:60vh; overflow:auto; padding-right:6px;">`;
+        // ✅ Yaklaşan / Gelecek ve Geçmiş olarak ayır
+    const upcomingByDate = {};
+    const pastByDate = {};
+    const dateKeys = Object.keys(byDate);
 
-        Object.keys(byDate).forEach(day => {
-            html += `<div style="margin:12px 0 8px; font-weight:800; color:#0e1b42;">${escapeHtml(_formatBroadcastDateTr({dateISO: day}))}</div>`;
-            html += `<div style="display:grid; gap:8px;">`;
+    dateKeys.forEach(key => {
+      const arr = byDate[key] || [];
+      arr.forEach(it => {
+        const startEpoch = Number(it?.startEpoch || 0);
+        const isPast = startEpoch ? (startEpoch < now) : false;
+        const bucket = isPast ? pastByDate : upcomingByDate;
+        if (!bucket[key]) bucket[key] = [];
+        bucket[key].push(it);
+      });
+    });
 
-            byDate[day].forEach(it => {
-                html += `
-                    <div style="border:1px solid #eee; border-left:4px solid var(--secondary); border-radius:10px; padding:10px;">
-                        <div style="font-weight:800; color:#333;">${escapeHtml(it.event)}</div>
-                        <div style="margin-top:4px; font-size:0.85rem; color:#666; display:flex; gap:14px; flex-wrap:wrap;">
-                            <span><i class="far fa-clock"></i> ${escapeHtml(it.time)}</span>
-                            <span><i class="fas fa-microphone"></i> ${escapeHtml(it.announcer)}</span>
-                        </div>
-                    </div>`;
-            });
+    const renderSection = (title, bucket, emptyText) => {
+      const keys = dateKeys.filter(k => (bucket[k] && bucket[k].length));
+      if (!keys.length) {
+        html += `<div class="ba-empty">${escapeHtml(emptyText)}</div>`;
+        return;
+      }
+      html += `<div class="ba-section">${escapeHtml(title)}</div>`;
+      keys.forEach(key => {
+        const label = dateLabelByKey[key] || _formatBroadcastDateTr({ dateISO: key });
+        html += `<div class="ba-day">${escapeHtml(label)}</div>`;
+        html += `<div class="ba-grid">`;
 
-            html += `</div>`;
+        bucket[key].forEach(it => {
+          const startEpoch = Number(it?.startEpoch || 0);
+          const isPast = startEpoch ? (startEpoch < now) : false;
+
+          const time = String(it?.time || "").trim();
+          const event = String(it?.event || "").trim();
+          const announcer = String(it?.announcer || "").trim();
+
+          html += `
+            <div class="ba-row ${isPast ? "past" : ""}">
+              <div class="ba-top">
+                <div class="ba-title">${escapeHtml(event || "-")}</div>
+                <div class="ba-time">${escapeHtml(time || "")}</div>
+              </div>
+              <div class="ba-sub">
+                <span><i class="fas fa-microphone"></i> ${escapeHtml(announcer || "-")}</span>
+              </div>
+            </div>`;
         });
 
         html += `</div>`;
+      });
+    };
 
-        Swal.fire({
-            title: "Yayın Akışı",
-            html,
-            width: 900,
-            confirmButtonText: "Kapat"
-        });
+    // ✅ Önce yaklaşanlar, sonra geçmişler
+    renderSection("Yaklaşan / Gelecek", upcomingByDate, "Yaklaşan yayın bulunamadı.");
+    html += `<div class="ba-divider"></div>`;
+    renderSection("Geçmiş", pastByDate, "Geçmiş yayın bulunamadı.");
 
-    } catch (err) {
-        Swal.fire("Hata", (err && err.message) ? err.message : "Yayın akışı alınamadı.", "error");
-    }
+      html += `</div>`;
+    });
+
+    html += `</div>`;
+
+    Swal.fire({
+      title: "Yayın Akışı",
+      html,
+      width: 980,
+      confirmButtonText: "Kapat"
+    });
+
+  } catch (err) {
+    Swal.fire("Hata", err?.message || "Yayın akışı alınamadı.", "error");
+  }
 }
 
 // XSS koruması
@@ -2340,8 +2440,7 @@ function loadFeedbackList() {
                         <span><i class="fas fa-comment-alt"></i> Kanal: ${channel}</span>
                         <span><i class="fas fa-tag"></i> Tip: ${infoType}</span>
                      </div>
-                     <span class="feedback-tag" style="background:${feedbackClass}; color:white;">${isManual ? 'MANUEL' : 'OTOMATİK'}</span>
-                </div>
+                     
             </div>`;
     });
 }
