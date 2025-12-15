@@ -560,7 +560,7 @@ function renderCards(data) {
     container.innerHTML = html;
 }
 
-function highlightTextfunction highlightText(htmlContent) {
+function highlightText(htmlContent) {
     if (!htmlContent) return "";
     const searchTerm = document.getElementById('searchInput').value.toLocaleLowerCase('tr-TR').trim();
     if (!searchTerm) return htmlContent;
@@ -612,10 +612,6 @@ function showCardDetail(title, text) {
         title: safeTitle,
         html: `<div style="text-align:left; font-size:1rem; line-height:1.6;">${safeText}</div>`,
         showCloseButton: true, showConfirmButton: false, width: '650px', background: '#f8f9fa'
-    });
-}
-</div>`,
-        showCloseButton: true, showConfirmButton: false, width: '600px', background: '#f8f9fa'
     });
 }
 function toggleEditMode() {
