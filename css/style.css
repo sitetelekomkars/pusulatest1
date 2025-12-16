@@ -133,7 +133,7 @@ body {
     /* Kırmızı boşlukları silmek için padding'i sıfırladık */
     padding-bottom: 0; 
     position: relative;
-    flex-wrap: wrap; 
+    flex-wrap: nowrap; 
 }
 .search-container { position: relative; width: 300px; flex-shrink: 0; }
 #searchInput { 
@@ -157,6 +157,8 @@ body {
 .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: rgba(255, 255, 255, 0.5); font-size: 0.85rem; }
 /* Filtre Alanı */
 .filter-container { 
+    flex: 1;
+    min-width: 0;
     display: flex; 
     gap: 6px; 
     align-items: center;
@@ -166,6 +168,12 @@ body {
     position: relative;
 }
 .filter-container::-webkit-scrollbar { height: 0px; } 
+
+@media (max-width: 1100px){
+  .control-wrapper{ flex-wrap: wrap; }
+  .search-container{ width: 100%; }
+  .filter-container{ width: 100%; }
+}
 /* GENEL FİLTRE BUTONU */
 .filter-btn { 
     background-color: rgba(255, 255, 255, 0.03); 
@@ -370,7 +378,7 @@ body.editing .edit-icon { display: block !important; }
 .evaluation-details-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-in-out; margin-top: 0; }
 .evaluation-summary { transition: background 0.2s; }
 .evaluation-summary:hover { background: #fcfcfc; }
-.quality-controls-top { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; margin-bottom: 15px; flex-wrap: wrap; gap: 15px; }
+.quality-controls-top { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; margin-bottom: 15px; flex-wrap: nowrap; gap: 15px; }
 .quality-filter-group { display: flex; gap: 15px; align-items: center; flex-grow: 1; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 1rem; background: #f0f4ff; border: 1px solid #d0d8f0; justify-content: space-around; }
 .eval-modal-wrapper { display: flex; flex-direction: column; gap: 15px; text-align: left; font-family: 'Segoe UI', sans-serif; }
 .eval-header-card { background: #f8f9fa; padding: 15px; border-radius: 10px; border-left: 5px solid var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
@@ -787,7 +795,7 @@ body.editing .edit-icon { display: block !important; }
 .tech-buttons-area {
     display: flex;
     gap: 15px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     margin-top: 30px;
     padding-top: 20px;
     border-top: 1px solid #eee;
