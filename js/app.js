@@ -1,6 +1,49 @@
 const BAKIM_MODU = false;
+
+function showGlobalError(msg){
+  try{
+    let box=document.getElementById('globalErrorBox');
+    if(!box){
+      box=document.createElement('div');
+      box.id='globalErrorBox';
+      box.style.position='fixed';
+      box.style.left='12px';
+      box.style.right='12px';
+      box.style.bottom='12px';
+      box.style.zIndex='99999';
+      box.style.background='rgba(211,47,47,0.95)';
+      box.style.color='white';
+      box.style.padding='12px 14px';
+      box.style.borderRadius='10px';
+      box.style.fontFamily='system-ui, -apple-system, Segoe UI, Roboto, Arial';
+      box.style.fontSize='14px';
+      box.style.boxShadow='0 8px 20px rgba(0,0,0,0.25)';
+      box.innerHTML = '<b>Uyarı</b><div id="globalErrorMsg" style="margin-top:6px;opacity:.95"></div>'
+        + '<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">'
+        + '<button id="btnSetScriptUrl" style="border:0;padding:8px 10px;border-radius:8px;cursor:pointer">SCRIPT URL Ayarla</button>'
+        + '<button id="btnCloseErr" style="border:0;padding:8px 10px;border-radius:8px;cursor:pointer;opacity:.9">Kapat</button>'
+        + '</div>';
+      document.body.appendChild(box);
+      document.getElementById('btnCloseErr').onclick=()=>box.remove();
+      document.getElementById('btnSetScriptUrl').onclick=()=>{
+        const cur = localStorage.getItem("PUSULA_SCRIPT_URL") || "";
+        const u = prompt("Apps Script Web App URL (…/exec):", cur);
+        if(u && u.includes("/exec")){
+          localStorage.setItem("PUSULA_SCRIPT_URL", u.trim());
+          alert("Kaydedildi. Sayfayı yenileyin (Ctrl+F5).");
+        } else {
+          alert("URL /exec içermeli.");
+        }
+      };
+    }
+    const m=document.getElementById('globalErrorMsg');
+    if(m) m.textContent=msg;
+  }catch(e){ console.error(e); }
+}
+
 // Apps Script URL'si
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbywdciHyiPCEWGu9hIyN05HkeBgwPlFgzrDZY16K08svQhTcvXhN8A_DyBrzO8SalDu/exec";
+let SCRIPT_URL = localStorage.getItem("PUSULA_SCRIPT_URL") || "https://script.google.com/macros/s/AKfycbywdciHyiPCEWGu9hIyN05HkeBgwPlFgzrDZY16K08svQhTcvXhN8A_DyBrzO8SalDu/exec"; // Apps Script Web App URL
+
 // Oyun Değişkenleri
 let jokers = { call: 1, half: 1, double: 1 };
 let doubleChanceUsed = false;
@@ -15,7 +58,7 @@ let isAdminMode = false;
 let isEditingActive = false;
 let sessionTimeout;
 let activeCards = [];
-let currentCategory = 'all';
+let currentCategory = "home";
 let adminUserList = [];
 let allEvaluationsData = [];
 let wizardStepsData = {};
@@ -446,22 +489,9 @@ function loadContentData() {
             sportsData = rawData.filter(i => i.Type.toLowerCase() === 'sport').map(i => ({
                 title: i.Title, icon: i.Icon, desc: i.Text, tip: i.Tip, detail: i.Detail, pronunciation: i.Pronunciation
             }));
-            salesScripts = rawData.filter(i => i.Type.toLowerCase() === 'sales').map(i => ({ title: i.Title, text: i.Text }));
-            // TeleSatış - Data Teklifleri (Sheet yapısına göre esnek parse)
-            telesatisOffers = rawData
-                .filter(i => {
-                    const t = String(i.Type || '').toLowerCase();
-                    return t.includes('telesat') || t.includes('teklif') || t.includes('offer') || t.includes('datateklif');
-                })
-                .map(i => ({
-                    segment: i.Segment || i.Category || 'GENEL',
-                    title: i.TeklifAdi || i.Title || 'Teklif',
-                    desc: i.Açıklama || i.Aciklama || i.Text || '',
-                    note: i.Not || i.Script || '',
-                    status: i.Durum || i.Status || i.Link || ''
-                }))
-                .filter(x => (x.title || '').trim() !== '');
+            try{ applySportsRights(); }catch(e){}
 
+            salesScripts = rawData.filter(i => i.Type.toLowerCase() === 'sales').map(i => ({ title: i.Title, text: i.Text }));
             quizQuestions = rawData.filter(i => i.Type.toLowerCase() === 'quiz').map(i => ({
                 q: i.Text, opts: i.QuizOptions ? i.QuizOptions.split(',').map(o => o.trim()) : [], a: parseInt(i.QuizAnswer)
             }));
@@ -482,7 +512,7 @@ function loadContentData() {
 
             
             if(currentCategory === 'fav') { filterCategory(document.querySelector('.btn-fav'), 'fav'); } 
-            else { activeCards = database; renderCards(database); }
+            else { activeCards = database; if(currentCategory==='home'){ showHomeScreen(); } else { hideHomeScreen(); renderCards(database); } }
             startTicker();
             try { updateSearchResultCount(activeCards.length || database.length, database.length); } catch(e) {}
         } else { document.getElementById('loading').innerHTML = `Veriler alınamadı: ${data.message || 'Bilinmeyen Hata'}`; }
@@ -562,7 +592,17 @@ function updateSearchResultCount(count, total) {
 
 
 function filterCategory(btn, cat) {
+    // Ana Sayfa özel ekran
+    if (cat === "home") {
+        currentCategory = "home";
+        setActiveFilterButton(btn);
+        showHomeScreen();
+        return;
+    }
+
     currentCategory = cat;
+    hideHomeScreen();
+
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     filterContent();
@@ -3338,309 +3378,619 @@ async function editEvaluation(targetCallId) {
 }
 
 /* =========================================================
-   ANA SAYFA + TEKNİK + TELESATIŞ (UI REVAMP)
+   ANA SAYFA + TEKNİK + TELESATIŞ (FULLSCREEN) GÜNCELLEMESİ
    ========================================================= */
 
-function hideMainLists() {
-  const home = document.getElementById('home-screen');
-  const grid = document.getElementById('cardGrid');
-  if(home) home.style.display = 'none';
-  if(grid) grid.style.display = 'none';
+const TELESales_OFFERS_FALLBACK = [{"offer": "YILLIK - 1299 TL", "segment": "WİNBACK", "description": "Kullanıcı daha önce aylık ya da yıllık herhangi bir paket kullanmış, ardından paket sonlanmış ve şu anda aktif paketi olmayan kullanıcıları aradığımız bir data", "note": "Kullanıcının izleme geçmişi olabilir."}, {"offer": "AYLIK  - 6 AY 109 TL", "segment": "WİNBACK", "description": "Kullanıcı daha önce aylık ya da yıllık herhangi bir paket kullanmış, ardından paket sonlanmış ve şu anda aktif paketi olmayan kullanıcıları aradığımız bir data", "note": "Kullanıcının izleme geçmişi olabilir."}, {"offer": "YILLIK - 1399 TL", "segment": "CANCELLİNG", "description": "Aboneliğinde iptal talebinde bulunmuş, paket süresi bitimine kadar erişime devam eden, geri kazanım için aradığımız bir data", "note": "Kullanıcının izleme geçmişi olabilir. İndirim oranı yüksek + Kullanıcının bir iptal nedeni olabilir"}, {"offer": "AYLIK  - 6 AY 119 TL", "segment": "CANCELLİNG", "description": "Aboneliğinde iptal talebinde bulunmuş, paket süresi bitimine kadar erişime devam eden, geri kazanım için aradığımız bir data", "note": "Kullanıcının izleme geçmişi olabilir. İndirim oranı yüksek + Kullanıcının bir iptal nedeni olabilir"}, {"offer": "YILLIK - 1499 TL", "segment": "ACTİVE GRACE", "description": "Paket yenileme sürecine giren fakat ücret alınamadığı için paketi yenilenemeyen kullanıcıları aradığımız bir data", "note": "Paket yenileme sürecinden bir ödeme sorunu oluştuğunu bu nedenle aboneliğinin yenilenmediğini, kullanıcıya hem bu sorunu çözmek hem de indirimli fiyatlar üzerinden yardımcı olmak +İçerik"}, {"offer": "AYLIK  - 6 AY 109 TL", "segment": "ACTİVE GRACE", "description": "Paket yenileme sürecine giren fakat ücret alınamadığı için paketi yenilenemeyen kullanıcıları aradığımız bir data", "note": "Paket yenileme sürecinden bir ödeme sorunu oluştuğunu bu nedenle aboneliğinin yenilenmediğini, kullanıcıya hem bu sorunu çözmek hem de indirimli fiyatlar üzerinden yardımcı olmak +İçerik"}, {"offer": "YILLIK - 1499 TL", "segment": "INBOUND", "description": "Inbound üzerinden gelen satın alma talepleri ya da satışa ikna edilen kullanıcılar için sunulan teklif", "note": ""}, {"offer": "AYLIK - 6 AY 139,5 TL", "segment": "INBOUND", "description": "Inbound üzerinden gelen satın alma talepleri ya da satışa ikna edilen kullanıcılar için sunulan teklif", "note": ""}];
+const SPORTS_RIGHTS_FALLBACK = [{"item": "Euroleague maçları ve stüdyo programları", "period": "2025-2026 / 2026- 2027 / 2027-2028 / 2028-2029", "note": ""}, {"item": "Bundesliga", "period": "2025-2026 / 2026- 2027 / 2027-2028 / 2028-2029", "note": ""}, {"item": "Bundesliga 2", "period": "2025-2026 / 2026- 2027 / 2027-2028 / 2028-2029", "note": ""}, {"item": "İspanya LaLiga önemli maçları", "period": "2025 - 2026 / 2026 - 2027", "note": ""}, {"item": "LaLiga 2 önemli maçları", "period": "2025 - 2026 / 2026 - 2027", "note": ""}, {"item": "İtalya Serie A önemli maçları", "period": "2025 - 2026 / 2026 - 2027", "note": ""}, {"item": "Portekiz Liga Portugal önemli maçları", "period": "2025 - 2026", "note": ""}, {"item": "Suudi Arabistan Pro Lig önemli maçları", "period": "2025-2026 / 2026- 2027 / 2027-2028 / 2028-2029", "note": ""}, {"item": "Hollanda Ligi", "period": "2025-2026 / 2026- 2027 / 2027-2028 / 2028-2029", "note": ""}, {"item": "İskoçya Premiership önemli maçları", "period": "2025 - 2026 / 2026 - 2027", "note": ""}, {"item": "NCAA Amerikan Futbol", "period": "2025 - 2026 / 2026 - 2027", "note": ""}, {"item": "NCAA Basketbol", "period": "2025 - 2026 / 2026 - 2027", "note": ""}, {"item": "NFL", "period": "2025 - 2026", "note": ""}, {"item": "NBA", "period": "2025-2026 / 2026- 2027 / 2027-2028 / 2028-2029", "note": ""}, {"item": "EuroCup", "period": "2025-2026 / 2026- 2027 / 2027-2028 / 2028-2029", "note": ""}, {"item": "Yunanistan Basketbol Ligi önemli maçları", "period": "2025 - 2026 Sezon belirsiz", "note": ""}, {"item": "NCAA", "period": "2025 - 2026 / 2026 - 2027", "note": ""}, {"item": "Libertadores Kupası", "period": "2027, 2028, 2029, 2030 (4 seasons)", "note": ""}, {"item": "Copa Sudamericana", "period": "2027, 2028, 2029, 2030 (4 seasons)", "note": ""}, {"item": "WRC", "period": "2025", "note": "2026 da alınabilir net değil"}, {"item": "Nascar", "period": "2025 - 2026 - 2027 - 2028 ve 2029", "note": ""}, {"item": "IndyCar", "period": "2025 - 2026 - 2027", "note": ""}, {"item": "MotoGP - Moto2 - Moto3", "period": "2025 - 2026 - 2027", "note": ""}, {"item": "ATP Tenis Turnuvaları önemli maçlar", "period": "2025 - 2026 - 2027 and 2028", "note": ""}, {"item": "Wimbledon Tenis önemli maçlar", "period": "2025 - 2026 - 2027", "note": ""}, {"item": "UFC Dövüş Gecesi yayınları", "period": "2027 sonuna kadar bizde", "note": ""}, {"item": "Oktagon", "period": "2025", "note": ""}, {"item": "PFL MMA", "period": "2025", "note": ""}, {"item": "Cage Warriors Boks Maçları", "period": "2025", "note": ""}, {"item": "BKFC", "period": "Kaldırıldı", "note": ""}];
+
+function setActiveFilterButton(btn){
+    try{
+        document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+        if(btn) btn.classList.add('active');
+    }catch(e){}
 }
 
-function openHome() {
-  // filter button active state
-  try {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    const btn = document.querySelector('.filter-btn[data-cat="home"]');
-    if(btn) btn.classList.add('active');
-  } catch(e){}
-
-  const home = document.getElementById('home-screen');
-  const grid = document.getElementById('cardGrid');
-  if(grid) grid.style.display = 'none';
-  if(home) home.style.display = 'block';
-  renderHome();
+function showHomeScreen(){
+    const home = document.getElementById('home-screen');
+    const grid = document.getElementById('cardGrid');
+    const empty = document.getElementById('emptyMessage');
+    if (home) home.style.display = 'block';
+    if (grid) grid.style.display = 'none';
+    if (empty) empty.style.display = 'none';
+    renderHomePanels();
 }
 
-function renderHome(){
-  // News
-  const newsBox = document.getElementById('home-news-list');
-  if(newsBox){
-    const items = (newsData || []).slice(0, 3);
-    if(items.length === 0){
-      newsBox.innerHTML = '<div class="home-list muted">Bugün için duyuru bulunamadı.</div>';
-    }else{
-      newsBox.innerHTML = items.map(n => `
-        <div class="home-news-item" onclick="openNews()">
-          <div class="d">${escapeHtml(n.date || '')}</div>
-          <div class="t">${escapeHtml(n.title || '')}</div>
-          <div class="s">${escapeHtml((n.desc || '').slice(0, 120))}${(n.desc||'').length>120?'...':''}</div>
+function hideHomeScreen(){
+    const home = document.getElementById('home-screen');
+    if (home) home.style.display = 'none';
+    const grid = document.getElementById('cardGrid');
+    if (grid) grid.style.display = 'grid';
+}
+
+function renderHomePanels(){
+    // Bugün kutusu: en güncel 3 duyuru + yaklaşan yayın akışı (varsa)
+    const todayEl = document.getElementById('home-today');
+    if(todayEl){
+        const latest = (newsData || []).slice(0,3);
+        if(latest.length===0){
+            todayEl.innerHTML = 'Henüz duyuru yok.';
+        }else{
+            todayEl.innerHTML = latest.map(n=>`
+                <div style="padding:10px;border:1px solid #eef2f7;border-radius:10px;margin-bottom:10px;background:#fff">
+                  <div style="font-size:.78rem;color:#8a8a8a;font-weight:800">${escapeHtml(n.date||'')}</div>
+                  <div style="font-weight:900;color:#0e1b42;margin-top:2px">${escapeHtml(n.title||'')}</div>
+                  <div style="color:#555;margin-top:6px;line-height:1.45">${escapeHtml((n.desc||'')).slice(0,160)}${(n.desc||'').length>160?'...':''}</div>
+                </div>
+            `).join('');
+        }
+    }
+
+    // Favoriler kutusu: favori kartların ilk 6'sı
+    const favEl = document.getElementById('home-favs');
+    if(favEl){
+        const favs = (cardsData||[]).filter(c=>isFavorite(c.id)).slice(0,6);
+        if(favs.length===0){
+            favEl.innerHTML = 'Henüz favori eklemedin. Kartlarda ⭐ simgesine basarak ekleyebilirsin.';
+        }else{
+            favEl.innerHTML = favs.map(c=>`
+                <div style="display:flex;gap:10px;align-items:flex-start;border:1px solid #eef2f7;border-radius:10px;padding:10px;margin-bottom:10px">
+                  <div style="font-weight:900;color:#0e1b42;min-width:0;flex:1">
+                    <div style="font-size:.75rem;color:#8a8a8a;font-weight:900">${escapeHtml(c.category||'')}</div>
+                    <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(c.title||'')}</div>
+                  </div>
+                  <button class="btn btn-copy" style="white-space:nowrap" onclick="openCardDetail('${escapeForJsString(c.id)}')">Aç</button>
+                </div>
+            `).join('');
+        }
+    }
+}
+
+// Kart detayını doğrudan açmak için küçük bir yardımcı
+function openCardDetail(cardId){
+    const card = (cardsData||[]).find(x=>String(x.id)===String(cardId));
+    if(!card){Swal.fire('Hata','Kart bulunamadı.','error');return;}
+    showCardDetail(card);
+}
+
+/* -------------------------
+   TELE SATIŞ FULLSCREEN
+--------------------------*/
+let telesalesOffers = [];
+function safeGetToken(){
+    try{ return (typeof getToken === 'function') ? getToken() : ''; }catch(e){ return ''; }
+}
+async function fetchSheetObjects(actionName){
+    const payload = { action: actionName, username: (currentUser||''), token: safeGetToken() };
+    const r = await fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+    });
+    const d = await r.json();
+    if(!d || d.result !== "success") throw new Error((d && d.message) ? d.message : "Veri alınamadı.");
+    // backend handleFetchData returns {data:[...]} ; other handlers may use {items:[...]}
+    return d.data || d.items || [];
+}
+
+async function openTelesalesArea(){
+    const wrap = document.getElementById('telesales-fullscreen');
+    if(!wrap) return;
+    wrap.style.display = 'flex';
+
+    // Sidebar profil
+    const av = document.getElementById('t-side-avatar');
+    const nm = document.getElementById('t-side-name');
+    const rl = document.getElementById('t-side-role');
+    if(av) av.innerText = (currentUser||'U').trim().slice(0,1).toUpperCase();
+    if(nm) nm.innerText = currentUser || 'Kullanıcı';
+    if(rl) rl.innerText = isAdminMode ? 'Admin' : 'Temsilci';
+
+    // Data teklifleri: önce e-tabladan çekmeyi dene, olmazsa fallback
+    if(telesalesOffers.length===0){
+        let loaded = [];
+        try{
+            loaded = await fetchSheetObjects("getTelesalesOffers");
+        }catch(e){
+            // sessiz fallback
+        }
+        telesalesOffers = (Array.isArray(loaded) && loaded.length)
+            ? loaded.map(o=>({
+                segment: o.segment || o.Segment || o.SEGMENT || '',
+                title: o.title || o.Başlık || o.Baslik || o.Teklif || o['Teklif Adı'] || o['Teklif Adi'] || '',
+                desc: o.desc || o.Açıklama || o.Aciklama || o.Detay || o['Detay/Not'] || o.Not || '',
+                example: o.example || o.Örnek || o.Ornek || '',
+                tips: o.tips || o.İpucu || o.Ipucu || '',
+                objection: o.objection || o.Itiraz || '',
+                reply: o.reply || o.Cevap || ''
+            }))
+            : (Array.isArray(window.telesalesOffersFromSheet) && window.telesalesOffersFromSheet.length
+                ? window.telesalesOffersFromSheet
+                : TELESales_OFFERS_FALLBACK);
+    }
+
+    hydrateTelesalesSegmentFilter();
+    renderTelesalesDataOffers();
+    renderTelesalesScripts();
+    renderTelesalesDocs();
+    switchTelesalesTab('data');
+}
+
+function closeFullTelesales(){
+    const wrap = document.getElementById('telesales-fullscreen');
+    if(wrap) wrap.style.display = 'none';
+}
+
+function switchTelesalesTab(tab){
+    document.querySelectorAll('#telesales-fullscreen .q-nav-item').forEach(i=>i.classList.remove('active'));
+    // Set active nav by onclick marker
+    document.querySelectorAll('#telesales-fullscreen .q-nav-item').forEach(i=>{
+        if((i.getAttribute('onclick')||'').includes(`"${tab}"`)) i.classList.add('active');
+    });
+
+    document.querySelectorAll('#telesales-fullscreen .q-view-section').forEach(s=>s.classList.remove('active'));
+    const el = document.getElementById(`t-view-${tab}`);
+    if(el) el.classList.add('active');
+}
+
+function hydrateTelesalesSegmentFilter(){
+    const sel = document.getElementById('t-data-seg');
+    if(!sel) return;
+    const segs = Array.from(new Set((telesalesOffers||[]).map(o=>o.segment).filter(Boolean))).sort();
+    sel.innerHTML = '<option value="all">Tüm Segmentler</option>' + segs.map(s=>`<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+}
+
+function renderTelesalesDataOffers(){
+    const grid = document.getElementById('t-data-grid');
+    if(!grid) return;
+
+    const seg = (document.getElementById('t-data-seg')?.value)||'all';
+    const q = (document.getElementById('t-data-search')?.value||'').toLowerCase();
+
+    const list = (telesalesOffers||[]).filter(o=>{
+        const okSeg = seg==='all' || (o.segment===seg);
+        const hay = `${o.title||''} ${o.desc||''}`.toLowerCase();
+        const okQ = !q || hay.includes(q);
+        return okSeg && okQ;
+    });
+
+    if(list.length===0){
+        grid.innerHTML = '<div style="opacity:.7;padding:20px">Sonuç bulunamadı.</div>';
+        return;
+    }
+
+    grid.innerHTML = list.map((o, idx)=>`
+        <div class="q-training-card" style="cursor:pointer" onclick="showTelesalesOfferDetail(${idx})">
+          <div class="t-training-head">
+            <div style="font-weight:900;color:#0e1b42">${escapeHtml(o.title||'')}</div>
+            <div class="t-training-badge">${escapeHtml(o.segment||'')}</div>
+          </div>
+          <div class="t-training-desc">${escapeHtml((o.desc||'').slice(0,140))}${(o.desc||'').length>140?'...':''}</div>
+          <div style="margin-top:10px;color:#999;font-size:.8rem">(Detay için tıkla)</div>
         </div>
-      `).join('');
-    }
-  }
-
-  // Favorites
-  const favBox = document.getElementById('home-fav-list');
-  if(favBox){
-    const favs = getFavorites ? getFavorites() : [];
-    const favItems = (contentData || []).filter(i => favs.includes(i.Title)).slice(0, 6);
-    if(favItems.length === 0){
-      favBox.innerHTML = 'Favori içeriklerin burada görünecek.';
-      favBox.classList.add('muted');
-    }else{
-      favBox.classList.remove('muted');
-      favBox.innerHTML = favItems.map(i => `
-        <div class="home-news-item" onclick="showDetails('${escapeForJsString(i.Title)}')">
-          <div class="t">${escapeHtml(i.Title)}</div>
-          <div class="s">${escapeHtml((i.Text||'').slice(0,110))}${(i.Text||'').length>110?'...':''}</div>
-        </div>
-      `).join('');
-    }
-  }
+    `).join('');
 }
 
-// override: category filter now also supports home (eski imza: filterCategory(btn, cat))
-const _origFilterCategory = window.filterCategory;
-window.filterCategory = function(a, b) {
-  // support both: (btn, cat) and (cat)
-  const btn = (typeof a === 'object' && a) ? a : null;
-  const cat = (typeof a === 'string') ? a : (typeof b === 'string' ? b : 'all');
+function showTelesalesOfferDetail(idx){
+    const o = (telesalesOffers||[])[idx];
+    if(!o) return;
+    Swal.fire({
+        title: `<i class="fas fa-database" style="color:#0e1b42"></i> ${escapeHtml(o.title||'')}`,
+        html: `<div style="text-align:left;line-height:1.6">
+                <div style="margin-bottom:10px"><b>Segment:</b> ${escapeHtml(o.segment||'-')}</div>
+                <div>${escapeHtml(o.desc||'Detay yok.').replace(/\n/g,'<br>')}</div>
+              </div>`,
+        showCloseButton:true,
+        showConfirmButton:false,
+        width:'720px',
+        background:'#f8f9fa'
+    });
+}
 
-  if(cat === 'home'){ openHome(); return; }
+function renderTelesalesScripts(){
+    const area = document.getElementById('t-scripts-grid');
+    if(!area) return;
 
-  // any fullscreen module open? close it
-  closeTechArea(true);
-  closeSalesArea(true);
-
-  const home = document.getElementById('home-screen');
-  if(home) home.style.display = 'none';
-  const grid = document.getElementById('cardGrid');
-  if(grid) grid.style.display = 'grid';
-
-  if(typeof _origFilterCategory === 'function') {
-    return _origFilterCategory(btn, cat);
-  }
-};
-
-// --------- TEKNİK FULLSCREEN ---------
-let currentTechTab = 'Yayın';
-
-window.openTechArea = function(){
-  const wrap = document.getElementById('tech-fullscreen');
-  if(!wrap) { if(typeof openTechWizard === 'function') openTechWizard(); return; }
-  wrap.style.display = 'flex';
-  // sidebar user
-  const av = document.getElementById('t-side-avatar');
-  const nm = document.getElementById('t-side-name');
-  const rl = document.getElementById('t-side-role');
-  if(av) av.innerText = (currentUser || 'U').slice(0,1).toUpperCase();
-  if(nm) nm.innerText = currentUser || 'Kullanıcı';
-  if(rl) rl.innerText = isAdminMode ? 'Admin' : 'Temsilci';
-
-  // embed wizard content once
-  const embed = document.getElementById('tech-wizard-embed');
-  const src = document.getElementById('tech-wizard-modal-content') || document.getElementById('tech-wizard-content');
-  if(embed && src && embed.innerHTML.trim()===''){
-    embed.innerHTML = src.innerHTML;
-  }
-
-  switchTechTab(currentTechTab);
-};
-
-window.closeTechArea = function(silent=false){
-  const wrap = document.getElementById('tech-fullscreen');
-  if(wrap) wrap.style.display = 'none';
-  if(!silent){
-    // return to home by default
-    openHome();
-  }
-};
-
-window.switchTechTab = function(tab){
-  currentTechTab = tab;
-
-  document.querySelectorAll('#tech-fullscreen .q-nav-item').forEach(li => li.classList.remove('active'));
-  const li = Array.from(document.querySelectorAll('#tech-fullscreen .q-nav-item')).find(x => (x.getAttribute('onclick')||'').includes(`'${tab}'`));
-  if(li) li.classList.add('active');
-
-  const title = document.getElementById('tech-view-title');
-  if(title) title.innerText = tab === 'Kartlar' ? 'Teknik Kartlar' : (tab === 'Sihirbaz' ? 'Teknik Sihirbaz' : tab + ' Sorunları');
-
-  const docs = document.getElementById('tech-view-docs');
-  const cards = document.getElementById('tech-view-cards');
-  const wiz = document.getElementById('tech-view-wizard');
-  if(docs) docs.style.display = (tab === 'Kartlar' || tab === 'Sihirbaz') ? 'none' : 'block';
-  if(cards) cards.style.display = (tab === 'Kartlar') ? 'block' : 'none';
-  if(wiz) wiz.style.display = (tab === 'Sihirbaz') ? 'block' : 'none';
-
-  renderTechCurrent();
-};
-
-window.renderTechCurrent = function(){
-  const q = (document.getElementById('tech-search')?.value || '').toLowerCase().trim();
-
-  if(currentTechTab === 'Kartlar'){
-    const techGrid = document.getElementById('tech-cards-grid');
-    if(techGrid){
-      // mevcut kartları kullan
-      const items = (contentData || []).filter(i => (i.Category||'') === 'Teknik');
-      const filtered = q ? items.filter(i => (i.Title||'').toLowerCase().includes(q) || (i.Text||'').toLowerCase().includes(q)) : items;
-      techGrid.innerHTML = filtered.map(i => buildCardHtml(i)).join('');
-      bindCardEventsWithin(techGrid);
+    const list = (salesScripts||[]);
+    if(list.length===0){
+        area.innerHTML = '<div style="padding:16px;opacity:.7">Script bulunamadı.</div>';
+        return;
     }
-    return;
-  }
 
-  if(currentTechTab === 'Sihirbaz'){
-    // wizard already embedded; no-op
-    return;
-  }
-
-  const docsBox = document.getElementById('tech-view-docs');
-  if(!docsBox) return;
-
-  const tabMap = { 'Yayın':'Yayın', 'Erişim':'Erişim', 'App':'App', 'Aktivasyon':'Aktivasyon' };
-  const cat = tabMap[currentTechTab] || currentTechTab;
-
-  const docs = (contentData || []).filter(i => (i.Type||'').toLowerCase() === 'teknik' || (i.Type||'').toLowerCase() === 'tech');
-  let items = docs.filter(i => (i.Category||'') === cat);
-  // App Hataları için esnek: kategori App yoksa "Bilgi" içinde "App" geçenleri de yakala
-  if(currentTechTab === 'App' && items.length === 0){
-    items = docs.filter(i => ((i.Title||'')+(i.Text||'')).toLowerCase().includes('app'));
-  }
-  if(q) items = items.filter(i => (i.Title||'').toLowerCase().includes(q) || (i.Text||'').toLowerCase().includes(q));
-
-  if(items.length === 0){
-    docsBox.innerHTML = '<div class="home-list muted" style="padding:10px 6px">Bu başlık altında içerik bulunamadı.</div>';
-    return;
-  }
-
-  docsBox.innerHTML = items.map(i => `
-    <div class="tech-doc-item">
-      <div class="h">
-        <div class="ttl">${escapeHtml(i.Title||'')}</div>
-        <div class="cat">${escapeHtml(i.Category||'')}</div>
+    area.innerHTML = list.map((s, i)=>`
+      <div class="news-item" style="border-left-color:#10b981;cursor:pointer" onclick="copyText('${escapeForJsString(s.text||'')}')">
+        <span class="news-title">${escapeHtml(s.title||'Script')}</span>
+        <div class="news-desc" style="white-space:pre-line">${escapeHtml(s.text||'')}</div>
+        <div class="news-tag" style="background:rgba(16,185,129,.12);color:#0b6b4f;border:1px solid rgba(16,185,129,.25)">Tıkla & Kopyala</div>
       </div>
-      <div class="body">${escapeHtml((i.Text||'')).replace(/\n/g,'<br>')}</div>
-      <div class="meta">
-        <button class="btn btn-copy" onclick="copyText('${escapeForJsString(i.Text||'')}')"><i class="fas fa-copy"></i> Kopyala</button>
-        ${i.Link ? `<a class="btn btn-link" href="${escapeHtml(i.Link)}" target="_blank"><i class="fas fa-link"></i> Link</a>` : ``}
-      </div>
-    </div>
-  `).join('');
-};
+    `).join('');
+}
 
-// --------- TELESATIŞ FULLSCREEN ---------
-let currentSalesTab = 'offers';
-
-window.openSalesArea = function(){
-  const wrap = document.getElementById('sales-fullscreen');
-  if(!wrap) { if(typeof openSales === 'function') openSales(); return; }
-  wrap.style.display = 'flex';
-  const av = document.getElementById('s-side-avatar');
-  const nm = document.getElementById('s-side-name');
-  const rl = document.getElementById('s-side-role');
-  if(av) av.innerText = (currentUser || 'U').slice(0,1).toUpperCase();
-  if(nm) nm.innerText = currentUser || 'Kullanıcı';
-  if(rl) rl.innerText = isAdminMode ? 'Admin' : 'Temsilci';
-  switchSalesTab(currentSalesTab);
-};
-
-window.closeSalesArea = function(silent=false){
-  const wrap = document.getElementById('sales-fullscreen');
-  if(wrap) wrap.style.display = 'none';
-  if(!silent) openHome();
-};
-
-window.switchSalesTab = function(tab){
-  currentSalesTab = tab;
-  document.querySelectorAll('#sales-fullscreen .q-nav-item').forEach(li => li.classList.remove('active'));
-  const li = Array.from(document.querySelectorAll('#sales-fullscreen .q-nav-item')).find(x => (x.getAttribute('onclick')||'').includes(`'${tab}'`));
-  if(li) li.classList.add('active');
-
-  const title = document.getElementById('sales-view-title');
-  if(title) title.innerText = (tab === 'scripts') ? 'Scriptler' : 'Data Teklifleri';
-
-  const offersV = document.getElementById('sales-view-offers');
-  const scriptsV = document.getElementById('sales-view-scripts');
-  if(offersV) offersV.style.display = (tab === 'offers') ? 'block' : 'none';
-  if(scriptsV) scriptsV.style.display = (tab === 'scripts') ? 'block' : 'none';
-
-  renderSalesCurrent();
-};
-
-window.renderSalesCurrent = function(){
-  const q = (document.getElementById('sales-search')?.value || '').toLowerCase().trim();
-
-  if(currentSalesTab === 'scripts'){
-    // mevcut openSales renderını kullanalım ama fullscreen içine
-    const c = document.getElementById('sales-grid');
-    if(c){
-      c.innerHTML = '';
-      (salesScripts || []).forEach((s, index) => {
-        const txt = (s.text || '').replace(/\n/g,'<br>');
-        c.innerHTML += `
-          <div class="sales-item" id="sales-${index}">
-            <div class="sales-header" onclick="toggleSales(${index})">
-              <div><b>${escapeHtml(s.title||'')}</b></div>
-              <i id="icon-${index}" class="fas fa-chevron-down"></i>
-            </div>
-            <div class="sales-body">
-              <div class="sales-text">${escapeHtml(s.text||'').replace(/\n/g,'<br>')}</div>
-              <div style="text-align:right; margin-top:10px">
-                <button class="btn btn-copy" onclick="copyText('${escapeForJsString(s.text||'')}')"><i class="fas fa-copy"></i> Kopyala</button>
-              </div>
-            </div>
-          </div>`;
-      });
+function renderTelesalesDocs(){
+    const box = document.getElementById('t-docs');
+    if(!box) return;
+    const docs = (trainingData||[]).filter(t=>(t.target||'')==='Telesatış' || (t.title||'').toLowerCase().includes('telesatış'));
+    if(docs.length===0){
+        box.innerHTML = '<div style="opacity:.7;padding:10px">Bu ekibe atanmış döküman/eğitim görünmüyor.</div>';
+        return;
     }
-    return;
+    box.innerHTML = docs.map(d=>`
+      <div class="news-item" style="border-left-color:var(--secondary)">
+        <span class="news-date">${escapeHtml((d.startDate||'') + (d.endDate?(' → '+d.endDate):''))}</span>
+        <span class="news-title">${escapeHtml(d.title||'')}</span>
+        <div class="news-desc">${escapeHtml(d.desc||'')}</div>
+        ${d.link && d.link!=='N/A' ? `<a class="btn btn-link" href="${escapeHtml(d.link)}" target="_blank">Link</a>`:''}
+        ${d.docLink && d.docLink!=='N/A' ? `<a class="btn btn-link" href="${escapeHtml(d.docLink)}" target="_blank">Döküman</a>`:''}
+      </div>
+    `).join('');
+}
+
+/* -------------------------
+   TEKNİK FULLSCREEN
+--------------------------*/
+function openTechArea(tab){
+    const wrap = document.getElementById('tech-fullscreen');
+    if(!wrap) return;
+    wrap.style.display = 'flex';
+
+    // Sidebar profil
+    const av = document.getElementById('x-side-avatar');
+    const nm = document.getElementById('x-side-name');
+    const rl = document.getElementById('x-side-role');
+    if(av) av.innerText = (currentUser||'U').trim().slice(0,1).toUpperCase();
+    if(nm) nm.innerText = currentUser || 'Kullanıcı';
+    if(rl) rl.innerText = isAdminMode ? 'Admin' : 'Temsilci';
+
+    renderTechSections();
+    switchTechTab(tab || 'broadcast');
+}
+
+function closeFullTech(){
+    const wrap = document.getElementById('tech-fullscreen');
+    if(wrap) wrap.style.display = 'none';
+}
+
+function switchTechTab(tab){
+    document.querySelectorAll('#tech-fullscreen .q-nav-item').forEach(i=>i.classList.remove('active'));
+    document.querySelectorAll('#tech-fullscreen .q-nav-item').forEach(i=>{
+        if((i.getAttribute('onclick')||'').includes(`"${tab}"`)) i.classList.add('active');
+    });
+
+    document.querySelectorAll('#tech-fullscreen .q-view-section').forEach(s=>s.classList.remove('active'));
+    const el = document.getElementById(`x-view-${tab}`);
+    if(el) el.classList.add('active');
+}
+
+const TECH_DOC_CONTENT = {"broadcast": [{"title": "Smart TV – Canlı Yayında Donma Problemi Yaşıyorum", "body": "Müşterinin sorun yaşadığı yayın ya da yayınlarda genel bir sorun var mı kontrol edilir? Genel bir sorun var ise teknik ekibin incelediği yönünde bilgi verilir.\nMüşterinin kullandığı cihaz TVmanager ‘da loglardan kontrol edilir. Arçelik/Beko/Grundig/Altus marka Android TV olmayan Smart TV’lerden ise genel sorun hakkında bilgi verilir.\nYukarıdaki durumlar dışında yaşanan bir sorun ise TV ve modemin elektrik bağlantısını kesilip tekrar verilmesi istenir. « Yaşadığınız sorunu kontrol ederken TV ve modeminizin elektrik bağlantısını kesip 10 sn sonra yeniden açabilir misiniz? Ardından yeniden yayını açıp kontrol edebilir misiniz? (Ayrıca öneri olarak modemi kapatıp tekrar açtıktan sonra, sadece izleme yaptığı cihaz modeme bağlı olursa daha iyi bir bağlantı olacağı bilgisi verilebilir)\nSorun devam eder ise Smart TV tarayıcısından https://www.hiztesti.com.tr/ bir hız testi yapması sonucu bizimle paylaşması istenir.\nHız testi sonucu 8 Mbps altında ise internet bağlantı hızının düşük olduğunu internet servis sağlayıcısı iletişime geçmesi istenir.\n8 Mbps üzerinde ise müşteriden sorunu gösteren kısa bir video talep edilir.\nVideo kaydı ve hız testinin sonuçları gösteren bilgiler alındıktan sonra müşteriye incelenmesi için teknik ekibimize iletildiği inceleme tamamlandığında eposta ile bilgi verileceği yönünde bilgi verilir.\nSorun aynı gün içinde benzer cihazlarda farklı müşterilerde yaşıyor ise tüm bilgilerle Erlab’a arıza kaydı açılır. Sorun birkaç müşteri ile sınırlı ise 17:00 – 01:00 vardiyasındaki ekip arkadaşında sistemsel bir sorun olmadığına dair eposta gönderilmesi için bilgileri paylaşılır."}, {"title": "Mobil Uygulama – Canlı Yayında Donma Sorunu Yaşıyorum", "body": "Müşterinin sorun yaşadığı yayın ya da yayınlarda genel bir sorun var mı kontrol edilir? Genel bir sorun var ise teknik ekibin incelediği yönünde bilgi verilir.(Müşteri İOS veya Android işletim sistemli hangi cihazdan izliyorsa, mümkünse aynı işletim sistemli mobil cihazdan kontrol edilebilir, gerekirse ekip arkadaşlarından kontrol etmeleri istenebilir)\nGenel bir sorun yok ise, www.hiztesti.com.tr link üzerinden hız testi yapması sonucu bizimle paylaşması istenir.\nHız testi sonucu 8 mbps altında ise internet bağlantı hızının düşük olduğu internet servisi sağlayıcısı ile iletişime geçmesi istenir. (Öneri olarak modemi kapatıp tekrar açtıktan sonra sadece izleme yaptığı cihaz modeme bağlı olursa daha iyi bir bağlantı olacağı bilgisi verilebilir)\n8 mbps üzerinde ise, uygulama verilerin temizlenmesi veya uygulamanın silip tekrar yüklenmesi istenilir, sorun devam etmesi durumunda sorunu gösteren video kaydı istenir.\n 4. Hız testi, cihaz marka model ve sürüm bilgileri alındıktan sonra, incelenmesi için teknik ekibe iletildiği, inceleme tamamlandığında e-posta  ile bilgi verileceği yönünde bilgi verilir.\n 5. Sorun aynı gün içerinde benzer cihazlarda farklı müşterilerde yaşıyor ise tüm bilgilerle Erlab’a arıza kaydı açılır. Sorun birkaç müşteri ile sınırlı  ise 17:00 – 01:00 vardiyasındaki ekip arkadaşında sistemsel bir sorun olmadığına dair eposta gönderilmesi için bilgileri paylaşılır."}, {"title": "Bilgisayar – Canlı Yayında Donma Sorunu Yaşıyorum", "body": "Müşterinin sorun yaşadığı yayın ya da yayınlarda genel bir sorun var mı kontrol edilir? Genel bir sorun var ise teknik ekibin incelediği yönünde bilgi verilir.\nGenel bir sorun değilse, öncelikle https://www.hiztesti.com.tr/ bir hız testi yapması sonucu bizimle paylaşması istenir.\nHız testi sonucu 8 mbps altında ise internet bağlantı hızının düşük olduğunu internet servis sağlayıcısı iletişime geçmesi istenir.\n8 mbps üzerinde ise müşteriden aşağıdaki adımları uygulaması istenir.\n3. Bilgisayarın işletim sitemi öğrenilip, görüşme üzerinden ‘’pingWindows7’’ veya ‘’pingwindows10’’ kısayollarından müşteri sunucuları kontrol edilir.\n(Windows 10 üzeri işletim sistemi cihazlara pingwindows10 kısayolu gönderilebilir.)\n4. Sunucu kontrol ekranında kontrol edilmesi gereken, ok ile gösterilen yerden, sunucu ile kayıp olup olmadığı ve kırmızı alan içerisinde sunucu ile web sitemize kaç saniyede işlem sağladığı kontrol edilir.\n5. 1 – 35 arası normal sayılabilir, bu saniye aralığında sorun yaşanıyorsa, web sitemize daha hızlı tepsi süresi veren ve genellikle sorunsuz bir şekilde izleme sağlanabilen 193.192.103.249, 185.11.14.27 veya 195.175.178.8 sunucuları kontrol edilmelidir.\n6. Uygun sunucuyu tespit ettikten sonra canlı destek ekranında ‘’Host’’ ‘’host2’’ kısa yolları kullanarak, kısa yoldaki adımlar ile müşterinin sadece bizim sitemize bağlandığı sunucusunu, en uygun sunucu ile değiştirip tarayıcı açıp kapattırdıktan sonra tekrar yayını kontrol etmesini iletebiliriz. (Ayrıca müşteri yayınları auto değil, manuel olarak 720 veya 1080p seçip kontrol edilmesi önerilir)\n7. Sorun aynı gün içerinde benzer işletim sistemi veya sunucuda farklı müşterilerde yaşıyor ise tüm bilgilerle Erlab’a arıza kaydı açılır. Sorun birkaç müşteri ile sınırlı ise 17:00 – 01:00 vardiyasındaki ekip arkadaşında sistemsel bir sorun olmadığına dair eposta gönderilmesi için bilgileri paylaşılır"}, {"title": "YAYIN SORUNLARI", "body": "35 sn arası normal sayılabilir, bu saniye aralığında sorun yaşanıyorsa, web sitemize daha hızlı tepsi süresi veren ve genellikle sorunsuz bir şekilde izleme sağlanabilen 193.192.103.249, 185.11.14.27 veya 195.175.178.8 sunucuları kontrol edilmelidir."}, {"title": "MacOS – Canlı Yayında Donma Sorunu Yaşıyorum", "body": "Müşterinin sorun yaşadığı yayın ya da yayınlarda genel bir sorun var mı kontrol edilir? Genel bir sorun var ise teknik ekibin incelediği yönünde bilgi verilir.\nGenel bir sorun değilse, öncelikle https://www.hiztesti.com.tr/ bir hız testi yapması sonucu bizimle paylaşması istenir.\nHız testi sonucu 8 mbps altında ise internet bağlantı hızının düşük olduğunu internet servis sağlayıcısı iletişime geçmesi istenir.\n8 mbps üzerinde ise müşteriden aşağıdaki adımları uygulaması istenir.\nMindbehind üzerinden ‘’pingmacOS’’ kısayolundan müşteri sunucuları kontrol edilir.\nSunucu kontrol ekranında kontrol edilmesi gereken, ‘’packet loss’’ kısmında kayıp olup olmadığı,  alan içerisinde sunucu ile web sitemize kaç saniyede işlem sağladığı kontrol edilir.\n1 – 35 arası normal sayılabilir, bu saniye aralığında sorun yaşanıyorsa, web sitemize daha hızlı tepsi süresi veren ve genellikle sorunsuz bir şekilde izleme sağlanabilen 193.192.103.249, 185.11.14.27 veya 195.175.178.8 sunucuları kontrol edilmelidir.\nUygun sunucuyu tespit ettikten sonra canlı destek ekranında ‘’macOShost’’ kısa yolunu kullanarak, kısa yoldaki adımlar ile müşterinin sadece bizim sitemize bağlandığı sunucuyu, en uygun sunucu ile değiştirip tarayıcı açıp kapattırdıktan sonra tekrar yayını kontrol etmesini iletebiliriz. (Ayrıca müşteri yayınları auto değil, manuel olarak 720 veya 1080p seçip kontrol edilmesi önerilir)\nSorun aynı gün içerinde benzer işletim sistemi veya sunucuda farklı müşterilerde yaşıyor ise tüm bilgilerle Erlab’a arıza kaydı açılır. Sorun birkaç müşteri ile sınırlı ise 17:00 – 01:00 vardiyasındaki ekip arkadaşında sistemsel bir sorun olmadığına dair eposta gönderilmesi için bilgileri paylaşılır."}, {"title": "‘’Yayında beklenmedik bir kesinti oluştu’’ Uyarısı", "body": "Bu uyarı genel bir yayın sorunu olduğunda ya da kullanıcı Türkiye sınırları dışında bir yerden erişim sağladığında karşımıza çıkmaktadır.\nKullanıcının sorun yaşadığı yayın kontrol edilir ve genel bir yayın sorunu olup olmadığı teyit edilir.\nTvmanager’da SubscriberLog ekranından ip adresi alınır ve yurtdışı bir konum olup olmadığı teyit edilir.\nKullanıcı yurtdışında ise erişim sağlayamayacağı bilgisi verilir, VPN kullanıyor ise kapatması istenir.\nTVmanager Devices kısmında oturumlar sonlandırılır ve kullanıcıdan tekrar giriş yaparak kontrol etmesi rica edilir.\nMobil veri veya farklı bir ağda bu hata mesajının alınıp alınmadığı teyit edilir.\nCihaz ve modem kapama ve açma işlemi uygulanır.\nSorun devam eder ise inceleme için cihaz ve diğer bilgilerle teknik ekibimize bilgi verileceği iletilir. Excel de kullanıcıdan alınan bilgiler not edilir."}], "access": [{"title": "ERİŞİM SORUNLARI", "body": "‘’Lisans hakları sebebiyle Türkiye sınırları dışında hizmet verilememektedir.’’ Uyarısı\nAlınan hata müşterinin yurt dışında olması ve yurt içinde ise VPN ya da benzeri bir uygulamanın cihazında aktif olmasından kaynaklanmaktadır.\n\nMüşteriye yurt dışında olup olmadığı sorulur, yurt dışında ise ‘’lisans hakları sebebiyle yayınların yurt dışından izlenemediği’’ yönünde bilgi verilir.\nYurt içinde ise VPN ya da benzeri bir uygulamanın cihazında aktif olup ya da olmadığı sorulur. Aktif ise devre dışı bırakılıp tekrar denemesi önerilir.\nVPN ya da benzeri bir uygulama kullanmıyor ise müşterinin ip adresi öğrenilir ve https://tr.wizcase.com/tools/whats-my-ip/ ip adresi kontrol edilir.  Aynı zamanda adresin vpn üzerinden alınıp alınmadığının kontrolü için https://vpnapi.io adresine girilip kontrol edilir.\nIp adresi yurt dışı ya da ISP bilgisi bilinen bir servis sağlayıcısı değilse müşteriye bulunduğu lokasyonun otel, yurt vb. bir yer olup olmadığı ya da cihazının şirket cihazı olup olmadığı sorulur."}, {"title": "‘’IP Karantina’’ Uyarısı", "body": "İp Karantina sorunu genel bir sorun yok ise, eposta veya şifre bir çok defa hatalı girilmesinden dolayı alınır.\nKullanıcının ip adresi karantina da olup ya da olmadığı, TVmanager – CMS – Admission Gate menüsü üzerinden kontrol edilerek çıkarılabilir. İkinci bir seçenek olarak modem kapama ve açma işlemi yaptırılabilir."}], "app": [{"title": "Teknik Sorun Analizi Nasıl Yapılır?", "body": "App Kaynaklı Nedenler\nCihaz Kaynaklı Nedenler\nApp hataları başlığında uygulamanın açılmaması ya da kendi kendine kapanması şeklinde teknik sorunlar ile karşılaşabiliriz. Bu tip sorunlar, kullanıcı deneyimini doğrudan etkileyerek uygulamaya erişilememesine neden olur.\nUygulamanın eski sürümü\nÖnbellek sorunları\nUyumsuz cihazlar\nDolu RAM/Arka planda çalışan fazla uygulama\nCihazın güncel olmaması (Eski sistemi sürümleri)\nKullanıcıya Sorulabilecek Sorular:\nUygulama açılıyor mu, yoksa açılmadan kapanıyor mu?\nUygulama sürümü, cihaz işletim sistemi sürümü nedir? (TVmanager kontrolü)\nCihazda yeterli depolama alanı var mı?"}], "activation": [{"title": "‘’Promosyon Kodu Bulunamadı’’ Uyarısı", "body": "Görselde ki örnekte doğrusu ‘’YILLIKLOCA’’ olan kampanya kodu, küçük harf ile yazıldığında ‘’Promosyon Kodu Bulunamadı’’ hatası alınmıştır. Bu hata ile karşılaşıldığında kampanya kodunun yanlış, eksik, küçük harf ya da boşluk bırakılarak yazıldığını tespitle, kullanıcıyı bu doğrultuda doğru yazım için yönlendirmemiz gerekir."}, {"title": "‘’Kampanya Kodu Aktif Edilemedi’’ Uyarısı", "body": "Görseldeki örnekteki gibi eski bir promosyon kodu yazıldığında ‘’Kampanya Kodu Aktif Edilemedi’’ uyarısı alınır."}, {"title": "‘’Geçersiz Kampanya Kodu’’ Uyarısı", "body": "Görseldeki örnekteki gibi daha önce kullanılmış bir promosyon kodu yazıldığında ‘’Geçersiz Kampanya Kodu’’ hatası alınır.\nPromosyon kodunun hangi hesapta kullanıldığını aşağıdaki görseldeki gibi Campaign alanında arama yaparak görüntüleyebiliriz."}, {"title": "Playstore Uygulama Aktivasyon Sorunu", "body": "Bazı durumlarda, kullanıcılar Google Play Store üzerinden S Sport Plus uygulamasında abonelik satın aldıklarında veya yenileme gerçekleştiğinde, üyelikleri otomatik olarak aktifleşmeyebiliyor.  Bu durumda, kullanıcının uygulama üzerinden manuel olarak paket aktivasyonu yapması gerekmektedir.\n\nAktivasyon işleminin başarılı olabilmesi için:\n Google Play Store üzerinden satın alma işlemi yapılırken kullanılan Gmail hesabı, aktivasyon anında cihazda açık olmalıdır.\n Aktivasyon işlemi uygulama içerisinden yapılmalıdır.\nDestek ekibi tarafından Mindbehind üzerinden “paketgoogle” kısayolu kullanılarak yönlendirme sağlanabilir.  Kullanıcı başarılı bir şekilde paket aktivasyonu yaptıktan sonra, paket ataması sistemde gerçekleşir ve log kayıtlarında ilgili işlem aşağıdaki gibi görünür (ekli görsellerdeki gibi).  Bu işlem, paketin doğru şekilde tanımlanması için önemlidir."}, {"title": "App Store Uygulama Aktivasyon Sorunu", "body": "Müşteriler App Store üzerinden uygulamamızdan abonelik satın aldığı veya yenileme olduğu zaman bazen üyelik aktif olmuyor.\nÜyelikleri aktif olabilmeleri için, uygulama üzerinden paket aktivasyon yapmaları gerekiyor. Paket aktivasyon yaparken, satın alma yaparken hangi Apple kimliği hesabı açık ise, o hesap açıkken aktivasyon denemesi gerekiyor.\nMindbehind üzerinden ‘’paketapple’’ kısayolu kullanılır.\nMüşteri paket aktivasyonu yaptıktan sonra üyelik ataması ve loglarda nasıl gözüktüğü görsellerdeki gibidir.\nPaket aktivasyon butonu örnek görüntüsü yandaki gibidir."}, {"title": "AKTİVASYON SORUNLARI", "body": "İOS Uygulama Paket Aktivasyon ‘’Abonelik Başkasına Aittir’’ Sorunu\n\nİos uygulamamızda müşteri paket aktivasyon işlemi yaptığında ‘’Abonelik Başkasına Aittir’’ hatası geliyor ise, cihazda açık olan Apple kimliği ile satın alınmış, ancak aktivasyon yaptığı eposta adresi farklı bir eposta adresidir.\n\nFarklı eposta adresi ile paket aktivasyon yaptığında ‘’Subscriberlog’’ kısmında örnek ekran görüntüsünde kırmızı alana alınan ‘’packageValidation’’  kısmı çıkar, ok ile gösterilen ID kısmından doğru üyeliği ID araması ile bulabiliriz."}, {"title": "AKTİVASYON SORUNLARI", "body": "Android ‘’Paket Başka Bir Kullanıcıya Ait Olduğu İçin Paket Atama İşlemi Başarısız Oldu’’ Sorunu\n\nAndroid uygulamamızda müşteri paket aktivasyon işlemi yaptığında ‘’Paket Başka Bir Kullanıcıya Ait Olduğu İçin Paket Atama İşlemi Başarısız Oldu’’ hatası geliyor ise, cihazda açık olan Play Store gmail hesabı ile satın alınmış, ancak aktivasyon yaptığı eposta adresi farklı bir eposta adresidir.\n\nFarklı eposta adresi ile paket aktivasyon yaptığında ‘’Subscriberlog’’ kısmında örnek ekran görüntüsünde kırmızı alana alınan ‘’Validate Google Package’’  kısmı çıkar, ok ile gösterilen ID kısmından doğru üyeliği ID araması ile bulabiliriz."}, {"title": "AKTİVASYON SORUNLARI", "body": "Android Uygulama Paket Aktivasyon İşlem Tamamlanamadı veya Üyelik Bulunamama Sorunu\nAndroid uygulamamızda müşteri ödeme yapmış olmasına rağmen paket aktivasyonu yaptığında ‘’İşlem tamamlandı, İşlem Tamamlanamadı veya Abone bulunamadı’’ hatası geliyor ve üyelik aktif olmuyor ise, müşteriden GPA kodunu paylaşılması istenir.\nGPA kodu, Google tarafından ödeme yapıldığına dair müşteriye gönderilen ödeme faturası (makbuz) içerisinde yer almaktadır.\nBu GPA kodu ile üyeliği Tvmanager üzerinden aşağıdaki görseldeki gibi Reporting > General > Payments kısmında tarihi aralığı ayarlanıp ‘’Transaction Identifer’’ kısmından arama yapılıp, üyelik ID’sine ‘’Subscriber ID’’ üzerinden ulaşılabilir."}, {"title": "AKTİVASYON SORUNLARI", "body": "Türksat Abone Bulunamadı veya Abone Active Değil Sorunu\nBu hata, Hizmet ID veya Geçici Kod hatalı yazılmasından dolayı alınır.  Müşteriler genellikle bazı büyük küçük harfleri karıştırabiliyor veya sistemden dolayı bazen bu sorun alınabiliyor.\nÇözüm olarak harf hatası olmaması için Tvmanager>Reporting>General>Thirtdparty Provisions kısmından tarih aralığı belirleyip, Hizmet ID numarasını ‘’Extrenal ID’’ kısmından aratıp, kullanıcı Türksat bilgilerini bulup ‘’UniqueID’’ kısmından geçici kodu bulup, kullanıcıya paylaştığımızda, ID ve Geçici kodu kopyala yapıştırır şeklinde ilerlemesini iletebiliriz.\nAynı sorun devam eder ise, kullanıcıdan onay alıp, ID ve geçici kod ile kullanıcının üyeliğini kendimiz yapabiliriz. Müşterinin üyeliğini biz tarafından yapıldı ise, müşteriye şifresini nasıl güncelleyebileceği ile ilgili bilgi verilir."}]};
+
+function renderTechSections(){
+    // Teknik kartları çek
+    const techCards = (cardsData||[]).filter(c=>String(c.category||'').toLowerCase()==='teknik');
+
+    // Heuristik sınıflandırma
+    const buckets = {broadcast:[], access:[], app:[], activation:[]};
+    techCards.forEach(c=>{
+        const hay = `${c.title||''} ${c.text||''} ${c.script||''}`.toLowerCase();
+        if(hay.includes('yayın') || hay.includes('don') || hay.includes('buffer') || hay.includes('akış') || hay.includes('tv')){
+            buckets.broadcast.push(c);
+        }else if(hay.includes('erişim') || hay.includes('vpn') || hay.includes('login') || hay.includes('giriş') || hay.includes('yurtdışı')){
+            buckets.access.push(c);
+        }else if(hay.includes('app') || hay.includes('uygulama') || hay.includes('hata') || hay.includes('crash') || hay.includes('versiyon')){
+            buckets.app.push(c);
+        }else if(hay.includes('aktivasyon') || hay.includes('satın') || hay.includes('ödeme') || hay.includes('abonelik') || hay.includes('apple') || hay.includes('google play')){
+            buckets.activation.push(c);
+        }else{
+            // bilinmeyen: yayın altına
+            buckets.broadcast.push(c);
+        }
+    });
+
+    renderTechList('x-broadcast-list', buckets.broadcast);
+    renderTechList('x-access-list', buckets.access);
+    renderTechList('x-app-list', buckets.app);
+    renderTechList('x-activation-list', buckets.activation);
+    try{ renderTechDocs(); }catch(e){ console.error(e); }
+
+    // Sihirbazı içeride render et
+    try{ renderTechWizardInto('x-wizard'); }catch(e){ console.error(e); }
+
+    // Teknik kartlar sekmesi: tüm teknik kartlar
+    renderTechList('x-cards', techCards, true);
+}
+
+function renderTechList(targetId, list, showCategory=false){
+    const el = document.getElementById(targetId);
+    if(!el) return;
+    if(!list || list.length===0){
+        el.innerHTML = '<div style="padding:16px;opacity:.7">Bu başlık altında içerik yok.</div>';
+        return;
+    }
+    el.innerHTML = list.map((c)=>`
+      <div class="news-item" style="cursor:pointer" onclick="showCardDetail(${JSON.stringify(c).replace(/</g,'\u003c')})">
+        <span class="news-title">${escapeHtml(c.title||'')}</span>
+        ${showCategory ? `<span class="news-tag" style="background:#eef2ff;color:#2b3a8a;border:1px solid #dde3ff">${escapeHtml(c.category||'')}</span>`:''}
+        <div class="news-desc" style="white-space:pre-line">${escapeHtml(c.text||'')}</div>
+        ${c.script ? `<div class="script-box" style="margin-top:10px"><b>Script:</b><div style="margin-top:6px;white-space:pre-line">${escapeHtml(c.script||'')}</div><div style="text-align:right;margin-top:10px"><button class="btn btn-copy" onclick="event.stopPropagation(); copyText('${escapeForJsString(c.script||'')}')">Kopyala</button></div></div>`:''}
+      </div>
+    `).join('');
+}
+
+function renderTechDocs(){
+    const map = {
+        broadcast: 'x-broadcast-docs',
+        access: 'x-access-docs',
+        app: 'x-app-docs',
+        activation: 'x-activation-docs'
+    };
+
+    Object.keys(map).forEach(key=>{
+        const el = document.getElementById(map[key]);
+        if(!el) return;
+
+        try{
+            const items = (TECH_DOC_CONTENT && TECH_DOC_CONTENT[key]) ? TECH_DOC_CONTENT[key] : [];
+            if(!Array.isArray(items) || items.length===0){
+                el.innerHTML = '<div style="padding:12px 2px;opacity:.7">Bu başlık altında teknik döküman bulunamadı.</div>';
+                return;
+            }
+
+            el.innerHTML = items.map((it,idx)=>`
+                <div class="doc-card">
+                  <button type="button" class="doc-head" onclick="toggleDocAccordion(this)">
+                    <span class="doc-title">${escapeHtml(it.title||('İçerik ' + (idx+1)))}</span>
+                    <i class="fas fa-chevron-down"></i>
+                  </button>
+                  <div class="doc-body" style="display:none; white-space:pre-line">${escapeHtml(it.body||'')}</div>
+                </div>
+            `).join('');
+        }catch(err){
+            console.error('renderTechDocs error', err);
+            el.innerHTML = '<div style="padding:12px 2px;opacity:.7">Dökümanlar yüklenemedi. (Konsolu kontrol edin)</div>';
+        }
+    });
+}
+
+function toggleDocAccordion(btn){
+    try{
+        const card = btn.closest('.doc-card');
+        if(!card) return;
+        const body = card.querySelector('.doc-body');
+        if(!body) return;
+        const isOpen = body.style.display !== 'none';
+        body.style.display = isOpen ? 'none' : 'block';
+        card.classList.toggle('open', !isOpen);
+    }catch(e){}
+}
+
+
+function renderTechWizardInto(targetId){
+    const box = document.getElementById(targetId);
+    if(!box) return;
+
+    // Mevcut openTechWizard içeriğini burada üret
+    if(!Array.isArray(techWizardSteps) || techWizardSteps.length===0){
+        box.innerHTML = '<div style="padding:16px;opacity:.7">Sihirbaz içeriği bulunamadı.</div>';
+        return;
+    }
+
+    // Basit bir liste: adım kartları
+    box.innerHTML = `
+      <div style="padding:12px">
+        <div class="tech-alert"><b>İpucu:</b> Soruna en yakın başlığa tıkla. Adım adım yönergeler açılacak.</div>
+        ${techWizardSteps.map((s, idx)=>`
+          <div class="news-item" style="cursor:pointer" onclick="showTechWizardStep(${idx})">
+            <span class="news-title">${escapeHtml(s.title||('Adım '+(idx+1)))}</span>
+            <div class="news-desc">${escapeHtml((s.desc||'').slice(0,160))}${(s.desc||'').length>160?'...':''}</div>
+            <div class="news-tag" style="background:rgba(14,27,66,.08);color:#0e1b42;border:1px solid rgba(14,27,66,.15)">Detay</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+}
+
+function showTechWizardStep(idx){
+    const s = techWizardSteps[idx];
+    if(!s) return;
+    Swal.fire({
+        title: `<i class="fas fa-magic" style="color:#0e1b42"></i> ${escapeHtml(s.title||'Teknik Sihirbaz')}`,
+        html: `<div style="text-align:left;line-height:1.65">
+                ${(s.desc||'').replace(/\n/g,'<br>')}
+                ${s.code ? `<div class="tech-code-block" style="margin-top:12px">${escapeHtml(s.code)}</div>`:''}
+                ${s.btns && s.btns.length ? `<div class="tech-buttons-area">${s.btns.map(b=>`<button class="tech-btn tech-btn-option" onclick="window.open('${escapeHtml(b.url||'#')}', '_blank')">${escapeHtml(b.label||'Aç')}</button>`).join('')}</div>`:''}
+              </div>`,
+        showCloseButton:true, showConfirmButton:false, width:'820px', background:'#f8f9fa'
+    });
+}
+
+/* -------------------------
+   Spor Rehberi: Yayın hakkı bitiş bilgisi
+--------------------------*/
+function applySportsRights(){
+    if(!Array.isArray(sportsData) || sportsData.length===0) return;
+    const rights = (window.sportRightsFromSheet && window.sportRightsFromSheet.length) ? window.sportRightsFromSheet : SPORTS_RIGHTS_FALLBACK;
+    sportsData.forEach(s=>{
+        const hay = `${s.title||''} ${s.desc||''} ${s.detail||''}`.toLowerCase();
+        const hit = rights.find(r=>hay.includes(String(r.name||'').toLowerCase().replaceAll('*','').trim().split(' ')[0]));
+        if(hit){
+            const extra = `Yayın hakkı bitiş: ${hit.end || hit.duration}`;
+            if(s.tip && !s.tip.includes('Yayın hakkı')) s.tip = `${s.tip} • ${extra}`;
+            else if(!s.tip) s.tip = extra;
+            if(s.detail && !s.detail.includes('Yayın hakkı')) s.detail = `${s.detail}\n\n${extra}`;
+            else if(!s.detail) s.detail = extra;
+        }
+    });
+}
+
+// Var olan veri yüklemesi bittikten sonra hak bilgisi ekle
+const _orig_afterDataLoaded = window.afterDataLoaded;
+window.afterDataLoaded = function(){
+    try{ if(typeof _orig_afterDataLoaded==='function') _orig_afterDataLoaded(); }catch(e){}
+    try{ applySportsRights(); }catch(e){}
+};
+
+
+// ======================
+// TECH DOCS - SHEET BIND
+// ======================
+let __techDocsCache = null;
+let __techDocsLoadedAt = 0;
+
+function __normalizeTechTab(tab){
+  // tab ids: broadcast, access, app, activation
+  return tab;
+}
+function __normalizeTechCategory(cat){
+  const c = (cat||"").toString().trim().toLowerCase();
+  if(c.startsWith("yay")) return "broadcast";
+  if(c.startsWith("eri")) return "access";
+  if(c.startsWith("app")) return "app";
+  if(c.startsWith("akt")) return "activation";
+  if(c.startsWith("bil")) return "info";
+  return "";
+}
+
+async function __fetchTechDocs(){
+  if(!SCRIPT_URL){
+    if(typeof showGlobalError === "function") showGlobalError("SCRIPT_URL ayarlı değil. Sağ alttan ayarlayabilirsin.");
+    throw new Error("SCRIPT_URL missing");
   }
+  const res = await fetch(SCRIPT_URL, {
+    method: 'POST',
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({ action: "getTechDocs" })
+  });
+  const data = await res.json();
+  if(data.result !== "success") throw new Error(data.message || "getTechDocs failed");
+  const rows = Array.isArray(data.data) ? data.data : [];
+  return rows
+    .filter(r => (r.Durum||"").toString().trim().toLowerCase() !== "pasif")
+    .map(r => ({
+      categoryKey: __normalizeTechCategory(r.Kategori),
+      kategori: (r.Kategori||"").trim(),
+      baslik: (r.Başlık || r.Baslik || r.Title || r["Başlık"] || "").toString().trim(),
+      icerik: (r.İçerik || r.Icerik || r.Content || r["İçerik"] || "").toString(),
+      adim: (r.Adım || r.Adim || r.Step || r["Adım"] || "").toString(),
+      not: (r.Not || "").toString(),
+      link: (r.Link || "").toString(),
+      durum: (r.Durum || "").toString()
+    }))
+    .filter(x => x.categoryKey && x.baslik);
+}
 
-  const grid = document.getElementById('ts-offer-grid');
-  if(!grid) return;
+function __escapeHtml(s){
+  return (s||"").toString().replace(/[&<>"']/g, m => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
+  }[m]));
+}
 
-  let items = Array.isArray(telesatisOffers) ? telesatisOffers.slice() : [];
-  if(q) items = items.filter(x =>
-      (x.title||'').toLowerCase().includes(q) ||
-      (x.segment||'').toLowerCase().includes(q) ||
-      (x.desc||'').toLowerCase().includes(q) ||
-      (x.note||'').toLowerCase().includes(q)
+function __renderTechList(tabKey, items){
+  const listEl = document.getElementById(
+    tabKey==="broadcast" ? "x-broadcast-list" :
+    tabKey==="access" ? "x-access-list" :
+    tabKey==="app" ? "x-app-list" :
+    tabKey==="activation" ? "x-activation-list" : ""
   );
+  const docsEl = document.getElementById(
+    tabKey==="broadcast" ? "x-broadcast-docs" :
+    tabKey==="access" ? "x-access-docs" :
+    tabKey==="app" ? "x-app-docs" :
+    tabKey==="activation" ? "x-activation-docs" : ""
+  );
+  if(!listEl) return;
 
-  if(items.length === 0){
-    grid.innerHTML = '<div class="home-list muted" style="padding:10px 6px">Teklif bulunamadı.</div>';
+  if(!items || items.length===0){
+    listEl.innerHTML = `<div style="padding:16px;opacity:.75">Bu başlık altında henüz içerik yok. (Sheet: Teknik_Dokumanlar)</div>`;
+    if(docsEl) docsEl.innerHTML = "";
     return;
   }
 
-  grid.innerHTML = items.map(x => `
-    <div class="ts-offer-card">
-      <div class="ts-offer-title">${escapeHtml(x.title||'')}</div>
-      <div class="ts-offer-seg">${escapeHtml(x.segment||'')}</div>
-      <div class="ts-offer-desc">${escapeHtml(x.desc||'').replace(/\n/g,'<br>')}</div>
-      ${x.note ? `<div class="ts-offer-note">${escapeHtml(x.note||'').replace(/\n/g,'<br>')}</div>` : ``}
-      <div class="ts-offer-actions">
-        <button class="btn btn-copy" onclick="copyText('${escapeForJsString((x.note? (x.note+'\n\n'):'') + (x.desc||''))}')"><i class="fas fa-copy"></i> Kopyala</button>
+  // Search box
+  const searchId = `x-tech-search-${tabKey}`;
+  let searchBox = document.getElementById(searchId);
+  if(!searchBox){
+    searchBox = document.createElement("div");
+    searchBox.id = searchId;
+    searchBox.style.padding = "12px 0 0 0";
+    searchBox.innerHTML = `
+      <div style="display:flex;gap:10px;align-items:center;padding:0 4px 12px 4px">
+        <input id="${searchId}-inp" placeholder="Sorunlarda ara..." style="flex:1;padding:10px 12px;border-radius:10px;border:1px solid rgba(0,0,0,.12)">
+        <span style="font-size:12px;opacity:.7" id="${searchId}-cnt"></span>
       </div>
-    </div>
-  `).join('');
-};
+    `;
+    listEl.parentElement.insertBefore(searchBox, listEl);
+  }
 
-// header shortcuts: override openSales/openTechWizard buttons to new fullscreen
-const _origOpenSales = window.openSales;
-window.openSales = function(){ openSalesArea(); };
+  function render(filtered){
+    document.getElementById(`${searchId}-cnt`).textContent = `${filtered.length} kayıt`;
+    listEl.innerHTML = filtered.map((it, idx) => {
+      const body = [
+        it.icerik ? `<div class="q-doc-body">${it.icerik}</div>` : "",
+        it.adim ? `<div class="q-doc-meta"><b>Adım:</b> ${__escapeHtml(it.adim)}</div>` : "",
+        it.not ? `<div class="q-doc-meta"><b>Not:</b> ${__escapeHtml(it.not)}</div>` : "",
+        it.link ? `<div class="q-doc-meta"><b>Link:</b> <a href="${__escapeHtml(it.link)}" target="_blank">${__escapeHtml(it.link)}</a></div>` : ""
+      ].join("");
+      return `
+        <details class="q-accordion" style="margin-bottom:10px;background:#fff;border-radius:12px;border:1px solid rgba(0,0,0,.08);padding:10px 12px">
+          <summary style="cursor:pointer;font-weight:800">${__escapeHtml(it.baslik)}</summary>
+          <div style="padding:10px 2px 2px 2px">${body}</div>
+        </details>
+      `;
+    }).join("");
+  }
 
-const _origOpenTechWizard = window.openTechWizard;
-window.openTechWizard = function(){ openTechArea(); };
+  const inp = document.getElementById(`${searchId}-inp`);
+  inp.oninput = () => {
+    const q = inp.value.toLowerCase().trim();
+    const filtered = !q ? items : items.filter(x =>
+      (x.baslik||"").toLowerCase().includes(q) ||
+      (x.icerik||"").toLowerCase().includes(q) ||
+      (x.adim||"").toLowerCase().includes(q) ||
+      (x.not||"").toLowerCase().includes(q)
+    );
+    render(filtered);
+  };
 
-// after login load, default to home
-const _origAfterLogin = window.showMainApp;
-if(typeof _origAfterLogin === 'function'){
-  window.showMainApp = function(){
-    _origAfterLogin();
-    // default: home
-    setTimeout(openHome, 50);
+  render(items);
+  if(docsEl) docsEl.innerHTML = ""; // docs stack reserved if later needed
+}
+
+async function loadTechDocsIfNeeded(force=false){
+  const now = Date.now();
+  if(!force && __techDocsCache && (now-__techDocsLoadedAt)<120000) return __techDocsCache; // 2dk cache
+  try{
+    const rows = await __fetchTechDocs();
+    __techDocsCache = rows;
+    __techDocsLoadedAt = now;
+    return rows;
+  }catch(e){
+    console.error("[TECH DOCS]", e);
+    if(typeof showGlobalError === "function") showGlobalError("Teknik döküman verisi çekilemedi. SCRIPT_URL ve Web App yetkilerini kontrol et.");
+    return [];
   }
 }
+
+// override / extend existing switchTechTab
+window.switchTechTab = async function(tab){
+  try{
+    // existing visual tab switch
+    document.querySelectorAll('#tech-fullscreen .q-nav-item').forEach(li => li.classList.remove('active'));
+    const tabMap = {broadcast:'x-view-broadcast',access:'x-view-access',app:'x-view-app',activation:'x-view-activation',wizard:'x-view-wizard',cards:'x-view-cards'};
+    const viewId = tabMap[tab];
+    // activate clicked item
+    const items = Array.from(document.querySelectorAll('#tech-fullscreen .q-nav-menu .q-nav-item'));
+    const idx = ['broadcast','access','app','activation','wizard','cards'].indexOf(tab);
+    if(idx>=0 && items[idx]) items[idx].classList.add('active');
+
+    document.querySelectorAll('#tech-fullscreen .q-view-section').forEach(v => v.classList.remove('active'));
+    const viewEl = document.getElementById(viewId);
+    if(viewEl) viewEl.classList.add('active');
+
+    if(['broadcast','access','app','activation'].includes(tab)){
+      const all = await loadTechDocsIfNeeded(false);
+      const filtered = all.filter(x => x.categoryKey === tab);
+      __renderTechList(tab, filtered);
+    }
+  }catch(e){
+    console.error(e);
+  }
+};
