@@ -51,7 +51,7 @@ let firstAnswerIndex = -1;
 const VALID_CATEGORIES = ['Teknik', 'İkna', 'Kampanya', 'Bilgi'];
 const MONTH_NAMES = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
 // --- GLOBAL DEĞİŞKENLER ---
-let database = [], newsData = [], sportsData = [], salesScripts = [], quizQuestions = [], quickDecisionQuestions = [];
+let database = [], cardsData = [], newsData = [], todayData = [], quoteData = [], sportsData = [], salesScripts = [], quizQuestions = [], quickDecisionQuestions = [];
 let techWizardData = {}; // Teknik Sihirbaz Verisi
 let currentUser = "";
 let isAdminMode = false;    
@@ -182,117 +182,6 @@ function toggleFavorite(title) {
         Swal.fire({toast:true, position:'top-end', icon: added ? 'success' : 'info', title: added ? 'Favorilere eklendi' : 'Favorilerden kaldırıldı', showConfirmButton:false, timer:1200});
     } catch(e) {}
 
-// === Grup Bazlı Menü Yetkilendirme (Admin yönetir) ===
-function getUserGroup() { return localStorage.getItem("sSportGroup") || ""; }
-
-function getAccessConfig() {
-    try { return JSON.parse(localStorage.getItem("ACCESS_CFG") || "{}"); }
-    catch (e) { return {}; }
-}
-function setAccessConfig(cfg) {
-    localStorage.setItem("ACCESS_CFG", JSON.stringify(cfg || {}));
-}
-
-function canSee(featureKey) {
-    // Admin (admin/locadmin) her şeyi görsün
-    if (isAdminMode) return true;
-
-    const cfg = getAccessConfig();
-    const g = (getUserGroup() || "").toString().toLocaleLowerCase('tr-TR');
-    const rule = (cfg.features && cfg.features[featureKey]) ? cfg.features[featureKey] : null;
-    if (!rule) return true;
-
-    const deny = (rule.denyGroups || []).map(x => (x || "").toString().toLocaleLowerCase('tr-TR'));
-    const allow = (rule.allowGroups || []).map(x => (x || "").toString().toLocaleLowerCase('tr-TR'));
-
-    if (deny.includes(g)) return false;
-    if (allow.length > 0 && !allow.includes(g)) return false;
-    return true;
-}
-
-function applyFeatureVisibility() {
-    const map = {
-        tech: ['btn-top-tech', 'btn-home-tech'],
-        telesales: ['btn-top-telesales', 'btn-home-telesales'],
-        guide: ['btn-top-guide', 'btn-home-guide'],
-        broadcast: ['btn-top-broadcast', 'btn-home-broadcast'],
-        game: ['btn-top-game', 'btn-home-game'],
-        quality: ['btn-top-quality', 'btn-home-quality']
-    };
-
-    Object.keys(map).forEach(key => {
-        const ok = canSee(key);
-        map[key].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.style.display = ok ? '' : 'none';
-        });
-    });
-}
-
-function enforceFeatureAccess(featureKey) {
-    if (canSee(featureKey)) return true;
-    if (typeof Swal !== 'undefined') {
-        Swal.fire('Yetki yok', 'Bu alana erişimin yok.', 'warning');
-    } else {
-        alert('Bu alana erişimin yok.');
-    }
-    return false;
-}
-
-// Admin için hızlı erişim: kapalı grupları ayarla
-async function openAccessManager() {
-    if (!isAdminMode || typeof Swal === 'undefined') return;
-
-    const cfg = getAccessConfig();
-    cfg.features = cfg.features || {};
-    const feats = [
-        { key: 'telesales', label: 'TeleSatış' },
-        { key: 'tech', label: 'Teknik' },
-        { key: 'guide', label: 'Spor Rehberi' },
-        { key: 'broadcast', label: 'Yayın Akışı' },
-        { key: 'game', label: 'Oyun' },
-        { key: 'quality', label: 'Kalite' },
-    ];
-
-    const rows = feats.map(f => {
-        const cur = ((cfg.features[f.key] && cfg.features[f.key].denyGroups) || []).join(', ');
-        return `<div style="text-align:left;margin:10px 0">
-            <b>${f.label} kapalı gruplar</b>
-            <input id="deny-${f.key}" class="swal2-input" placeholder="örn: chat, telesatis-chat" value="${cur}">
-            <div style="opacity:.7;font-size:.85rem;margin-top:6px">Virgülle ayır. Boş bırakırsan herkese açık.</div>
-        </div>`;
-    }).join('');
-
-    const { value: v } = await Swal.fire({
-        title: 'Erişim Yönetimi',
-        html: rows,
-        width: 700,
-        showCancelButton: true,
-        confirmButtonText: 'Kaydet',
-        cancelButtonText: 'Vazgeç',
-        preConfirm: () => {
-            const out = {};
-            feats.forEach(f => {
-                const val = (document.getElementById(`deny-${f.key}`).value || '');
-                out[f.key] = val.split(',').map(x => x.trim()).filter(Boolean);
-            });
-            return out;
-        }
-    });
-
-    if (!v) return;
-
-    feats.forEach(f => {
-        cfg.features[f.key] = cfg.features[f.key] || {};
-        cfg.features[f.key].denyGroups = v[f.key] || [];
-    });
-
-    setAccessConfig(cfg);
-    applyFeatureVisibility();
-}
-
-
-
     if (currentCategory === 'fav') { filterCategory(document.querySelector('.btn-fav'), 'fav'); } 
     else { renderCards(activeCards); }
     try { updateSearchResultCount(activeCards.length || 0, database.length); } catch(e) {}
@@ -390,8 +279,7 @@ function checkSession() {
         document.getElementById("login-screen").style.display = "none";
         document.getElementById("user-display").innerText = currentUser;
         checkAdmin(savedRole);
-    applyFeatureVisibility();
-startSessionTimer();
+        startSessionTimer();
         
         if (BAKIM_MODU) {
             document.getElementById("maintenance-screen").style.display = "flex";
@@ -440,8 +328,8 @@ function girisYap() {
             localStorage.setItem("sSportUser", currentUser);
             localStorage.setItem("sSportToken", data.token);
             localStorage.setItem("sSportRole", data.role);
-            localStorage.setItem("sSportGroup", data.group || "");
-const savedRole = data.role;
+            
+            const savedRole = data.role;
             if (data.forceChange === true) {
                 Swal.fire({
                     icon: 'warning', title: ' ⚠️  Güvenlik Uyarısı',
@@ -485,11 +373,8 @@ function checkAdmin(role) {
     const addCardDropdown = document.getElementById('dropdownAddCard');
     const quickEditDropdown = document.getElementById('dropdownQuickEdit');
     
-        const accessDropdown = document.getElementById('dropdownAccess');
-isAdminMode = (role === "admin" || role === "locadmin");
-    const accessLink = document.getElementById("access-manager-link");
-    if (accessLink) accessLink.style.display = isAdminMode ? "block" : "none";
-isEditingActive = false;
+    isAdminMode = (role === "admin" || role === "locadmin");
+    isEditingActive = false;
     document.body.classList.remove('editing');
     
     const isQualityUser = (role === 'qusers');
@@ -517,7 +402,6 @@ isEditingActive = false;
     
     if(isAdminMode) {
         if(addCardDropdown) addCardDropdown.style.display = 'flex';
-        if(accessDropdown) accessDropdown.style.display = 'flex';
         if(quickEditDropdown) {
             quickEditDropdown.style.display = 'flex';
             quickEditDropdown.innerHTML = '<i class="fas fa-pen" style="color:var(--secondary);"></i> Düzenlemeyi Aç';
@@ -526,7 +410,6 @@ isEditingActive = false;
     } else {
         if(addCardDropdown) addCardDropdown.style.display = 'none';
         if(quickEditDropdown) quickEditDropdown.style.display = 'none';
-        if(accessDropdown) accessDropdown.style.display = 'none';
     }
 }
 function logout() {
@@ -601,7 +484,17 @@ function loadContentData() {
             // Yeni eklenenleri üstte göstermek için tarihe göre (azalan) sırala
             database.sort((a,b) => parseDateTRToTS(b.date) - parseDateTRToTS(a.date));
             newsData = rawData.filter(i => i.Type.toLowerCase() === 'news').map(i => ({
-                date: formatDateToDDMMYYYY(i.Date), title: i.Title, desc: i.Text, type: i.Category, status: i.Status
+                date: formatDateToDDMMYYYY(i.Date), title: i.Title, desc: i.Text, type: i.Category, s
+            // Ana Sayfa: Bugün Neler Var? (Type=today) ve Günün Sözü (Type=quote)
+            todayData = rawData
+              .filter(i => (i.Type || '').toLowerCase() === 'today' && (i.Status || '') !== 'Pasif')
+              .map(i => ({ date: formatDateToDDMMYYYY(i.Date), title: i.Title, desc: i.Text, status: i.Status }))
+              .sort((a,b) => parseDateTRToTS(b.date) - parseDateTRToTS(a.date));
+
+            quoteData = rawData
+              .filter(i => (i.Type || '').toLowerCase() === 'quote' && (i.Status || '') !== 'Pasif')
+              .map(i => ({ title: i.Title, text: i.Text, detail: i.Detail, date: formatDateToDDMMYYYY(i.Date) }));
+tatus: i.Status
             }));
             sportsData = rawData.filter(i => i.Type.toLowerCase() === 'sport').map(i => ({
                 title: i.Title, icon: i.Icon, desc: i.Text, tip: i.Tip, detail: i.Detail, pronunciation: i.Pronunciation
@@ -634,6 +527,8 @@ function loadContentData() {
             try { updateSearchResultCount(activeCards.length || database.length, database.length); } catch(e) {}
         } else { document.getElementById('loading').innerHTML = `Veriler alınamadı: ${data.message || 'Bilinmeyen Hata'}`; }
     }).catch(error => { document.getElementById('loading').innerHTML = 'Bağlantı Hatası! Sunucuya ulaşılamıyor.'; });
+            cardsData = database; // geriye dönük uyumluluk
+
 }
 function loadWizardData() {
     return new Promise((resolve, reject) => {
@@ -726,43 +621,51 @@ function filterCategory(btn, cat) {
 }
 function filterContent() {
     const search = document.getElementById('searchInput').value.toLocaleLowerCase('tr-TR').trim();
-    let filtered;
-
-    // Favoriler sekmesindeysek sadece favorilerde ara
-    if (currentCategory === 'fav') {
-        filtered = (database || []).filter(i => isFav(i.title));
-    } else if (search) {
-        // Arama varsa ALL (tüm içerikler) içinde ara
-        filtered = (database || []);
-    } else {
-        // Arama yoksa mevcut kategori filtresi
-        filtered = (database || []);
-        if (currentCategory !== 'all') {
-            filtered = filtered.filter(i => String(i.category||'').toLocaleLowerCase('tr-TR') === String(currentCategory||'').toLocaleLowerCase('tr-TR'));
-        }
-    }
-
+    let filtered = database;
+    if (currentCategory === 'fav') { filtered = filtered.filter(i => isFav(i.title)); } 
+    else if (currentCategory !== 'all') { filtered = filtered.filter(i => i.category === currentCategory); }
+    
     if (search) {
         filtered = filtered.filter(item => {
             const title = (item.title || "").toString().toLocaleLowerCase('tr-TR');
             const text = (item.text || "").toString().toLocaleLowerCase('tr-TR');
             const script = (item.script || "").toString().toLocaleLowerCase('tr-TR');
             const code = (item.code || "").toString().toLocaleLowerCase('tr-TR');
-            const cat = (item.category || "").toString().toLocaleLowerCase('tr-TR');
-            return title.includes(search) || text.includes(search) || script.includes(search) || code.includes(search) || cat.includes(search);
+            return title.includes(search) || text.includes(search) || script.includes(search) || code.includes(search);
         });
     }
-
     activeCards = filtered;
-    updateSearchResultCount(filtered.length, (database || []).length);
+    updateSearchResultCount(filtered.length, database.length);
     renderCards(filtered);
 }
 function showCardDetail(title, text) {
+    // Geriye dönük uyumluluk: showCardDetail(cardObj) çağrısını da destekle
+    if (title && typeof title === 'object') {
+        const c = title;
+        const t = c.title || c.name || 'Detay';
+        const body = (c.text || c.desc || '').toString();
+        const script = (c.script || '').toString();
+        const alertTxt = (c.alert || '').toString();
+        const html = `
+          <div style="text-align:left; font-size:1rem; line-height:1.6; white-space:pre-line;">
+            ${escapeHtml(body).replace(/\n/g,'<br>')}
+            ${script ? `<div class="tech-script-box" style="margin-top:12px">
+                <span class="tech-script-label">Müşteriye iletilecek:</span>${escapeHtml(script).replace(/\n/g,'<br>')}
+              </div>` : ''}
+            ${alertTxt ? `<div class="tech-alert" style="margin-top:12px">${escapeHtml(alertTxt).replace(/\n/g,'<br>')}</div>` : ''}
+          </div>`;
+        Swal.fire({ title: t, html, showCloseButton: true, showConfirmButton: false, width: '820px', background: '#f8f9fa' });
+        return;
+    }
+
+    const safeText = (text ?? '').toString();
     Swal.fire({
-        title: title, html: `<div style="text-align:left; font-size:1rem; line-height:1.6;">${text.replace(/\\n/g,'<br>')}</div>`,
+        title: title,
+        html: `<div style="text-align:left; font-size:1rem; line-height:1.6;">${escapeHtml(safeText).replace(/\n/g,'<br>')}</div>`,
         showCloseButton: true, showConfirmButton: false, width: '600px', background: '#f8f9fa'
     });
 }
+
 function toggleEditMode() {
     if (!isAdminMode) return;
     isEditingActive = !isEditingActive;
@@ -3539,55 +3442,88 @@ function hideHomeScreen(){
     if (grid) grid.style.display = 'grid';
 }
 
+
 function renderHomePanels(){
-    // Duyurular (home-today)
+    // Admin butonlarını göster/gizle
+    const btnAddNews = document.getElementById('btnAddNewsHome');
+    const btnAddToday = document.getElementById('btnAddTodayHome');
+    const btnEditQuote = document.getElementById('btnEditQuoteHome');
+    const showAdminBtns = !!isAdminMode; // locadmin da dahil (checkAdmin içinde setleniyor)
+    if(btnAddNews) btnAddNews.style.display = showAdminBtns ? 'inline-flex' : 'none';
+    if(btnAddToday) btnAddToday.style.display = showAdminBtns ? 'inline-flex' : 'none';
+    if(btnEditQuote) btnEditQuote.style.display = showAdminBtns ? 'inline-flex' : 'none';
+
+    // 1) Duyurular (News) - son 3 aktif duyuru
+    const annEl = document.getElementById('home-announcements');
+    if(annEl){
+        const latest = (newsData || []).filter(n => (n.status || '') !== 'Pasif').slice(0,3);
+        if(latest.length===0){
+            annEl.innerHTML = 'Henüz duyuru yok.';
+        }else{
+            annEl.innerHTML = latest.map(n=>`
+                <div class="home-item">
+                  <div class="meta">${escapeHtml(n.date||'')}</div>
+                  <div class="title">${escapeHtml(n.title||'')}</div>
+                  <div class="desc">${escapeHtml((n.desc||'')).slice(0,180)}${(n.desc||'').length>180?'...':''}</div>
+                  ${isAdminMode && isEditingActive ? `
+                    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+                      <button class="mini-btn" onclick="openNews()">Düzenle</button>
+                      <button class="mini-btn danger" onclick="homeDisableByTitle('news', '${escapeHtml((n.title||'').replace(/'/g,'\\\''))}')">Pasifleştir</button>
+                    </div>` : ``}
+                </div>
+            `).join('');
+        }
+    }
+
+    // 2) Bugün Neler Var? (todayData)
     const todayEl = document.getElementById('home-today');
     if(todayEl){
-        const latest = (newsData || []).slice(0,3);
-        if(latest.length===0){
-            todayEl.innerHTML = 'Henüz duyuru yok.';
-        }else{
-            todayEl.innerHTML = latest.map(n=>`
-                <div style="padding:10px;border:1px solid #eef2f7;border-radius:10px;margin-bottom:10px;background:#fff">
-                  <div style="font-size:.78rem;color:#8a8a8a;font-weight:800">${escapeHtml(n.date||'')}</div>
-                  <div style="font-weight:900;color:#0e1b42;margin-top:2px">${escapeHtml(n.title||'')}</div>
-                  <div style="color:#555;margin-top:6px;line-height:1.45">${escapeHtml(String(n.desc||'')).slice(0,160)}${(String(n.desc||'').length>160)?'...':''}</div>
-                </div>
-            `).join('');
-        }
-    }
-
-    // Bugün Neler Var? (admin ekler/düzenler) -> home-favs alanında gösteriyoruz
-    const favEl = document.getElementById('home-favs');
-    if(favEl){
-        const items = getHomeTodayItems();
+        const items = (todayData || []).slice(0,10);
         if(items.length===0){
-            favEl.innerHTML = 'Henüz içerik yok.';
+            todayEl.innerHTML = 'Henüz içerik yok.';
         }else{
-            favEl.innerHTML = items.map((it, idx)=>`
-              <div style="padding:10px;border:1px solid #eef2f7;border-radius:10px;margin-bottom:10px;background:#fff;display:flex;gap:10px;align-items:flex-start">
-                <div style="flex:1;min-width:0">
-                  <div style="font-size:.78rem;color:#8a8a8a;font-weight:800">${escapeHtml(it.date||'')}</div>
-                  <div style="font-weight:900;color:#0e1b42;margin-top:2px">${escapeHtml(it.title||'')}</div>
-                  <div style="color:#555;margin-top:6px;line-height:1.45;white-space:pre-line">${escapeHtml(it.text||'')}</div>
+            todayEl.innerHTML = items.map(item=>`
+                <div class="home-item">
+                  <div class="meta">${escapeHtml(item.date||'')}</div>
+                  <div class="title">${escapeHtml(item.title||'')}</div>
+                  <div class="desc">${escapeHtml((item.desc||'')).slice(0,220)}${(item.desc||'').length>220?'...':''}</div>
+                  ${isAdminMode && isEditingActive ? `
+                    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+                      <button class="mini-btn" onclick="homeEditToday('${escapeHtml((item.title||'').replace(/'/g,'\\\''))}', '${escapeHtml((item.desc||'').replace(/'/g,'\\\''))}')">Düzenle</button>
+                      <button class="mini-btn danger" onclick="homeDisableByTitle('today', '${escapeHtml((item.title||'').replace(/'/g,'\\\''))}')">Pasifleştir</button>
+                    </div>` : ``}
                 </div>
-                ${isAdminMode ? `
-                  <div style="display:flex;flex-direction:column;gap:6px">
-                    <button class="btn btn-copy" onclick="editHomeTodayItem(${idx}); event.stopPropagation();">✏️</button>
-                    <button class="btn btn-copy" style="background:#d32f2f;color:#fff" onclick="deleteHomeTodayItem(${idx}); event.stopPropagation();">🗑️</button>
-                  </div>
-                ` : ``}
-              </div>
             `).join('');
         }
     }
 
-    syncHomeTodayAdminBtn();
+    // 3) Günün Sözü (quote)
+    const qEl = document.getElementById('home-quote');
+    const qAuthorEl = document.getElementById('home-quote-author');
+    if(qEl){
+        const q = (quoteData && quoteData.length) ? quoteData[0] : null;
+        if(!q || !(q.text||'').trim()){
+            qEl.innerHTML = 'Henüz günün sözü eklenmedi.';
+            if(qAuthorEl) qAuthorEl.style.display = 'none';
+        }else{
+            qEl.innerHTML = escapeHtml(q.text);
+            const author = (q.detail||'').trim();
+            if(qAuthorEl){
+                if(author){
+                    qAuthorEl.style.display = 'block';
+                    qAuthorEl.innerHTML = '— ' + escapeHtml(author);
+                }else{
+                    qAuthorEl.style.display = 'none';
+                }
+            }
+        }
+    }
 }
+
 
 // Kart detayını doğrudan açmak için küçük bir yardımcı
 function openCardDetail(cardId){
-    const card = (database||[]).find(x=>String(x.id)===String(cardId));
+    const card = (cardsData||[]).find(x=>String(x.id)===String(cardId));
     if(!card){Swal.fire('Hata','Kart bulunamadı.','error');return;}
     showCardDetail(card);
 }
@@ -3844,21 +3780,12 @@ function renderTechList(targetId, list, showCategory=false){
         el.innerHTML = '<div style="padding:16px;opacity:.7">Bu başlık altında içerik yok.</div>';
         return;
     }
-    el.innerHTML = list.map((c, idx)=>`
+    el.innerHTML = list.map((c)=>`
       <div class="news-item" style="cursor:pointer" onclick="showCardDetail(${JSON.stringify(c).replace(/</g,'\u003c')})">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
-          <div style="min-width:0;flex:1">
-            <span class="news-title">${escapeHtml(c.title||'')}</span>
-            ${showCategory ? `<span class="news-tag" style="background:#f3f5ff;color:#3c4db4;border:1px solid #dde3ff">${escapeHtml(c.category||'')}</span>`:''}
-          </div>
-          ${isAdminMode ? `
-            <div style="display:flex;gap:6px;flex-shrink:0">
-              <button class="btn btn-copy" onclick="editTechCard(${JSON.stringify(c).replace(/</g,'\u003c')}); event.stopPropagation();">✏️</button>
-            </div>
-          ` : ``}
-        </div>
+        <span class="news-title">${escapeHtml(c.title||'')}</span>
+        ${showCategory ? `<span class="news-tag" style="background:#eef2ff;color:#2b3a8a;border:1px solid #dde3ff">${escapeHtml(c.category||'')}</span>`:''}
         <div class="news-desc" style="white-space:pre-line">${escapeHtml(c.text||'')}</div>
-        ${c.script ? `<div class="script-box" style="margin-top:8px"><span class="script-label">Müşteriye iletilecek:</span>${escapeHtml(c.script||'')}<div style="margin-top:8px"><button class="btn btn-copy" onclick="copyText('${escapeForJsString(c.script||'')}'); event.stopPropagation();">Kopyala</button></div></div>`:''}
+        ${c.script ? `<div class="script-box" style="margin-top:10px"><b>Script:</b><div style="margin-top:6px;white-space:pre-line">${escapeHtml(c.script||'')}</div><div style="text-align:right;margin-top:10px"><button class="btn btn-copy" onclick="event.stopPropagation(); copyText('${escapeForJsString(c.script||'')}')">Kopyala</button></div></div>`:''}
       </div>
     `).join('');
 }
@@ -3915,44 +3842,86 @@ function renderTechWizardInto(targetId){
     const box = document.getElementById(targetId);
     if(!box) return;
 
-    // Mevcut openTechWizard içeriğini burada üret
-    if(!Array.isArray(techWizardSteps) || techWizardSteps.length===0){
-        box.innerHTML = '<div style="padding:16px;opacity:.7">Sihirbaz içeriği bulunamadı.</div>';
+    // Ayrı state: fullscreen içindeki gömülü sihirbaz
+    window.embeddedTwState = window.embeddedTwState || { currentStep: 'start', history: [] };
+
+    // Veri yoksa yükle
+    if(!techWizardData || Object.keys(techWizardData).length === 0){
+        box.innerHTML = '<div style="padding:16px;opacity:.7">Sihirbaz yükleniyor...</div>';
+        loadTechWizardData().then(()=>renderTechWizardInto(targetId));
         return;
     }
 
-    // Basit bir liste: adım kartları
-    box.innerHTML = `
-      <div style="padding:12px">
-        <div class="tech-alert"><b>İpucu:</b> Soruna en yakın başlığa tıkla. Adım adım yönergeler açılacak.</div>
-        ${techWizardSteps.map((s, idx)=>`
-          <div class="news-item" style="cursor:pointer" onclick="showTechWizardStep(${idx})">
-            <span class="news-title">${escapeHtml(s.title||('Adım '+(idx+1)))}</span>
-            <div class="news-desc">${escapeHtml((s.desc||'').slice(0,160))}${(s.desc||'').length>160?'...':''}</div>
-            <div class="news-tag" style="background:rgba(14,27,66,.08);color:#0e1b42;border:1px solid rgba(14,27,66,.15)">Detay</div>
-          </div>
-        `).join('')}
+    embeddedTwRender(targetId);
+}
+
+function embeddedTwRender(targetId){
+    const box = document.getElementById(targetId);
+    if(!box) return;
+
+    const st = window.embeddedTwState || { currentStep:'start', history:[] };
+    const stepData = techWizardData[st.currentStep];
+
+    if(!stepData){
+        box.innerHTML = `<div class="tech-alert">Hata: Adım bulunamadı (${escapeHtml(String(st.currentStep))}).</div>`;
+        return;
+    }
+
+    const backVisible = st.history && st.history.length>0;
+
+    let html = `
+      <div style="display:flex; gap:8px; align-items:center; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap">
+        <div style="display:flex; gap:8px; align-items:center">
+          ${backVisible ? `<button type="button" class="tech-btn tech-btn-option" onclick="embeddedTwBack('${targetId}')">⬅ Geri</button>` : ''}
+          <button type="button" class="tech-btn tech-btn-option" onclick="embeddedTwReset('${targetId}')">↻ Sıfırla</button>
+        </div>
+        <div style="opacity:.7; font-size:.9rem">Adım: ${escapeHtml(stepData.title || '')}</div>
       </div>
+
+      <div class="tech-step-title">${escapeHtml(stepData.title || '')}</div>
     `;
+
+    if(stepData.text){
+        html += `<div style="font-size:1rem; margin:10px 0; white-space:pre-line">${escapeHtml(stepData.text)}</div>`;
+    }
+    if(stepData.script){
+        html += `<div class="tech-script-box"><span class="tech-script-label">Müşteriye iletilecek:</span>${escapeHtml(stepData.script)}</div>`;
+    }
+    if(stepData.alert){
+        html += `<div class="tech-alert">${escapeHtml(stepData.alert)}</div>`;
+    }
+
+    if(Array.isArray(stepData.buttons) && stepData.buttons.length){
+        html += `<div class="tech-buttons-area">`;
+        stepData.buttons.forEach(btn=>{
+            const cls = btn.style === 'option' ? 'tech-btn-option' : 'tech-btn-primary';
+            html += `<button type="button" class="tech-btn ${cls}" onclick="embeddedTwChangeStep('${targetId}','${escapeForJsString(btn.next||'start')}')">${escapeHtml(btn.text||'')}</button>`;
+        });
+        html += `</div>`;
+    }
+
+    box.innerHTML = html;
 }
 
-function showTechWizardStep(idx){
-    const s = techWizardSteps[idx];
-    if(!s) return;
-    Swal.fire({
-        title: `<i class="fas fa-magic" style="color:#0e1b42"></i> ${escapeHtml(s.title||'Teknik Sihirbaz')}`,
-        html: `<div style="text-align:left;line-height:1.65">
-                ${(s.desc||'').replace(/\n/g,'<br>')}
-                ${s.code ? `<div class="tech-code-block" style="margin-top:12px">${escapeHtml(s.code)}</div>`:''}
-                ${s.btns && s.btns.length ? `<div class="tech-buttons-area">${s.btns.map(b=>`<button class="tech-btn tech-btn-option" onclick="window.open('${escapeHtml(b.url||'#')}', '_blank')">${escapeHtml(b.label||'Aç')}</button>`).join('')}</div>`:''}
-              </div>`,
-        showCloseButton:true, showConfirmButton:false, width:'820px', background:'#f8f9fa'
-    });
+function embeddedTwChangeStep(targetId, newStep){
+    window.embeddedTwState = window.embeddedTwState || { currentStep:'start', history:[] };
+    window.embeddedTwState.history.push(window.embeddedTwState.currentStep);
+    window.embeddedTwState.currentStep = newStep;
+    embeddedTwRender(targetId);
+}
+function embeddedTwBack(targetId){
+    window.embeddedTwState = window.embeddedTwState || { currentStep:'start', history:[] };
+    if(window.embeddedTwState.history.length){
+        window.embeddedTwState.currentStep = window.embeddedTwState.history.pop();
+        embeddedTwRender(targetId);
+    }
+}
+function embeddedTwReset(targetId){
+    window.embeddedTwState = { currentStep:'start', history:[] };
+    embeddedTwRender(targetId);
 }
 
-/* -------------------------
-   Spor Rehberi: Yayın hakkı bitiş bilgisi
---------------------------*/
+
 function applySportsRights(){
     if(!Array.isArray(sportsData) || sportsData.length===0) return;
     const rights = (window.sportRightsFromSheet && window.sportRightsFromSheet.length) ? window.sportRightsFromSheet : SPORTS_RIGHTS_FALLBACK;
@@ -4143,110 +4112,235 @@ window.switchTechTab = async function(tab){
   }
 };
 
-// === Feature Guards (buton saklansa bile erişim engeli) ===
-function wrapFeatureGuards(){
-    const wrap = (fnName, key) => {
-        const orig = window[fnName];
-        if (typeof orig !== 'function') return;
-        window[fnName] = function(...args){
-            if(!enforceFeatureAccess(key)) return;
-            return orig.apply(this, args);
-        }
-    };
-    wrap('openTechArea', 'tech');
-    wrap('openTelesalesArea', 'telesales');
-    wrap('openGuide', 'guide');
-    wrap('openBroadcastFlow', 'broadcast');
-    wrap('openGameHub', 'game');
-    wrap('openQualityArea', 'quality');
-}
-document.addEventListener('DOMContentLoaded', ()=>{ 
-    try{ wrapFeatureGuards(); }catch(e){}
-});
-
-
-// ===== Home "Bugün Neler Var?" (admin düzenler) =====
-function getHomeTodayItems(){
-  try{
-    const raw = localStorage.getItem('HOME_TODAY_ITEMS') || '[]';
-    const arr = JSON.parse(raw);
-    return Array.isArray(arr) ? arr : [];
-  }catch(e){ return []; }
-}
-function setHomeTodayItems(items){
-  localStorage.setItem('HOME_TODAY_ITEMS', JSON.stringify(items || []));
-}
-function syncHomeTodayAdminBtn(){
-  const btn = document.getElementById('home-add-today');
-  if(btn) btn.style.display = isAdminMode ? 'inline-flex' : 'none';
-}
-
-async function addHomeTodayItem(){
+// =====================
+// HOME - Edit/Ekle
+// =====================
+function homeAddToday(){
   if(!isAdminMode) return;
-  const { value:v } = await Swal.fire({
-    title:'Bugün Neler Var? - Ekle',
-    html:`<input id="ht-title" class="swal2-input" placeholder="Başlık">
-          <textarea id="ht-text" class="swal2-textarea" placeholder="Açıklama"></textarea>`,
-    showCancelButton:true,
-    confirmButtonText:'Kaydet',
-    cancelButtonText:'Vazgeç',
-    focusConfirm:false,
-    preConfirm:()=>({
-      title: (document.getElementById('ht-title').value||'').trim(),
-      text: (document.getElementById('ht-text').value||'').trim()
-    })
+  Swal.fire({
+    title: 'Bugün Neler Var? - Ekle',
+    html: `
+      <input id="homeTodayTitle" class="swal2-input" placeholder="Başlık">
+      <textarea id="homeTodayDesc" class="swal2-textarea" placeholder="Açıklama"></textarea>
+    `,
+    focusConfirm: false,
+    preConfirm: () => {
+      const title = (document.getElementById('homeTodayTitle').value || '').trim();
+      const desc = (document.getElementById('homeTodayDesc').value || '').trim();
+      if(!title) { Swal.showValidationMessage('Başlık zorunlu'); return false; }
+      return { title, desc };
+    },
+    showCancelButton: true,
+    confirmButtonText: 'Kaydet',
+    cancelButtonText: 'İptal'
+  }).then(res=>{
+    if(!res.isConfirmed) return;
+    const now = new Date();
+    const dd = String(now.getDate()).padStart(2,'0');
+    const mm = String(now.getMonth()+1).padStart(2,'0');
+    const yyyy = now.getFullYear();
+    const dateStr = `${dd}.${mm}.${yyyy}`;
+    fetch(SCRIPT_URL, {
+      method:'POST',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({
+        action:'addCard',
+        username: currentUser,
+        token: getToken(),
+        cardType:'today',
+        category:'home',
+        title: res.value.title,
+        text: res.value.desc,
+        script:'',
+        code:'',
+        link:'',
+        date: dateStr,
+        tip:'',
+        detail:'',
+        pronunciation:'',
+        quizOptions:'',
+        quizAnswer:''
+      })
+    }).then(r=>r.json()).then(d=>{
+      if(d.result==='success'){ Swal.fire({icon:'success', title:'Kaydedildi', timer:1200, showConfirmButton:false}); setTimeout(loadContentData, 900); }
+      else Swal.fire('Hata', d.message || 'Kaydedilemedi', 'error');
+    }).catch(e=>Swal.fire('Hata','Sunucu hatası: '+e,'error'));
   });
-  if(!v || !v.title) return;
-  const items = getHomeTodayItems();
-  const now = new Date();
-  const date = now.toLocaleDateString('tr-TR');
-  items.unshift({ id: String(Date.now()), date, title: v.title, text: v.text });
-  setHomeTodayItems(items);
-  renderHomePanels();
 }
 
-async function editHomeTodayItem(idx){
+function homeEditToday(title, desc){
   if(!isAdminMode) return;
-  const items = getHomeTodayItems();
-  const it = items[idx];
-  if(!it) return;
-
-  const { value:v } = await Swal.fire({
+  Swal.fire({
     title:'Bugün Neler Var? - Düzenle',
-    html:`<input id="ht-title" class="swal2-input" placeholder="Başlık" value="${escapeHtml(it.title||'')}">
-          <textarea id="ht-text" class="swal2-textarea" placeholder="Açıklama">${escapeHtml(it.text||'')}</textarea>`,
+    html: `
+      <input id="homeTodayTitle" class="swal2-input" placeholder="Başlık" value="${escapeHtml(title||'')}">
+      <textarea id="homeTodayDesc" class="swal2-textarea" placeholder="Açıklama">${escapeHtml(desc||'')}</textarea>
+      <div style="font-size:.8rem;color:#888;margin-top:8px">Not: Başlık değiştirirsen yeni kayıt gibi algılanır. En iyisi başlığı sabit bırak.</div>
+    `,
+    focusConfirm:false,
+    preConfirm: ()=>{
+      const newTitle=(document.getElementById('homeTodayTitle').value||'').trim();
+      const newDesc=(document.getElementById('homeTodayDesc').value||'').trim();
+      if(!newTitle){ Swal.showValidationMessage('Başlık zorunlu'); return false; }
+      return { newTitle, newDesc };
+    },
+    showCancelButton:true,
+    confirmButtonText:'Güncelle',
+    cancelButtonText:'İptal'
+  }).then(res=>{
+    if(!res.isConfirmed) return;
+
+    // Text güncelle
+    updateContentByTitle(title, 'Text', res.value.newDesc, () => {
+      // Başlık değiştiyse ayrıca Title güncelle
+      if(res.value.newTitle && res.value.newTitle !== title){
+        updateContentByTitle(title, 'Title', res.value.newTitle, () => loadContentData());
+      }else{
+        loadContentData();
+      }
+    });
+  });
+}
+
+function homeAddNews(){
+  if(!isAdminMode) return;
+  Swal.fire({
+    title: 'Duyuru Ekle',
+    html: `
+      <input id="homeNewsTitle" class="swal2-input" placeholder="Başlık">
+      <textarea id="homeNewsDesc" class="swal2-textarea" placeholder="Açıklama"></textarea>
+    `,
+    focusConfirm:false,
+    preConfirm: ()=>{
+      const title=(document.getElementById('homeNewsTitle').value||'').trim();
+      const desc=(document.getElementById('homeNewsDesc').value||'').trim();
+      if(!title){ Swal.showValidationMessage('Başlık zorunlu'); return false; }
+      return { title, desc };
+    },
     showCancelButton:true,
     confirmButtonText:'Kaydet',
-    cancelButtonText:'Vazgeç',
-    focusConfirm:false,
-    preConfirm:()=>({
-      title: (document.getElementById('ht-title').value||'').trim(),
-      text: (document.getElementById('ht-text').value||'').trim()
-    })
+    cancelButtonText:'İptal'
+  }).then(res=>{
+    if(!res.isConfirmed) return;
+    const now=new Date();
+    const dd=String(now.getDate()).padStart(2,'0');
+    const mm=String(now.getMonth()+1).padStart(2,'0');
+    const yyyy=now.getFullYear();
+    const dateStr=`${dd}.${mm}.${yyyy}`;
+    fetch(SCRIPT_URL,{
+      method:'POST',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({
+        action:'addCard',
+        username: currentUser,
+        token: getToken(),
+        cardType:'news',
+        category:'Genel',
+        title: res.value.title,
+        text: res.value.desc,
+        script:'',
+        code:'',
+        link:'',
+        date: dateStr,
+        tip:'',
+        detail:'',
+        pronunciation:'',
+        quizOptions:'',
+        quizAnswer:''
+      })
+    }).then(r=>r.json()).then(d=>{
+      if(d.result==='success'){ Swal.fire({icon:'success', title:'Kaydedildi', timer:1200, showConfirmButton:false}); setTimeout(loadContentData, 900); }
+      else Swal.fire('Hata', d.message || 'Kaydedilemedi', 'error');
+    }).catch(e=>Swal.fire('Hata','Sunucu hatası: '+e,'error'));
   });
-  if(!v || !v.title) return;
-
-  items[idx] = { ...it, title: v.title, text: v.text };
-  setHomeTodayItems(items);
-  renderHomePanels();
 }
 
-async function deleteHomeTodayItem(idx){
+function homeEditQuote(){
   if(!isAdminMode) return;
-  const ok = await Swal.fire({icon:'warning', title:'Silinsin mi?', showCancelButton:true, confirmButtonText:'Sil', cancelButtonText:'Vazgeç'});
-  if(!ok.isConfirmed) return;
-  const items = getHomeTodayItems();
-  items.splice(idx,1);
-  setHomeTodayItems(items);
-  renderHomePanels();
+  const q = (quoteData && quoteData.length) ? quoteData[0] : { text:'', detail:'' };
+  Swal.fire({
+    title:'Günün Sözü',
+    html: `
+      <textarea id="homeQuoteText" class="swal2-textarea" placeholder="Söz">${escapeHtml((q.text||''))}</textarea>
+      <input id="homeQuoteAuthor" class="swal2-input" placeholder="Söyleyen (opsiyonel)" value="${escapeHtml((q.detail||''))}">
+    `,
+    focusConfirm:false,
+    preConfirm: ()=>{
+      const text=(document.getElementById('homeQuoteText').value||'').trim();
+      const author=(document.getElementById('homeQuoteAuthor').value||'').trim();
+      if(!text){ Swal.showValidationMessage('Söz boş olamaz'); return false; }
+      return { text, author };
+    },
+    showCancelButton:true,
+    confirmButtonText:'Kaydet',
+    cancelButtonText:'İptal'
+  }).then(res=>{
+    if(!res.isConfirmed) return;
+    // Quote kaydı: Title sabit -> "GUNUN_SOZU"
+    // Önce varsa update, yoksa add
+    const exists = (quoteData && quoteData.length);
+    if(exists){
+      updateContentByTitle(quoteData[0].title, 'Text', res.value.text, () => {
+        updateContentByTitle(quoteData[0].title, 'Detail', res.value.author, () => loadContentData());
+      });
+    }else{
+      const now=new Date();
+      const dd=String(now.getDate()).padStart(2,'0');
+      const mm=String(now.getMonth()+1).padStart(2,'0');
+      const yyyy=now.getFullYear();
+      const dateStr=`${dd}.${mm}.${yyyy}`;
+      fetch(SCRIPT_URL,{
+        method:'POST',
+        headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body: JSON.stringify({
+          action:'addCard',
+          username: currentUser,
+          token: getToken(),
+          cardType:'quote',
+          category:'home',
+          title:'GUNUN_SOZU',
+          text: res.value.text,
+          script:'',
+          code:'',
+          link:'',
+          date: dateStr,
+          tip:'',
+          detail: res.value.author,
+          pronunciation:'',
+          quizOptions:'',
+          quizAnswer:''
+        })
+      }).then(r=>r.json()).then(d=>{
+        if(d.result==='success'){ Swal.fire({icon:'success', title:'Kaydedildi', timer:1200, showConfirmButton:false}); setTimeout(loadContentData, 900); }
+        else Swal.fire('Hata', d.message || 'Kaydedilemedi', 'error');
+      }).catch(e=>Swal.fire('Hata','Sunucu hatası: '+e,'error'));
+    }
+  });
 }
 
-// ===== Teknik kart admin düzenleme =====
-function editTechCard(cardObj){
+function homeDisableByTitle(type, title){
   if(!isAdminMode) return;
-  // aktifCards editContent için kullanılıyor
-  activeCards = [cardObj];
-  // editContent async; wrapper
-  (async ()=>{ try{ await editContent(0); }catch(e){ console.error(e); } })();
+  Swal.fire({
+    icon:'warning',
+    title:'Pasifleştirilsin mi?',
+    text:'Bu içerik duyurularda görünmez (Sheet tarafında Status=Pasif).',
+    showCancelButton:true,
+    confirmButtonText:'Evet',
+    cancelButtonText:'İptal'
+  }).then(res=>{
+    if(!res.isConfirmed) return;
+    updateContentByTitle(title, 'Status', 'Pasif', () => loadContentData());
+  });
 }
 
+// Sheet update helper (Title üzerinden)
+function updateContentByTitle(searchKey, column, value, cb){
+  fetch(SCRIPT_URL,{
+    method:'POST',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body: JSON.stringify({ action:'updateContent', username: currentUser, token: getToken(), searchKey, column, value })
+  }).then(r=>r.json()).then(d=>{
+    if(d.result==='success'){ if(cb) cb(); }
+    else Swal.fire('Hata', d.message || 'Güncellenemedi', 'error');
+  }).catch(e=>Swal.fire('Hata','Sunucu hatası: '+e,'error'));
+}
