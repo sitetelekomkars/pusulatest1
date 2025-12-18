@@ -1053,3 +1053,6 @@ body.editing .edit-icon { display: block !important; }
 .doc-head i{
   transition: transform .2s ease;
 }
+/* FIX: üst menü tıklanabilirlik */
+.header, .top-bar, .control-wrapper { position: relative; z-index: 50; }
+.news-ticker-box { position: relative; z-index: 10; }
