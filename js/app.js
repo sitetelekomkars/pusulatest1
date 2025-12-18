@@ -738,7 +738,7 @@ function filterContent() {
         // Arama yoksa mevcut kategori filtresi
         filtered = (database || []);
         if (currentCategory !== 'all') {
-            filtered = filtered.filter(i => i.category === currentCategory);
+            filtered = filtered.filter(i => String(i.category||'').toLocaleLowerCase('tr-TR') === String(currentCategory||'').toLocaleLowerCase('tr-TR'));
         }
     }
 
