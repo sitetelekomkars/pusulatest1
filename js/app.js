@@ -13,7 +13,7 @@ function showGlobalError(message){
 }
 
 // Apps Script URL'si
-let SCRIPT_URL = localStorage.getItem("PUSULA_SCRIPT_URL") || "https://script.google.com/macros/s/AKfycbz6dDFHv-49h-13EwNPVCqpj-H4xjRqNpkz1JPvkixDkOkM_AUyN2cgYpH7-j9a5Tg/exec"; // Apps Script Web App URL
+let SCRIPT_URL = localStorage.getItem("PUSULA_SCRIPT_URL") || "https://script.google.com/macros/s/AKfycbywdciHyiPCEWGu9hIyN05HkeBgwPlFgzrDZY16K08svQhTcvXhN8A_DyBrzO8SalDu/exec"; // Apps Script Web App URL
 
 // ---- API CALL helper (Menu/Yetki vs için gerekli) ----
 async function apiCall(action, payload = {}) {
@@ -89,9 +89,8 @@ function isAllowedByPerm(perm){
   // NONE varsa kimse görmesin
   if(groups.some(g => String(g||"").trim().toUpperCase() === "NONE")) return false;
 
-  // ALL varsa herkese açık kabul et (grup filtresini kaldır)
-  const hasAll = groups.some(g => String(g||"").trim().toUpperCase() === "ALL");
-  if(hasAll) groups = [];
+  // ALL varsa grup filtresi yok
+  if(groups.some(g => String(g||"").trim().toUpperCase() === "ALL")) groups = [];
 
   if(roles.length && roles.indexOf(role)===-1) return false;
   if(groups.length && groups.indexOf(grp)===-1) return false;
@@ -119,10 +118,13 @@ function loadMenuPermissions(){
     if(res && res.result==="success"){
       menuPermissions = {};
       (res.items||[]).forEach(it=>{
-        menuPermissions[it.key] = {
-          allowedGroups: normalizeList(it.allowedGroups),
-          enabled: (it.enabled === false || String(it.enabled).toUpperCase()==="FALSE") ? false : true,
-          allowedRoles: normalizeList(it.allowedRoles) // backward-compat if still present
+        const key = it.key || it.MenuKey || it.menuKey;
+        const allowedGroupsRaw = (it.allowedGroups ?? it.AllowedGroups ?? it.allowed_groups ?? it.allowedGroup ?? it.groups ?? "");
+        const enabledRaw = (it.enabled ?? it.Enabled ?? it.isEnabled ?? "TRUE");
+        menuPermissions[key] = {
+          allowedGroups: normalizeList(allowedGroupsRaw).map(x=>String(x).trim()),
+          enabled: (enabledRaw === false || String(enabledRaw).toUpperCase()==="FALSE") ? false : true,
+          allowedRoles: normalizeList(it.allowedRoles ?? it.AllowedRoles ?? it.allowed_roles ?? "")
         };
       });
       applyMenuPermissions();
@@ -169,8 +171,8 @@ function openMenuPermissions(){
       const enabled = !(m.enabled === false || String(m.enabled).toUpperCase()==="FALSE");
       const cells = groups.map(g=>{
         const hasNone = allowed.some(x=>String(x||"").trim().toUpperCase()==="NONE");
-      const hasAll = allowed.some(x=>String(x||"").trim().toUpperCase()==="ALL");
-      const checked = hasNone ? false : (hasAll ? true : (allowed.indexOf(g)>-1));
+        const hasAll = allowed.some(x=>String(x||"").trim().toUpperCase()==="ALL");
+        const checked = hasNone ? false : (hasAll ? true : (allowed.indexOf(g)>-1));
         return `<td style="text-align:center">
           <input type="checkbox" data-mk="${m.key}" data-g="${g}" ${checked?'checked':''}/>
         </td>`;
@@ -222,7 +224,7 @@ function openMenuPermissions(){
           const g=cb.getAttribute('data-g');
           if(cb.checked && out[k]) out[k].allowedGroups.push(g);
         });
-        // Hepsi seçiliyse "ALL" olarak yaz (daha temiz)
+        // Hepsi seçiliyse "ALL", hiçbiri seçili değilse "NONE" olarak yaz
         Object.keys(out).forEach(k=>{
           const arr = out[k].allowedGroups||[];
           if(arr.length===groups.length){
