@@ -51,7 +51,7 @@ let firstAnswerIndex = -1;
 const VALID_CATEGORIES = ['Teknik', 'İkna', 'Kampanya', 'Bilgi'];
 const MONTH_NAMES = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
 // --- GLOBAL DEĞİŞKENLER ---
-let database = [], cardsData = [], newsData = [], sportsData = [], salesScripts = [], quizQuestions = [], quickDecisionQuestions = [];
+let database = [], newsData = [], sportsData = [], salesScripts = [], quizQuestions = [], quickDecisionQuestions = [];
 let techWizardData = {}; // Teknik Sihirbaz Verisi
 let currentUser = "";
 let isAdminMode = false;    
@@ -517,8 +517,6 @@ function loadContentData() {
             try { updateSearchResultCount(activeCards.length || database.length, database.length); } catch(e) {}
         } else { document.getElementById('loading').innerHTML = `Veriler alınamadı: ${data.message || 'Bilinmeyen Hata'}`; }
     }).catch(error => { document.getElementById('loading').innerHTML = 'Bağlantı Hatası! Sunucuya ulaşılamıyor.'; });
-            cardsData = database; // geriye dönük uyumluluk
-
 }
 function loadWizardData() {
     return new Promise((resolve, reject) => {
@@ -629,33 +627,11 @@ function filterContent() {
     renderCards(filtered);
 }
 function showCardDetail(title, text) {
-    // Geriye dönük uyumluluk: showCardDetail(cardObj) çağrısını da destekle
-    if (title && typeof title === 'object') {
-        const c = title;
-        const t = c.title || c.name || 'Detay';
-        const body = (c.text || c.desc || '').toString();
-        const script = (c.script || '').toString();
-        const alertTxt = (c.alert || '').toString();
-        const html = `
-          <div style="text-align:left; font-size:1rem; line-height:1.6; white-space:pre-line;">
-            ${escapeHtml(body).replace(/\n/g,'<br>')}
-            ${script ? `<div class="tech-script-box" style="margin-top:12px">
-                <span class="tech-script-label">Müşteriye iletilecek:</span>${escapeHtml(script).replace(/\n/g,'<br>')}
-              </div>` : ''}
-            ${alertTxt ? `<div class="tech-alert" style="margin-top:12px">${escapeHtml(alertTxt).replace(/\n/g,'<br>')}</div>` : ''}
-          </div>`;
-        Swal.fire({ title: t, html, showCloseButton: true, showConfirmButton: false, width: '820px', background: '#f8f9fa' });
-        return;
-    }
-
-    const safeText = (text ?? '').toString();
     Swal.fire({
-        title: title,
-        html: `<div style="text-align:left; font-size:1rem; line-height:1.6;">${escapeHtml(safeText).replace(/\n/g,'<br>')}</div>`,
+        title: title, html: `<div style="text-align:left; font-size:1rem; line-height:1.6;">${text.replace(/\\n/g,'<br>')}</div>`,
         showCloseButton: true, showConfirmButton: false, width: '600px', background: '#f8f9fa'
     });
 }
-
 function toggleEditMode() {
     if (!isAdminMode) return;
     isEditingActive = !isEditingActive;
@@ -3689,7 +3665,7 @@ const TECH_DOC_CONTENT = {"broadcast": [{"title": "Smart TV – Canlı Yayında 
 
 function renderTechSections(){
     // Teknik kartları çek
-    const techCards = (database||[]).filter(c=>String(c.category||'').toLowerCase()==='teknik');
+    const techCards = (cardsData||[]).filter(c=>String(c.category||'').toLowerCase()==='teknik');
 
     // Heuristik sınıflandırma
     const buckets = {broadcast:[], access:[], app:[], activation:[]};
@@ -3791,86 +3767,44 @@ function renderTechWizardInto(targetId){
     const box = document.getElementById(targetId);
     if(!box) return;
 
-    // Ayrı state: fullscreen içindeki gömülü sihirbaz
-    window.embeddedTwState = window.embeddedTwState || { currentStep: 'start', history: [] };
-
-    // Veri yoksa yükle
-    if(!techWizardData || Object.keys(techWizardData).length === 0){
-        box.innerHTML = '<div style="padding:16px;opacity:.7">Sihirbaz yükleniyor...</div>';
-        loadTechWizardData().then(()=>renderTechWizardInto(targetId));
+    // Mevcut openTechWizard içeriğini burada üret
+    if(!Array.isArray(techWizardSteps) || techWizardSteps.length===0){
+        box.innerHTML = '<div style="padding:16px;opacity:.7">Sihirbaz içeriği bulunamadı.</div>';
         return;
     }
 
-    embeddedTwRender(targetId);
-}
-
-function embeddedTwRender(targetId){
-    const box = document.getElementById(targetId);
-    if(!box) return;
-
-    const st = window.embeddedTwState || { currentStep:'start', history:[] };
-    const stepData = techWizardData[st.currentStep];
-
-    if(!stepData){
-        box.innerHTML = `<div class="tech-alert">Hata: Adım bulunamadı (${escapeHtml(String(st.currentStep))}).</div>`;
-        return;
-    }
-
-    const backVisible = st.history && st.history.length>0;
-
-    let html = `
-      <div style="display:flex; gap:8px; align-items:center; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap">
-        <div style="display:flex; gap:8px; align-items:center">
-          ${backVisible ? `<button type="button" class="tech-btn tech-btn-option" onclick="embeddedTwBack('${targetId}')">⬅ Geri</button>` : ''}
-          <button type="button" class="tech-btn tech-btn-option" onclick="embeddedTwReset('${targetId}')">↻ Sıfırla</button>
-        </div>
-        <div style="opacity:.7; font-size:.9rem">Adım: ${escapeHtml(stepData.title || '')}</div>
+    // Basit bir liste: adım kartları
+    box.innerHTML = `
+      <div style="padding:12px">
+        <div class="tech-alert"><b>İpucu:</b> Soruna en yakın başlığa tıkla. Adım adım yönergeler açılacak.</div>
+        ${techWizardSteps.map((s, idx)=>`
+          <div class="news-item" style="cursor:pointer" onclick="showTechWizardStep(${idx})">
+            <span class="news-title">${escapeHtml(s.title||('Adım '+(idx+1)))}</span>
+            <div class="news-desc">${escapeHtml((s.desc||'').slice(0,160))}${(s.desc||'').length>160?'...':''}</div>
+            <div class="news-tag" style="background:rgba(14,27,66,.08);color:#0e1b42;border:1px solid rgba(14,27,66,.15)">Detay</div>
+          </div>
+        `).join('')}
       </div>
-
-      <div class="tech-step-title">${escapeHtml(stepData.title || '')}</div>
     `;
-
-    if(stepData.text){
-        html += `<div style="font-size:1rem; margin:10px 0; white-space:pre-line">${escapeHtml(stepData.text)}</div>`;
-    }
-    if(stepData.script){
-        html += `<div class="tech-script-box"><span class="tech-script-label">Müşteriye iletilecek:</span>${escapeHtml(stepData.script)}</div>`;
-    }
-    if(stepData.alert){
-        html += `<div class="tech-alert">${escapeHtml(stepData.alert)}</div>`;
-    }
-
-    if(Array.isArray(stepData.buttons) && stepData.buttons.length){
-        html += `<div class="tech-buttons-area">`;
-        stepData.buttons.forEach(btn=>{
-            const cls = btn.style === 'option' ? 'tech-btn-option' : 'tech-btn-primary';
-            html += `<button type="button" class="tech-btn ${cls}" onclick="embeddedTwChangeStep('${targetId}','${escapeForJsString(btn.next||'start')}')">${escapeHtml(btn.text||'')}</button>`;
-        });
-        html += `</div>`;
-    }
-
-    box.innerHTML = html;
 }
 
-function embeddedTwChangeStep(targetId, newStep){
-    window.embeddedTwState = window.embeddedTwState || { currentStep:'start', history:[] };
-    window.embeddedTwState.history.push(window.embeddedTwState.currentStep);
-    window.embeddedTwState.currentStep = newStep;
-    embeddedTwRender(targetId);
-}
-function embeddedTwBack(targetId){
-    window.embeddedTwState = window.embeddedTwState || { currentStep:'start', history:[] };
-    if(window.embeddedTwState.history.length){
-        window.embeddedTwState.currentStep = window.embeddedTwState.history.pop();
-        embeddedTwRender(targetId);
-    }
-}
-function embeddedTwReset(targetId){
-    window.embeddedTwState = { currentStep:'start', history:[] };
-    embeddedTwRender(targetId);
+function showTechWizardStep(idx){
+    const s = techWizardSteps[idx];
+    if(!s) return;
+    Swal.fire({
+        title: `<i class="fas fa-magic" style="color:#0e1b42"></i> ${escapeHtml(s.title||'Teknik Sihirbaz')}`,
+        html: `<div style="text-align:left;line-height:1.65">
+                ${(s.desc||'').replace(/\n/g,'<br>')}
+                ${s.code ? `<div class="tech-code-block" style="margin-top:12px">${escapeHtml(s.code)}</div>`:''}
+                ${s.btns && s.btns.length ? `<div class="tech-buttons-area">${s.btns.map(b=>`<button class="tech-btn tech-btn-option" onclick="window.open('${escapeHtml(b.url||'#')}', '_blank')">${escapeHtml(b.label||'Aç')}</button>`).join('')}</div>`:''}
+              </div>`,
+        showCloseButton:true, showConfirmButton:false, width:'820px', background:'#f8f9fa'
+    });
 }
 
-
+/* -------------------------
+   Spor Rehberi: Yayın hakkı bitiş bilgisi
+--------------------------*/
 function applySportsRights(){
     if(!Array.isArray(sportsData) || sportsData.length===0) return;
     const rights = (window.sportRightsFromSheet && window.sportRightsFromSheet.length) ? window.sportRightsFromSheet : SPORTS_RIGHTS_FALLBACK;
