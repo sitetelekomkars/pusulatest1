@@ -133,7 +133,7 @@ body {
     /* Kırmızı boşlukları silmek için padding'i sıfırladık */
     padding-bottom: 0; 
     position: relative;
-    flex-wrap: wrap; 
+    flex-wrap: nowrap; 
 }
 .search-container { position: relative; width: 300px; flex-shrink: 0; }
 #searchInput { 
@@ -157,6 +157,8 @@ body {
 .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: rgba(255, 255, 255, 0.5); font-size: 0.85rem; }
 /* Filtre Alanı */
 .filter-container { 
+    flex: 1;
+    min-width: 0;
     display: flex; 
     gap: 6px; 
     align-items: center;
@@ -166,6 +168,12 @@ body {
     position: relative;
 }
 .filter-container::-webkit-scrollbar { height: 0px; } 
+
+@media (max-width: 1100px){
+  .control-wrapper{ flex-wrap: wrap; }
+  .search-container{ width: 100%; }
+  .filter-container{ width: 100%; }
+}
 /* GENEL FİLTRE BUTONU */
 .filter-btn { 
     background-color: rgba(255, 255, 255, 0.03); 
@@ -370,7 +378,7 @@ body.editing .edit-icon { display: block !important; }
 .evaluation-details-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-in-out; margin-top: 0; }
 .evaluation-summary { transition: background 0.2s; }
 .evaluation-summary:hover { background: #fcfcfc; }
-.quality-controls-top { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; margin-bottom: 15px; flex-wrap: wrap; gap: 15px; }
+.quality-controls-top { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; margin-bottom: 15px; flex-wrap: nowrap; gap: 15px; }
 .quality-filter-group { display: flex; gap: 15px; align-items: center; flex-grow: 1; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 1rem; background: #f0f4ff; border: 1px solid #d0d8f0; justify-content: space-around; }
 .eval-modal-wrapper { display: flex; flex-direction: column; gap: 15px; text-align: left; font-family: 'Segoe UI', sans-serif; }
 .eval-header-card { background: #f8f9fa; padding: 15px; border-radius: 10px; border-left: 5px solid var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
@@ -787,7 +795,7 @@ body.editing .edit-icon { display: block !important; }
 .tech-buttons-area {
     display: flex;
     gap: 15px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     margin-top: 30px;
     padding-top: 20px;
     border-top: 1px solid #eee;
@@ -983,4 +991,65 @@ body.editing .edit-icon { display: block !important; }
   justify-content:space-between;
   gap:10px;
   flex-wrap:wrap;
+}
+
+
+/* --- HOME SCREEN --- */
+.home-screen{animation:fadeIn .25s ease;padding-top:10px}
+.home-hero{display:flex;gap:14px;align-items:stretch;justify-content:space-between;flex-wrap:wrap;background:linear-gradient(135deg,rgba(14,27,66,.95),rgba(14,27,66,.75));border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:18px;color:#fff;box-shadow:0 10px 30px rgba(0,0,0,.12)}
+.home-title{font-size:1.4rem;font-weight:800;letter-spacing:.2px}
+.home-sub{opacity:.8;margin-top:6px;font-size:.95rem;max-width:640px}
+.home-hero-right{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-left:auto}
+.home-quick-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#fff;padding:10px 12px;border-radius:10px;cursor:pointer;font-weight:700;transition:.2s}
+.home-quick-btn:hover{background:rgba(255,255,255,.14);transform:translateY(-1px)}
+.home-panels{margin-top:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.home-panel{background:#fff;border-radius:12px;border:1px solid #eaedf2;box-shadow:0 8px 20px rgba(0,0,0,.05);overflow:hidden}
+.home-panel-head{padding:12px 14px;font-weight:800;color:#0e1b42;background:#f7f9fc;border-bottom:1px solid #eef2f7;display:flex;gap:8px;align-items:center}
+.home-panel-body{padding:12px 14px;color:#444;font-size:.95rem;line-height:1.55}
+.home-shortcuts{display:flex;gap:10px;flex-wrap:wrap}
+.home-shortcut{background:#0e1b42;color:#fff;border:none;border-radius:10px;padding:10px 12px;cursor:pointer;font-weight:800;transition:.2s}
+.home-shortcut:hover{transform:translateY(-1px);opacity:.92}
+.minimal-input{padding:10px 12px;border:1px solid #e5e7eb;border-radius:10px;outline:none}
+.minimal-input:focus{border-color:#fabb00;box-shadow:0 0 0 3px rgba(250,187,0,.18)}
+
+
+/* Teknik Döküman Kartları */
+.doc-stack{
+  padding: 14px 14px 0 14px;
+  display: grid;
+  gap: 10px;
+}
+.doc-card{
+  background: rgba(255,255,255,.92);
+  border: 1px solid rgba(221,227,255,.9);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(20, 20, 60, .08);
+}
+.doc-head{
+  width: 100%;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+.doc-title{
+  font-weight: 800;
+  font-size: 14px;
+}
+.doc-body{
+  padding: 0 14px 14px 14px;
+  color: #253;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.doc-card.open .doc-head i{
+  transform: rotate(180deg);
+}
+.doc-head i{
+  transition: transform .2s ease;
 }
