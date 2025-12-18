@@ -54,7 +54,8 @@ const MONTH_NAMES = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Te
 let database = [], cardsData = [], newsData = [], sportsData = [], salesScripts = [], quizQuestions = [], quickDecisionQuestions = [];
 let techWizardData = {}; // Teknik Sihirbaz Verisi
 let currentUser = "";
-let isAdminMode = false;    
+let isAdminMode = false;
+let isLocAdmin = false;
 let isEditingActive = false;
 let sessionTimeout;
 let activeCards = [];
@@ -274,11 +275,13 @@ function checkSession() {
     const savedUser = localStorage.getItem("sSportUser");
     const savedToken = localStorage.getItem("sSportToken");
     const savedRole = localStorage.getItem("sSportRole");
+    const savedGroup = localStorage.getItem("sSportGroup");
     if (savedUser && savedToken) {
         currentUser = savedUser;
         document.getElementById("login-screen").style.display = "none";
         document.getElementById("user-display").innerText = currentUser;
         checkAdmin(savedRole);
+        try{ if(savedGroup){ const el=document.getElementById("t-side-role"); if(el) el.textContent=savedGroup; const el2=document.getElementById("tech-side-role"); if(el2) el2.textContent=savedGroup; } }catch(e){}
         startSessionTimer();
         
         if (BAKIM_MODU) {
@@ -328,6 +331,7 @@ function girisYap() {
             localStorage.setItem("sSportUser", currentUser);
             localStorage.setItem("sSportToken", data.token);
             localStorage.setItem("sSportRole", data.role);
+            if (data.group) localStorage.setItem("sSportGroup", data.group);
             
             const savedRole = data.role;
             if (data.forceChange === true) {
@@ -340,6 +344,7 @@ function girisYap() {
                 document.getElementById("login-screen").style.display = "none";
                 document.getElementById("user-display").innerText = currentUser;
                 checkAdmin(savedRole);
+        try{ if(savedGroup){ const el=document.getElementById("t-side-role"); if(el) el.textContent=savedGroup; const el2=document.getElementById("tech-side-role"); if(el2) el2.textContent=savedGroup; } }catch(e){}
                 startSessionTimer();
                 
                 if (BAKIM_MODU) {
@@ -373,7 +378,8 @@ function checkAdmin(role) {
     const addCardDropdown = document.getElementById('dropdownAddCard');
     const quickEditDropdown = document.getElementById('dropdownQuickEdit');
     
-    isAdminMode = (role === "admin");
+    isAdminMode = (role === "admin" || role === "locadmin");
+    isLocAdmin = (role === "locadmin");
     isEditingActive = false;
     document.body.classList.remove('editing');
     
@@ -3495,6 +3501,8 @@ async function openTelesalesArea(){
     const wrap = document.getElementById('telesales-fullscreen');
     if(!wrap) return;
     wrap.style.display = 'flex';
+    document.body.classList.add('fs-open');
+    document.body.style.overflow='hidden';
 
     // Sidebar profil
     const av = document.getElementById('t-side-avatar');
@@ -3537,6 +3545,8 @@ async function openTelesalesArea(){
 function closeFullTelesales(){
     const wrap = document.getElementById('telesales-fullscreen');
     if(wrap) wrap.style.display = 'none';
+    document.body.classList.remove('fs-open');
+    document.body.style.overflow='';
 }
 
 function switchTelesalesTab(tab){
@@ -3650,6 +3660,8 @@ function openTechArea(tab){
     const wrap = document.getElementById('tech-fullscreen');
     if(!wrap) return;
     wrap.style.display = 'flex';
+    document.body.classList.add('fs-open');
+    document.body.style.overflow='hidden';
 
     // Sidebar profil
     const av = document.getElementById('x-side-avatar');
@@ -3666,6 +3678,8 @@ function openTechArea(tab){
 function closeFullTech(){
     const wrap = document.getElementById('tech-fullscreen');
     if(wrap) wrap.style.display = 'none';
+    document.body.classList.remove('fs-open');
+    document.body.style.overflow='';
 }
 
 function switchTechTab(tab){
