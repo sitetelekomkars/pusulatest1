@@ -199,10 +199,6 @@ body {
 .link-btn:hover { color: #fff; background: rgba(255,255,255,0.1); }
 /* --- TICKER (Duyuru Barı İyileştirmesi) --- */
 .news-ticker-box { 
-    position: sticky;
-    /* Üstteki sabit header (logo + menü) yüksekliğine göre ayarla */
-    top: 92px;
-    z-index: 9999;
     width: 100%;
     /* Rengi üst barın ana rengine yakın, hafif koyu yaptık */
     background: #0a1532; 
@@ -217,10 +213,6 @@ body {
     margin-top: 0px; 
     box-sizing: border-box;
     overflow: hidden; 
-}
-
-@media (max-width: 900px){
-  .news-ticker-box{ top: 120px; }
 }
 .news-ticker-box:hover { background: #1c2438; } 
 .ticker-label { 
@@ -1039,6 +1031,10 @@ body.editing .edit-icon { display: block !important; }
   min-height: 120px;
 }
 .home-card-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom: 10px; }
+
+/* Ana sayfa: Bugün Neler Var + Duyurular otomatik çekiliyor (düzenleme butonu kapalı) */
+#home-edit-today,
+#home-edit-ann{ display:none !important; }
 .home-card-title{ font-weight: 900; color: #0e1b42; display:flex; align-items:center; gap:10px; }
 .home-card-body{ color:#555; line-height:1.55; }
 .home-edit{
@@ -1146,3 +1142,5 @@ body.editing .edit-icon { display: block !important; }
 .q-side-bottom{padding:14px 16px;border-top:1px solid rgba(255,255,255,.08)}
 .q-logout{width:100%;border:0;border-radius:12px;padding:12px 14px;background:#c62828;color:#fff;font-weight:900;cursor:pointer}
 .q-logout:hover{filter:brightness(.95)}
+/* --- HOME: Bugün Neler Var & Duyurular düzenleme butonlarını kapat --- */
+#home-edit-today, #home-edit-ann { display: none !important; }
