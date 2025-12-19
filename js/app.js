@@ -3917,9 +3917,7 @@ async function openTelesalesArea(){
                 ? window.telesalesOffersFromSheet
                 : TELESales_OFFERS_FALLBACK);
     }
-
-    hydrateTelesalesSegmentFilter();
-    renderTelesalesDataOffers();
+renderTelesalesDataOffers();
     renderTelesalesScripts();
     renderTelesalesDocs();
     switchTelesalesTab('data');
@@ -3944,25 +3942,17 @@ function switchTelesalesTab(tab){
     if(el) el.classList.add('active');
 }
 
-function hydrateTelesalesSegmentFilter(){
-    const sel = document.getElementById('t-data-seg');
-    if(!sel) return;
-    const segs = Array.from(new Set((telesalesOffers||[]).map(o=>o.segment).filter(Boolean))).sort();
-    sel.innerHTML = '<option value="all">Tüm Segmentler</option>' + segs.map(s=>`<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
-}
 
 function renderTelesalesDataOffers(){
     const grid = document.getElementById('t-data-grid');
     if(!grid) return;
 
-    const seg = (document.getElementById('t-data-seg')?.value)||'all';
     const q = (document.getElementById('t-data-search')?.value||'').toLowerCase();
 
     const list = (telesalesOffers||[]).filter(o=>{
-        const okSeg = seg==='all' || (o.segment===seg);
         const hay = `${o.title||''} ${o.desc||''}`.toLowerCase();
         const okQ = !q || hay.includes(q);
-        return okSeg && okQ;
+        return okQ;
     });
 
     if(list.length===0){
