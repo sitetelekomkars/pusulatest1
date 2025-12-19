@@ -1036,7 +1036,7 @@ async function addNewCardPopup() {
         Swal.fire({ title: 'Ekleniyor...', didOpen: () => { Swal.showLoading() } });
         fetch(SCRIPT_URL, {
             method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ action: "addCard", username: currentUser, token: getToken(), ...formValues })
+            body: JSON.stringify({ action: "addCard", username: currentUser, token: getToken(), .....formValues })
         }).then(response => response.json()).then(data => {
             if (data.result === "success") {
                 Swal.fire({icon: 'success', title: 'Başarılı', text: 'İçerik eklendi.', timer: 2000, showConfirmButton: false});
@@ -2880,7 +2880,7 @@ async function assignTrainingPopup() {
         fetch(SCRIPT_URL, {
             method: 'POST',
             headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({ action: "assignTraining", username: currentUser, token: getToken(), ...formValues })
+            body: JSON.stringify({ action: "assignTraining", username: currentUser, token: getToken(), .....formValues })
         }).then(r=>r.json()).then(d=>{
             Swal.fire('Başarılı', 'Eğitim atandı.', 'success');
             loadTrainingData();
@@ -3223,7 +3223,7 @@ async function addManualFeedbackPopup() {
         fetch(SCRIPT_URL, { 
             method: 'POST', 
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ action: "logEvaluation", username: currentUser, token: getToken(), ...formValues }) 
+            body: JSON.stringify({ action: "logEvaluation", username: currentUser, token: getToken(), .....formValues }) 
         })
         .then(r => r.json()).then(async d => {
             if (d.result === "success") { 
@@ -3249,7 +3249,7 @@ async function addManualFeedbackPopup() {
                     fetch(SCRIPT_URL, { 
                         method: 'POST',
                         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({ action: "logEvaluation", username: currentUser, token: getToken(), force: true, ...formValues })
+                        body: JSON.stringify({ action: "logEvaluation", username: currentUser, token: getToken(), force: true, .....formValues })
                     }).then(r2 => r2.json()).then(d2 => {
                         if (d2.result === "success") {
                             Swal.fire({ icon: 'success', title: 'Kaydedildi', timer: 1500, showConfirmButton: false });
@@ -3515,7 +3515,7 @@ async function logEvaluationPopup() {
         fetch(SCRIPT_URL, { 
             method: 'POST', 
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ action: "logEvaluation", username: currentUser, token: getToken(), ...formValues }) 
+            body: JSON.stringify({ action: "logEvaluation", username: currentUser, token: getToken(), .....formValues }) 
         })
         .then(r => r.json()).then(d => {
             if (d.result === "success") { 
@@ -3603,7 +3603,7 @@ async function editEvaluation(targetCallId) {
         fetch(SCRIPT_URL, { 
             method: 'POST', 
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ action: "updateEvaluation", username: currentUser, token: getToken(), ...formValues }) 
+            body: JSON.stringify({ action: "updateEvaluation", username: currentUser, token: getToken(), .....formValues }) 
         })
         .then(r => r.json()).then(d => {
             if (d.result === "success") { 
