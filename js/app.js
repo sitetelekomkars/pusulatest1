@@ -3650,138 +3650,107 @@ function hideHomeScreen(){
     if (grid) grid.style.display = 'grid';
 }
 
+// =========================
+// ANA SAYFA: Yayın Akışı'ndan "Önemli Maçlar"
+// =========================
+function _isImportantBroadcastItem(it){
+    const ev = String(it?.event || "").toLowerCase();
+    if(!ev) return false;
 
-// -------------------------
-// ANA SAYFA BLOKLARI (Admin düzenlenebilir)
-// -------------------------
-let homeBlocks = { today: null, ann: null, quote: null };
+    // manuel işaret: başlıkta ★ veya [ONEMLI] / [ÖNEMLİ]
+    if (ev.includes("★") || ev.includes("[onemli]") || ev.includes("[önemli]") || ev.includes("önemli") || ev.includes("derbi") || ev.includes("final")) return true;
 
-async function loadHomeBlocks(){
-    try{
-        const res = await fetch(SCRIPT_URL, {
-            method: 'POST',
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({ action: "getHomeBlocks", username: currentUser, token: safeGetToken() })
-        });
-        const data = await res.json();
-        if(data && data.result === "success"){
-            const b = data.blocks || {};
-            homeBlocks.today = b.today || null;
-            homeBlocks.ann = b.ann || null;
-            homeBlocks.quote = b.quote || null;
-            applyHomeBlocksToUI();
-        }
-    }catch(e){
-        console.warn("HomeBlocks yüklenemedi:", e);
-    }
+    // maç kalıbı: "A vs B", "A - B" gibi
+    const looksLikeMatch = /(\bvs\b|\sv\.\s|\s-\s|\s–\s|\s—\s)/i.test(it?.event || "");
+    if(!looksLikeMatch) return false;
+
+    // bazı program/sunum başlıklarını ele (tam garanti değil ama iyi filtre)
+    const notMatchHints = ["özet", "analiz", "stüdyo", "tekrar", "program", "magazin", "belgesel"];
+    if (notMatchHints.some(x => ev.includes(x))) return false;
+
+    return true;
 }
 
-function applyHomeBlocksToUI(){
-    // Admin butonları
-    try{
-        const show = !!isAdminMode;
-        const bt1 = document.getElementById('home-edit-today');
-        const bt2 = document.getElementById('home-edit-ann');
-        const bt3 = document.getElementById('home-edit-quote');
-        if(bt1) bt1.style.display = show ? 'inline-flex' : 'none';
-        if(bt2) bt2.style.display = show ? 'inline-flex' : 'none';
-        if(bt3) bt3.style.display = show ? 'inline-flex' : 'none';
-    }catch(e){}
+function _getBroadcastEpoch(it){
+    const ep = Number(it?.startEpoch || 0);
+    if (ep) return ep;
 
-    // Quote alanı
-    const quoteEl = document.getElementById('home-quote');
-    if(quoteEl){
-        const q = (homeBlocks.quote && (homeBlocks.quote.content || "").trim()) ? homeBlocks.quote.content : "";
-        quoteEl.innerHTML = q ? escapeHtml(q).replace(/\n/g,'<br>') : '<span style="opacity:.55">Henüz söz eklenmedi.</span>';
-    }
+    // startEpoch yoksa dateISO + time'dan üretmeye çalış
+    const dateISO = String(it?.dateISO || "").trim(); // "YYYY-MM-DD"
+    const time = String(it?.time || "").trim(); // "HH:mm" veya "HH:mm:ss"
+    if(!dateISO) return 0;
 
-    // Duyurular paneli (orta kutu): en güncel 4 duyuru + tıkla => duyurular modali
-    const annEl = document.getElementById('home-ann');
-    if(annEl){
-        const custom = (homeBlocks.ann && (homeBlocks.ann.content || "").trim()) ? homeBlocks.ann.content : "";
-        if(custom){
-            annEl.innerHTML = `<div style="padding:12px;border:1px solid #eef2f7;border-radius:12px;background:#fff;cursor:pointer" onclick="openNews()">
-                ${escapeHtml(custom).replace(/\n/g,'<br>')}
-            </div>`;
-        }else{
-            const latest = (newsData || []).slice(0,4);
-            if(!latest.length){
-                annEl.innerHTML = '<span style="opacity:.65">Henüz duyuru yok.</span>';
-            }else{
-                annEl.innerHTML = latest.map(n=>`
-                    <div class="home-item" style="cursor:pointer" onclick="openNews()">
-                        <div style="font-size:.75rem;color:#8a8a8a;font-weight:900">${escapeHtml(n.date||'')}</div>
-                        <div style="font-weight:900;color:#0e1b42;margin-top:2px">${escapeHtml(n.title||'')}</div>
-                        <div style="color:#555;margin-top:6px;line-height:1.45">${escapeHtml((n.desc||'')).slice(0,110)}${(n.desc||'').length>110?'...':''}</div>
-                    </div>
-                `).join('') + `<button class="btn btn-copy" style="margin-top:8px;justify-content:center" onclick="openNews()">Tüm Duyurular</button>`;
-            }
-        }
-    }
+    let hh = 0, mm = 0;
+    const m = time.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+    if(m){ hh = Number(m[1]||0); mm = Number(m[2]||0); }
 
-    // Bugün paneli: custom varsa onu göster, yoksa renderHomePanels içindeki varsayılan akış
-    // renderHomePanels zaten çağrılıyor; burada sadece override edilecekse override ediyoruz.
+    // Europe/Istanbul için basit yaklaşım (backend zaten local time gönderiyor genelde)
+    const d = new Date(dateISO + "T00:00:00");
+    if (isNaN(d.getTime())) return 0;
+    d.setHours(hh, mm, 0, 0);
+    return d.getTime();
+}
+
+async function _loadHomeImportantMatchesIntoToday(){
     const todayEl = document.getElementById('home-today');
-    if(todayEl){
-        const custom = (homeBlocks.today && (homeBlocks.today.content || "").trim()) ? homeBlocks.today.content : "";
-        if(custom){
-            todayEl.innerHTML = `<div style="padding:12px;border:1px solid #eef2f7;border-radius:12px;background:#fff;cursor:pointer" onclick="openNews()">
-                ${escapeHtml(custom).replace(/\n/g,'<br>')}
-            </div>`;
-        }
+    if(!todayEl) return;
+
+    // küçük bir yer tutucu (sessiz)
+    const slotId = "home-important-matches";
+    if(!document.getElementById(slotId)){
+        const slot = document.createElement('div');
+        slot.id = slotId;
+        slot.style.marginTop = "10px";
+        todayEl.appendChild(slot);
     }
-}
+    const slot = document.getElementById(slotId);
 
-async function editHomeBlock(key){
-    if(!isAdminMode) return;
-    const labels = { today: "Bugün Neler Var?", ann: "Duyurular", quote: "Günün Sözü" };
-    const cur = (homeBlocks && homeBlocks[key] && homeBlocks[key].content) ? homeBlocks[key].content : "";
-    const curTitle = (homeBlocks && homeBlocks[key] && homeBlocks[key].title) ? homeBlocks[key].title : (labels[key] || key);
-    const curVis = (homeBlocks && homeBlocks[key] && homeBlocks[key].visibleGroups) ? homeBlocks[key].visibleGroups : "";
-
-    const { value: formValues } = await Swal.fire({
-        title: `Düzenle: ${labels[key] || key}`,
-        html: `
-          <input id="hb-title" class="swal2-input" placeholder="Başlık (opsiyonel)" value="${escapeForJsString(curTitle)}">
-          <textarea id="hb-content" class="swal2-textarea" placeholder="İçerik" style="min-height:140px">${escapeHtml(cur)}</textarea>
-          <input id="hb-vis" class="swal2-input" placeholder="Görünecek Gruplar (CSV - boşsa herkes)" value="${escapeForJsString(curVis)}">
-          <div style="text-align:left; font-size:.8rem; color:#777; margin-top:6px">
-            İpucu: Duyuru kutusuna yazmazsan sistem otomatik son duyuruları gösterir.
-          </div>
-        `,
-        focusConfirm: false,
-        showCancelButton: true,
-        confirmButtonText: 'Kaydet',
-        cancelButtonText: 'Vazgeç',
-        preConfirm: () => {
-            const title = document.getElementById('hb-title').value || '';
-            const content = document.getElementById('hb-content').value || '';
-            const visibleGroups = document.getElementById('hb-vis').value || '';
-            return { title, content, visibleGroups };
-        }
-    });
-
-    if(!formValues) return;
-
-    Swal.fire({ title: 'Kaydediliyor...', didOpen: () => Swal.showLoading(), showConfirmButton:false, allowOutsideClick:false });
     try{
-        const res = await fetch(SCRIPT_URL, {
-            method: 'POST',
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({ action: "updateHomeBlock", username: currentUser, token: safeGetToken(), key, ...formValues })
-        });
-        const data = await res.json();
-        if(data && data.result === "success"){
-            Swal.fire({ icon:'success', title:'Kaydedildi', timer:1200, showConfirmButton:false });
-            await loadHomeBlocks();
-        }else{
-            Swal.fire('Hata', (data && data.message) ? data.message : 'Kaydedilemedi', 'error');
+        // fetchBroadcastFlow projede mevcut (Yayın Akışı butonu da bunu kullanıyor)
+        if (typeof fetchBroadcastFlow !== "function") return;
+
+        const items = await fetchBroadcastFlow();
+        const now = Date.now();
+        const horizon = now + (48 * 60 * 60 * 1000); // 48 saat
+
+        const important = (items||[])
+            .filter(_isImportantBroadcastItem)
+            .map(it => ({...it, _ep: _getBroadcastEpoch(it)}))
+            .filter(it => it._ep && it._ep >= now && it._ep <= horizon)
+            .sort((a,b) => a._ep - b._ep)
+            .slice(0, 4);
+
+        if(!important.length){
+            slot.innerHTML = "";
+            return;
         }
+
+        slot.innerHTML = `
+          <div style="display:flex;align-items:center;justify-content:space-between;margin:10px 0 8px 0;">
+            <div style="font-weight:900;color:#0e1b42;display:flex;gap:8px;align-items:center;">
+              <i class="fas fa-futbol" style="color:#fabb00"></i> Önemli Maçlar
+            </div>
+            <button class="btn btn-copy" style="padding:6px 10px" onclick="openBroadcastFlow()">Tümü</button>
+          </div>
+          ${important.map(it => `
+            <div onclick="openBroadcastFlow()" style="cursor:pointer;padding:10px;border:1px solid #eef2f7;border-radius:10px;margin-bottom:10px;background:#fff">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                <div style="font-weight:900;color:#0e1b42;min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                  ${escapeHtml(String(it.event||"-"))}
+                </div>
+                <div style="font-weight:900;color:#0e1b42;white-space:nowrap">
+                  ${escapeHtml(String(it.time||""))}
+                </div>
+              </div>
+              ${it.announcer ? `<div style="margin-top:6px;color:#666;font-size:.85rem"><i class="fas fa-microphone"></i> ${escapeHtml(String(it.announcer))}</div>` : ``}
+            </div>
+          `).join("")}
+        `;
     }catch(e){
-        Swal.fire('Hata', 'Sunucu hatası', 'error');
+        // hata olsa bile ana sayfayı bozma
+        try{ slot.innerHTML = ""; }catch(_){}
     }
 }
-
 
 function renderHomePanels(){
     // Bugün kutusu: en güncel 3 duyuru + yaklaşan yayın akışı (varsa)
@@ -3792,7 +3761,7 @@ function renderHomePanels(){
             todayEl.innerHTML = 'Henüz duyuru yok.';
         }else{
             todayEl.innerHTML = latest.map(n=>`
-                <div class="home-item" style="padding:10px;border:1px solid #eef2f7;border-radius:10px;margin-bottom:10px;background:#fff;cursor:pointer" onclick="openNews()">
+                <div style="padding:10px;border:1px solid #eef2f7;border-radius:10px;margin-bottom:10px;background:#fff">
                   <div style="font-size:.78rem;color:#8a8a8a;font-weight:800">${escapeHtml(n.date||'')}</div>
                   <div style="font-weight:900;color:#0e1b42;margin-top:2px">${escapeHtml(n.title||'')}</div>
                   <div style="color:#555;margin-top:6px;line-height:1.45">${escapeHtml((n.desc||'')).slice(0,160)}${(n.desc||'').length>160?'...':''}</div>
@@ -3800,6 +3769,10 @@ function renderHomePanels(){
             `).join('');
         }
     }
+
+    // Yayın akışı: önemli maçları Bugün kutusuna ekle
+    _loadHomeImportantMatchesIntoToday();
+
 
     // Favoriler kutusu: favori kartların ilk 6'sı
     const favEl = document.getElementById('home-favs');
@@ -3819,10 +3792,7 @@ function renderHomePanels(){
             `).join('');
         }
     }
-    // HomeBlocks override/extra paneller
-    applyHomeBlocksToUI();
 }
-
 
 // Kart detayını doğrudan açmak için küçük bir yardımcı
 function openCardDetail(cardId){
