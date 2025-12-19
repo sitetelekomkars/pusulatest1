@@ -3650,198 +3650,147 @@ function hideHomeScreen(){
     if (grid) grid.style.display = 'grid';
 }
 
-function renderHomePanels(){
-  renderHomeTodayFromBroadcast();
-  renderHomeAnnouncements();
-  loadHomeBlocks();
-  renderHomeFavorites();
-}
+// --- HOME BLOCKS (Günün Sözü) ---
+let homeBlocks = null;
 
-function _todayISO(){
-  const d = new Date();
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth()+1).padStart(2,'0');
-  const dd = String(d.getDate()).padStart(2,'0');
-  return `${yyyy}-${mm}-${dd}`;
-}
-
-async function renderHomeTodayFromBroadcast(){
-  const todayEl = document.getElementById('home-today');
-  if(!todayEl) return;
-
-  todayEl.innerHTML = '<div style="opacity:.7">Yükleniyor...</div>';
-
-  try{
-    const itemsRaw = await fetchBroadcastFlow();
-    const todayIso = _todayISO();
-    const items = (itemsRaw||[])
-      .filter(it => String(it?.dateISO || it?.date || '').trim() === todayIso)
-      .sort((a,b)=>Number(a?.startEpoch||0)-Number(b?.startEpoch||0));
-
-    if(!items.length){
-      todayEl.innerHTML = '<div style="opacity:.75">Bugün için yayın akışı bulunamadı.</div>';
-      return;
-    }
-
-    const listHtml = items.slice(0,8).map(it=>{
-      const time = String(it?.time||'').trim();
-      const event = String(it?.event||'').trim();
-      const ann = String(it?.announcer||'').trim();
-      return `
-        <div style="padding:10px;border:1px solid #eef2f7;border-radius:10px;margin-bottom:10px;background:#fff">
-          <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start">
-            <div style="font-weight:900;color:#0e1b42;line-height:1.25">${escapeHtml(event||'-')}</div>
-            <div style="font-weight:900;color:#0e1b42;white-space:nowrap">${escapeHtml(time||'')}</div>
-          </div>
-          <div style="margin-top:6px;color:#666;font-size:.85rem;display:flex;gap:10px;flex-wrap:wrap">
-            <span><i class="fas fa-microphone"></i> ${escapeHtml(ann||'-')}</span>
-          </div>
-        </div>
-      `;
-    }).join('');
-
-    const moreBtn = (items.length>8)
-      ? '<div style="margin-top:8px"><button class="btn btn-copy" onclick="openBroadcastFlow()">Tümünü Gör</button></div>'
-      : '';
-
-    todayEl.innerHTML = listHtml + moreBtn;
-  }catch(e){
-    todayEl.innerHTML = '<div style="opacity:.75">Yayın akışı alınamadı.</div>';
-  }
-}
-
-function renderHomeAnnouncements(){
-  const annEl = document.getElementById('home-ann');
-  if(!annEl) return;
-
-  const latest = (newsData || []).slice(0,4);
-  if(!latest.length){
-    annEl.innerHTML = '<div style="opacity:.75">Henüz duyuru yok.</div>';
-    return;
-  }
-
-  annEl.innerHTML = latest.map(n=>`
-    <div style="padding:10px;border:1px solid #eef2f7;border-radius:10px;margin-bottom:10px;background:#fff;cursor:pointer" onclick="openNews()">
-      <div style="font-size:.78rem;color:#8a8a8a;font-weight:800">${escapeHtml(n.date||'')}</div>
-      <div style="font-weight:900;color:#0e1b42;margin-top:2px">${escapeHtml(n.title||'')}</div>
-      <div style="color:#555;margin-top:6px;line-height:1.45">${escapeHtml((n.desc||'')).slice(0,140)}${(n.desc||'').length>140?'...':''}</div>
-    </div>
-  `).join('') + '<div style="margin-top:8px"><button class="btn btn-copy" onclick="openNews()">Tüm Duyurular</button></div>';
-}
-
-function renderHomeFavorites(){
-  const favEl = document.getElementById('home-favs');
-  if(!favEl) return;
-
-  const favs = (cardsData||[]).filter(c=>isFavorite(c.id)).slice(0,6);
-  if(!favs.length){
-    favEl.innerHTML = 'Henüz favori eklemedin. Kartlarda ⭐ simgesine basarak ekleyebilirsin.';
-    return;
-  }
-
-  favEl.innerHTML = favs.map(c=>`
-    <div style="display:flex;gap:10px;align-items:flex-start;border:1px solid #eef2f7;border-radius:10px;padding:10px;margin-bottom:10px">
-      <div style="font-weight:900;color:#0e1b42;min-width:0;flex:1">
-        <div style="font-size:.75rem;color:#8a8a8a;font-weight:900">${escapeHtml(c.category||'')}</div>
-        <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(c.title||'')}</div>
-      </div>
-      <button class="btn btn-copy" style="white-space:nowrap" onclick="openCardDetail('${escapeForJsString(c.id)}')">Aç</button>
-    </div>
-  `).join('');
-}
-
-/* -------------------------
-   HOME BLOCKS (quote)
---------------------------*/
-let homeBlocksCache = null;
-
-async function loadHomeBlocks(){
-  // edit butonları sadece admin
-  try{
-    const show = !!isAdminMode;
-    const btnToday = document.getElementById('home-edit-today');
-    const btnAnn = document.getElementById('home-edit-ann');
-    const btnQuote = document.getElementById('home-edit-quote');
-    if(btnToday) btnToday.style.display = show ? 'inline-flex' : 'none';
-    if(btnAnn) btnAnn.style.display = show ? 'inline-flex' : 'none';
-    if(btnQuote) btnQuote.style.display = show ? 'inline-flex' : 'none';
-  }catch(e){}
-
-  try{
+async function fetchHomeBlocks(){
     const r = await fetch(SCRIPT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action:'getHomeBlocks', username: currentUser, token: safeGetToken() })
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "getHomeBlocks", username: currentUser, token: getToken() })
     });
     const d = await r.json();
-    if(d && d.result === 'success') homeBlocksCache = d.blocks || {};
-  }catch(e){}
-
-  const qEl = document.getElementById('home-quote');
-  if(qEl){
-    const qb = (homeBlocksCache||{}).quote || null;
-    const txt = (qb && qb.content) ? String(qb.content) : '';
-    qEl.innerHTML = txt
-      ? `<div style="white-space:pre-wrap;line-height:1.6">${escapeHtml(txt)}</div>`
-      : '<div style="opacity:.7">Günün sözü henüz eklenmedi.</div>';
-  }
+    if(!d || d.result !== "success") throw new Error((d && d.message) ? d.message : "Ana sayfa blokları alınamadı.");
+    return d.blocks || {};
 }
 
 async function editHomeBlock(key){
-  if(!isAdminMode){
-    Swal.fire('Yetkisiz','Bu alanı sadece admin düzenleyebilir.','warning');
-    return;
-  }
+    // Sadece 'quote' için kullanılacak (buton sadece onda var)
+    if(!isAdminMode) return;
+    if(key !== 'quote') return;
 
-  const map = { today: 'Bugün Neler Var?', ann: 'Duyurular', quote: 'Günün Sözü' };
-  const k = String(key||'').trim();
-  if(!k) return;
+    let current = (homeBlocks && homeBlocks.quote && homeBlocks.quote.content) ? String(homeBlocks.quote.content) : "";
 
-  const cur = (homeBlocksCache||{})[k] || { title:'', content:'', visibleGroups:'' };
+    const { value: text } = await Swal.fire({
+        title: "Günün Sözü",
+        input: "textarea",
+        inputValue: current,
+        inputPlaceholder: "Söz / not ekle...",
+        showCancelButton: true,
+        confirmButtonText: "Kaydet",
+        cancelButtonText: "Vazgeç",
+        inputAttributes: { "aria-label": "Günün sözü" }
+    });
+    if(text === undefined) return;
 
-  const { value: form } = await Swal.fire({
-    title: `${map[k] || k} Düzenle`,
-    html: `
-      <div style="text-align:left">
-        <label style="font-weight:800;font-size:.85rem">Başlık (opsiyonel)</label>
-        <input id="hb-title" class="swal2-input" value="${escapeHtml(String(cur.title||''))}" placeholder="Başlık">
-        <label style="font-weight:800;font-size:.85rem">İçerik</label>
-        <textarea id="hb-content" class="swal2-textarea" style="min-height:140px" placeholder="İçerik">${escapeHtml(String(cur.content||''))}</textarea>
-        <label style="font-weight:800;font-size:.85rem">Görünen Gruplar (opsiyonel)</label>
-        <input id="hb-visible" class="swal2-input" value="${escapeHtml(String(cur.visibleGroups||''))}" placeholder="Örn: Chat,Teknik">
-        <div style="margin-top:6px;color:#777;font-size:.8rem">Boş bırakırsan herkese görünür.</div>
-      </div>
-    `,
-    showCancelButton: true,
-    confirmButtonText: '💾 Kaydet',
-    cancelButtonText: 'Vazgeç',
-    preConfirm: () => {
-      const title = document.getElementById('hb-title').value || '';
-      const content = document.getElementById('hb-content').value || '';
-      const visibleGroups = document.getElementById('hb-visible').value || '';
-      return { key:k, title, content, visibleGroups };
-    }
-  });
-
-  if(!form) return;
-
-  try{
-    Swal.fire({ title:'Kaydediliyor...', didOpen:()=>Swal.showLoading(), showConfirmButton:false });
+    Swal.fire({ title: "Kaydediliyor...", didOpen: () => Swal.showLoading(), showConfirmButton: false });
     const r = await fetch(SCRIPT_URL, {
-      method:'POST',
-      headers:{ 'Content-Type':'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action:'updateHomeBlock', username: currentUser, token: safeGetToken(), data: form })
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "updateHomeBlock", username: currentUser, token: getToken(), key: "quote", title: "Günün Sözü", content: String(text||"").trim(), visibleGroups: "" })
     });
     const d = await r.json();
-    if(d && d.result === 'success'){
-      Swal.fire('Kaydedildi','Güncellendi.','success');
-      await loadHomeBlocks();
-    }else{
-      Swal.fire('Hata', (d && d.message) ? d.message : 'Kaydedilemedi.', 'error');
+    if(!d || d.result !== "success"){
+        Swal.fire("Hata", (d && d.message) ? d.message : "Güncelleme başarısız.", "error");
+        return;
     }
-  }catch(e){
-    Swal.fire('Hata','Kaydedilemedi.','error');
-  }
+    Swal.fire({ icon: "success", title: "Kaydedildi", timer: 900, showConfirmButton: false });
+    try{ homeBlocks = await fetchHomeBlocks(); }catch(e){}
+    renderHomePanels();
+}
+
+function _todayISO_istanbul(){
+    try{
+        // sv-SE => YYYY-MM-DD
+        return new Intl.DateTimeFormat('sv-SE', { timeZone:'Europe/Istanbul', year:'numeric', month:'2-digit', day:'2-digit' }).format(new Date());
+    }catch(e){
+        const d = new Date();
+        const y = d.getFullYear();
+        const m = ("0"+(d.getMonth()+1)).slice(-2);
+        const dd = ("0"+d.getDate()).slice(-2);
+        return `${y}-${m}-${dd}`;
+    }
+}
+
+async function renderHomePanels(){
+    // Bugün kutusu: Yayın Akışı'nda bugünün maçları
+    const todayEl = document.getElementById('home-today');
+    if(todayEl){
+        todayEl.innerHTML = '<span style="color:#777">Yükleniyor...</span>';
+        try{
+            const all = await fetchBroadcastFlow();
+            const todayISO = _todayISO_istanbul();
+            const todays = (all||[]).filter(x => String(x?.dateISO||'') === todayISO);
+            const important = todays.filter(x => String(x?.importance||'').toLowerCase().replace('ö','o') === 'onemli');
+            const list = (important.length ? important : todays).slice(0, 8);
+            if(!list.length){
+                todayEl.innerHTML = 'Bugün için yayın bulunamadı.';
+            }else{
+                todayEl.innerHTML = list.map(it=>`
+                    <div style="padding:10px;border:1px solid #eef2f7;border-radius:10px;margin-bottom:10px;background:#fff;cursor:pointer" onclick="openBroadcastFlow()">
+                      <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
+                        <div style="font-weight:900;color:#0e1b42;line-height:1.25">${escapeHtml(it.event||'-')}</div>
+                        <div style="font-weight:900;color:#0e1b42;white-space:nowrap">${escapeHtml(it.time||'')}</div>
+                      </div>
+                      <div style="margin-top:6px;font-size:.86rem;color:#666;display:flex;gap:10px;flex-wrap:wrap">
+                        <span><i class="fas fa-microphone"></i> ${escapeHtml(it.announcer||'-')}</span>
+                      </div>
+                    </div>
+                `).join('');
+            }
+        }catch(e){
+            todayEl.innerHTML = '<span style="color:#d9534f;font-weight:800">Yayın akışı alınamadı.</span>';
+        }
+    }
+
+    // Duyurular kutusu: en güncel duyurular
+    const annEl = document.getElementById('home-ann');
+    if(annEl){
+        const active = (newsData || []).filter(n => n.status !== 'Pasif');
+        const latest = active.slice(0,4);
+        if(!latest.length){
+            annEl.innerHTML = 'Henüz duyuru yok.';
+        }else{
+            annEl.innerHTML = latest.map(n=>`
+                <div style="padding:10px;border:1px solid #eef2f7;border-radius:10px;margin-bottom:10px;background:#fff;cursor:pointer" onclick="openNews()">
+                  <div style="font-size:.78rem;color:#8a8a8a;font-weight:800">${escapeHtml(n.date||'')}</div>
+                  <div style="font-weight:900;color:#0e1b42;margin-top:2px">${escapeHtml(n.title||'')}</div>
+                  <div style="color:#555;margin-top:6px;line-height:1.45">${escapeHtml((n.desc||'')).slice(0,140)}${(n.desc||'').length>140?'...':''}</div>
+                </div>
+            `).join('');
+        }
+    }
+
+    // Günün Sözü
+    const quoteEl = document.getElementById('home-quote');
+    const quoteBtn = document.getElementById('home-edit-quote');
+    if(quoteBtn) quoteBtn.style.display = (isAdminMode ? 'inline-flex' : 'none');
+    if(quoteEl){
+        if(!homeBlocks){
+            try{ homeBlocks = await fetchHomeBlocks(); }catch(e){ homeBlocks = {}; }
+        }
+        const txt = (homeBlocks && homeBlocks.quote && homeBlocks.quote.content) ? String(homeBlocks.quote.content).trim() : '';
+        quoteEl.innerHTML = txt ? `<div class="home-quote-box">${escapeHtml(txt)}</div>` : '<span style="color:#777">Söz eklenmedi.</span>';
+    }
+
+    // Favoriler kutusu: favori kartların ilk 6'sı
+    const favEl = document.getElementById('home-favs');
+    if(favEl){
+        const favs = (cardsData||[]).filter(c=>isFavorite(c.id)).slice(0,6);
+        if(favs.length===0){
+            favEl.innerHTML = 'Henüz favori eklemedin. Kartlarda ⭐ simgesine basarak ekleyebilirsin.';
+        }else{
+            favEl.innerHTML = favs.map(c=>`
+                <div style="display:flex;gap:10px;align-items:flex-start;border:1px solid #eef2f7;border-radius:10px;padding:10px;margin-bottom:10px">
+                  <div style="font-weight:900;color:#0e1b42;min-width:0;flex:1">
+                    <div style="font-size:.75rem;color:#8a8a8a;font-weight:900">${escapeHtml(c.category||'')}</div>
+                    <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(c.title||'')}</div>
+                  </div>
+                  <button class="btn btn-copy" style="white-space:nowrap" onclick="openCardDetail('${escapeForJsString(c.id)}')">Aç</button>
+                </div>
+            `).join('');
+        }
+    }
 }
 
 // Kart detayını doğrudan açmak için küçük bir yardımcı
@@ -3917,7 +3866,9 @@ async function openTelesalesArea(){
                 ? window.telesalesOffersFromSheet
                 : TELESales_OFFERS_FALLBACK);
     }
-renderTelesalesDataOffers();
+
+    hydrateTelesalesSegmentFilter();
+    renderTelesalesDataOffers();
     renderTelesalesScripts();
     renderTelesalesDocs();
     switchTelesalesTab('data');
@@ -3942,17 +3893,25 @@ function switchTelesalesTab(tab){
     if(el) el.classList.add('active');
 }
 
+function hydrateTelesalesSegmentFilter(){
+    const sel = document.getElementById('t-data-seg');
+    if(!sel) return;
+    const segs = Array.from(new Set((telesalesOffers||[]).map(o=>o.segment).filter(Boolean))).sort();
+    sel.innerHTML = '<option value="all">Tüm Segmentler</option>' + segs.map(s=>`<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+}
 
 function renderTelesalesDataOffers(){
     const grid = document.getElementById('t-data-grid');
     if(!grid) return;
 
+    const seg = (document.getElementById('t-data-seg')?.value)||'all';
     const q = (document.getElementById('t-data-search')?.value||'').toLowerCase();
 
     const list = (telesalesOffers||[]).filter(o=>{
+        const okSeg = seg==='all' || (o.segment===seg);
         const hay = `${o.title||''} ${o.desc||''}`.toLowerCase();
         const okQ = !q || hay.includes(q);
-        return okQ;
+        return okSeg && okQ;
     });
 
     if(list.length===0){
