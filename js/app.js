@@ -493,9 +493,7 @@ function checkSession() {
             if (savedRole === 'qusers') {
                 const grid = document.getElementById('cardGrid'); if (grid) grid.style.display = 'none';
                 const controls = document.querySelector('.control-wrapper'); if (controls) controls.style.display = 'none';
-                const ticker = document.querySelector('.news-ticker-box'); if (ticker) ticker.style.display = 'none';
-
-                openQualityArea(); // Yeni Full Screen Modül
+                const ticker = document.querySelector('.news-ticker-box'); openQualityArea(); // Yeni Full Screen Modül
             }
         }
     }
@@ -558,8 +556,7 @@ function girisYap() {
                     if (savedRole === 'qusers') { 
                         const grid = document.getElementById('cardGrid'); if (grid) grid.style.display = 'none';
                         const controls = document.querySelector('.control-wrapper'); if (controls) controls.style.display = 'none';
-                        const ticker = document.querySelector('.news-ticker-box'); if (ticker) ticker.style.display = 'none';
-                        openQualityArea();
+                        const ticker = document.querySelector('.news-ticker-box'); openQualityArea();
                     }
                 }
             }
