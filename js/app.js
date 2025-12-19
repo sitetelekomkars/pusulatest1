@@ -12,6 +12,17 @@ function showGlobalError(message){
   }catch(e){}
 }
 
+
+// --- Sticky offset helper (ticker header altında sabit kalsın) ---
+function updateStickyOffsets(){
+  try{
+    const header = document.querySelector('.header');
+    if(!header) return;
+    const h = header.offsetHeight || 0;
+    if(h>0) document.documentElement.style.setProperty('--header-sticky-height', h + 'px');
+  }catch(e){}
+}
+window.addEventListener('resize', ()=>{ try{ updateStickyOffsets(); }catch(e){} });
 // Apps Script URL'si
 let SCRIPT_URL = localStorage.getItem("PUSULA_SCRIPT_URL") || "https://script.google.com/macros/s/AKfycbz6dDFHv-49h-13EwNPVCqpj-H4xjRqNpkz1JPvkixDkOkM_AUyN2cgYpH7-j9a5Tg/exec"; // Apps Script Web App URL
 
@@ -452,7 +463,7 @@ function copyText(t) {
 }
 document.addEventListener('contextmenu', event => event.preventDefault());
 document.onkeydown = function(e) { if(e.keyCode == 123) return false; }
-document.addEventListener('DOMContentLoaded', () => { checkSession(); });
+document.addEventListener('DOMContentLoaded', () => { updateStickyOffsets(); checkSession(); });
 // --- SESSION & LOGIN ---
 function checkSession() {
     const savedUser = localStorage.getItem("sSportUser");
@@ -484,6 +495,7 @@ function checkSession() {
             document.getElementById("maintenance-screen").style.display = "flex";
         } else {
             document.getElementById("main-app").style.display = "block";
+            try{ setTimeout(updateStickyOffsets, 0); }catch(e){}
 
             loadContentData();
             loadWizardData();
@@ -551,6 +563,7 @@ function girisYap() {
                     document.getElementById("maintenance-screen").style.display = "flex";
                 } else {
                     document.getElementById("main-app").style.display = "block";
+            try{ setTimeout(updateStickyOffsets, 0); }catch(e){}
                     loadContentData();
                     loadWizardData();
                     loadTechWizardData();
