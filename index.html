@@ -128,6 +128,7 @@
     <div class="q-side-top">
       <div class="q-avatar" id="t-side-avatar">U</div>
       <div class="q-user">
+        <div class="q-user-icon"><i class="fas fa-headset"></i></div>
         <div class="q-name" id="t-side-name">Kullanıcı</div>
         <div class="q-role" id="t-side-role">Temsilci</div>
       </div>
@@ -136,7 +137,6 @@
     <div class="q-nav-menu">
       <div class="q-nav-item active" onclick="switchTelesalesTab('data')"><i class="fas fa-database"></i> Data Teklifleri</div>
       <div class="q-nav-item" onclick="switchTelesalesTab('scripts')"><i class="fas fa-scroll"></i> Scriptler</div>
-      <div class="q-nav-item" onclick="switchTelesalesTab('docs')"><i class="fas fa-file-lines"></i> Dökümanlar</div>
     </div>
     <div class="q-side-bottom">
       <button class="q-logout" onclick="closeFullTelesales()"><i class="fas fa-arrow-left"></i> Geri</button>
@@ -147,7 +147,6 @@
     <div class="q-view">
       <section id="t-view-data" class="q-view-section active">
         <div class="q-toolbar">
-          <select id="t-data-seg" class="q-select"></select>
           <input id="t-data-search" class="q-input" placeholder="Teklif ara..." oninput="renderTelesalesDataOffers()">
           <div class="q-count" id="t-data-count"></div>
         </div>
@@ -156,10 +155,6 @@
       <section id="t-view-scripts" class="q-view-section">
         <div class="q-toolbar"><input id="t-scripts-search" class="q-input" placeholder="Script ara..." oninput="renderTelesalesScripts()"></div>
         <div id="t-scripts-grid" class="q-list"></div>
-      </section>
-      <section id="t-view-docs" class="q-view-section">
-        <div class="q-toolbar"><input id="t-docs-search" class="q-input" placeholder="Döküman ara..." oninput="renderTelesalesDocs()"></div>
-        <div id="t-docs" class="q-list"></div>
       </section>
     </div>
   </div>
