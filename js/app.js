@@ -3869,7 +3869,7 @@ function applyHomeBlocksToUI(){
     }
 
     // Bugün paneli: custom varsa onu göster, yoksa renderHomePanels içindeki varsayılan akış
-    // renderHomePanels zaten çağrılıyor; burada sadece override edilecekse override ediyoruz.
+    // renderHomePanels zaten çağrılıyor; burada custom yoksa "günün önemli karşılaşmaları" otomatik basılır.
     const todayEl = document.getElementById('home-today');
     if(todayEl){
         const custom = (homeBlocks.today && (homeBlocks.today.content || "").trim()) ? homeBlocks.today.content : "";
@@ -3877,7 +3877,47 @@ function applyHomeBlocksToUI(){
             todayEl.innerHTML = `<div style="padding:12px;border:1px solid #eef2f7;border-radius:12px;background:#fff;cursor:pointer" onclick="openNews()">
                 ${escapeHtml(custom).replace(/\n/g,'<br>')}
             </div>`;
+        }else{
+            // Varsayılan: Yayın Akışı'ndan "Önem Durumu = önemli" olan ve BUGÜN'e ait maçları getir
+            // (HomeBlocks'ta içerik boş bırakılırsa otomatik akar)
+            renderHomeTodayImportantMatches();
         }
+    }
+}
+
+// Ana ekran: "Bugün Neler Var?" => Yayın Akışı'ndaki ÖNEMLİ karşılaşmalar (BUGÜN)
+async function renderHomeTodayImportantMatches(){
+    const el = document.getElementById('home-today');
+    if(!el) return;
+    // Eğer admin custom içerik eklediyse üstüne yazmayalım
+    const custom = (homeBlocks.today && (homeBlocks.today.content || "").trim()) ? homeBlocks.today.content : "";
+    if(custom) return;
+
+    el.innerHTML = '<span style="opacity:.65">Yükleniyor...</span>';
+    try{
+        const list = await _getTodayImportantMatches(8);
+        if(!list || !list.length){
+            el.innerHTML = '<span style="opacity:.65">Bugün için önemli karşılaşma yok.</span>';
+            return;
+        }
+
+        const html = (list||[]).map(it=>{
+            const t = _timeToHM_TR(it.time || it.startTime || it["KO/ START TIME"] || "");
+            const title = (it.event || it.title || it.name || it["EVENT NAME - Turkish"] || "").trim();
+            const ann = (it.announcer || it.spiker || it["ANNOUNCER"] || "").trim();
+            return `
+              <div class="home-item" style="cursor:pointer" onclick="openBroadcastFlow()">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+                  <div style="font-weight:900;color:#0e1b42">${escapeHtml(title || 'Karşılaşma')}</div>
+                  ${t ? `<span style="font-weight:900;color:#0e1b42;opacity:.8">${escapeHtml(t)}</span>` : ``}
+                </div>
+                ${ann ? `<div style="margin-top:6px;color:#666;font-size:.92rem">🎙️ ${escapeHtml(ann)}</div>` : ``}
+              </div>`;
+        }).join('');
+
+        el.innerHTML = html + `<button class="btn btn-copy" style="margin-top:8px;justify-content:center" onclick="openBroadcastFlow()">Yayın Akışına Git</button>`;
+    }catch(e){
+        el.innerHTML = '<span style="opacity:.65">Veriler alınamadı.</span>';
     }
 }
 
@@ -4474,7 +4514,6 @@ async function __fetchTechDocs(){
   return rows
     .filter(r => (r.Durum||"").toString().trim().toLowerCase() !== "pasif")
     .map(r => ({
-      row: parseInt(r.__row || r.__ROW || r.row || r.Row || "", 10) || 0,
       categoryKey: __normalizeTechCategory(r.Kategori),
       kategori: (r.Kategori||"").trim(),
       baslik: (r.Başlık || r.Baslik || r.Title || r["Başlık"] || "").toString().trim(),
@@ -4492,148 +4531,6 @@ function __escapeHtml(s){
     "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
   }[m]));
 }
-
-function __techTabLabel(tabKey){
-  if(tabKey==="broadcast") return "Yayın Sorunları";
-  if(tabKey==="access") return "Erişim Sorunları";
-  if(tabKey==="app") return "App Hataları";
-  if(tabKey==="activation") return "Aktivasyon Sorunları";
-  return tabKey;
-}
-
-function __techTabToKategori(tabKey){
-  // Sheet'teki "Kategori" kolonuna yazılacak değer
-  // normalize fonksiyonu ilk kelimeye göre eşleştiriyor; bu yüzden TR başlık kullanıyoruz.
-  return __techTabLabel(tabKey);
-}
-
-async function __techAdminAdd(tabKey){
-  try{
-    if(!isAdminMode) return;
-    const kategori = __techTabToKategori(tabKey);
-    const r = await Swal.fire({
-      title: `Yeni Kayıt • ${kategori}`,
-      html: `
-        <input id="t-title" class="swal2-input" placeholder="Başlık">
-        <textarea id="t-content" class="swal2-textarea" placeholder="İçerik"></textarea>
-        <input id="t-step" class="swal2-input" placeholder="Adım (opsiyonel)">
-        <input id="t-note" class="swal2-input" placeholder="Not (opsiyonel)">
-        <input id="t-link" class="swal2-input" placeholder="Link (opsiyonel)">
-        <select id="t-status" class="swal2-input">
-          <option value="Aktif" selected>Aktif</option>
-          <option value="Pasif">Pasif</option>
-        </select>
-      `,
-      showCancelButton:true,
-      confirmButtonText:"Kaydet",
-      preConfirm: ()=>({
-        kategori,
-        baslik: (document.getElementById("t-title").value||"").trim(),
-        icerik: (document.getElementById("t-content").value||"").trim(),
-        adim: (document.getElementById("t-step").value||"").trim(),
-        not: (document.getElementById("t-note").value||"").trim(),
-        link: (document.getElementById("t-link").value||"").trim(),
-        durum: (document.getElementById("t-status").value||"Aktif").trim(),
-      })
-    });
-    if(!r.isConfirmed) return;
-    if(!r.value.baslik){
-      Swal.fire("Eksik Bilgi","Başlık zorunlu.","warning");
-      return;
-    }
-    await apiCall("addTechDoc", r.value);
-    __techDocsCache = null;
-    await window.switchTechTab(tabKey);
-    Swal.fire({toast:true,position:"top-end",icon:"success",title:"Kaydedildi",showConfirmButton:false,timer:1200});
-  }catch(e){
-    showGlobalError(e.message||"Kaydedilemedi");
-  }
-}
-
-async function __techAdminEdit(tabKey, item){
-  try{
-    if(!isAdminMode) return;
-    const r = await Swal.fire({
-      title: "Kaydı Düzenle",
-      html: `
-        <input id="t-title" class="swal2-input" placeholder="Başlık" value="${__escapeHtml(item.baslik)}">
-        <textarea id="t-content" class="swal2-textarea" placeholder="İçerik">${__escapeHtml(item.icerik||"")}</textarea>
-        <input id="t-step" class="swal2-input" placeholder="Adım (opsiyonel)" value="${__escapeHtml(item.adim||"")}">
-        <input id="t-note" class="swal2-input" placeholder="Not (opsiyonel)" value="${__escapeHtml(item.not||"")}">
-        <input id="t-link" class="swal2-input" placeholder="Link (opsiyonel)" value="${__escapeHtml(item.link||"")}">
-        <select id="t-status" class="swal2-input">
-          <option value="Aktif" ${String(item.durum||"").toLowerCase()!=="pasif"?"selected":""}>Aktif</option>
-          <option value="Pasif" ${String(item.durum||"").toLowerCase()==="pasif"?"selected":""}>Pasif</option>
-        </select>
-      `,
-      showCancelButton:true,
-      confirmButtonText:"Güncelle",
-      preConfirm: ()=>({
-        row: item.row,
-        kategori: __techTabToKategori(tabKey),
-        baslik: (document.getElementById("t-title").value||"").trim(),
-        icerik: (document.getElementById("t-content").value||"").trim(),
-        adim: (document.getElementById("t-step").value||"").trim(),
-        not: (document.getElementById("t-note").value||"").trim(),
-        link: (document.getElementById("t-link").value||"").trim(),
-        durum: (document.getElementById("t-status").value||"Aktif").trim(),
-      })
-    });
-    if(!r.isConfirmed) return;
-    if(!item.row){
-      Swal.fire("Hata","Satır ID bulunamadı. (Sheet'te __row gelmiyor)","error");
-      return;
-    }
-    await apiCall("updateTechDoc", r.value);
-    __techDocsCache = null;
-    await window.switchTechTab(tabKey);
-    Swal.fire({toast:true,position:"top-end",icon:"success",title:"Güncellendi",showConfirmButton:false,timer:1200});
-  }catch(e){
-    showGlobalError(e.message||"Güncellenemedi");
-  }
-}
-
-async function __techAdminDelete(tabKey, item){
-  try{
-    if(!isAdminMode) return;
-    const ok = await Swal.fire({
-      icon:"warning",
-      title:"Silinsin mi?",
-      text:`${item.baslik}`,
-      showCancelButton:true,
-      confirmButtonText:"Sil",
-      cancelButtonText:"Vazgeç"
-    });
-    if(!ok.isConfirmed) return;
-    await apiCall("deleteTechDoc", { row: item.row });
-    __techDocsCache = null;
-    await window.switchTechTab(tabKey);
-    Swal.fire({toast:true,position:"top-end",icon:"success",title:"Silindi",showConfirmButton:false,timer:1200});
-  }catch(e){
-    showGlobalError(e.message||"Silinemedi");
-  }
-}
-
-// Render içinde kullanılan global admin fonksiyonları
-window.techAdminAdd = async function(tabKey){
-  return __techAdminAdd(tabKey);
-};
-window.techAdminEdit = async function(tabKey, row){
-  try{
-    const all = await loadTechDocsIfNeeded(true);
-    const item = (all||[]).find(x => String(x.row) === String(row));
-    if(!item) return;
-    return __techAdminEdit(tabKey, item);
-  }catch(e){ showGlobalError(e.message||"Düzenleme açılamadı"); }
-};
-window.techAdminDelete = async function(tabKey, row){
-  try{
-    const all = await loadTechDocsIfNeeded(true);
-    const item = (all||[]).find(x => String(x.row) === String(row));
-    if(!item) return;
-    return __techAdminDelete(tabKey, item);
-  }catch(e){ showGlobalError(e.message||"Silinemedi"); }
-};
 
 function __renderTechList(tabKey, items){
   const listEl = document.getElementById(
@@ -4663,14 +4560,10 @@ function __renderTechList(tabKey, items){
     searchBox = document.createElement("div");
     searchBox.id = searchId;
     searchBox.style.padding = "12px 0 0 0";
-    const adminBtn = (typeof isAdminMode !== 'undefined' && isAdminMode)
-      ? `<button type="button" class="btn btn-copy" style="background:#0e1b42;color:#fff;border-radius:10px;padding:10px 12px" onclick="techAdminAdd('${tabKey}')"><i class="fas fa-plus"></i> Yeni</button>`
-      : ``;
     searchBox.innerHTML = `
       <div style="display:flex;gap:10px;align-items:center;padding:0 4px 12px 4px">
         <input id="${searchId}-inp" placeholder="Sorunlarda ara..." style="flex:1;padding:10px 12px;border-radius:10px;border:1px solid rgba(0,0,0,.12)">
-        ${adminBtn}
-        <span style="font-size:12px;opacity:.7;min-width:70px;text-align:right" id="${searchId}-cnt"></span>
+        <span style="font-size:12px;opacity:.7" id="${searchId}-cnt"></span>
       </div>
     `;
     listEl.parentElement.insertBefore(searchBox, listEl);
@@ -4679,12 +4572,6 @@ function __renderTechList(tabKey, items){
   function render(filtered){
     document.getElementById(`${searchId}-cnt`).textContent = `${filtered.length} kayıt`;
     listEl.innerHTML = filtered.map((it, idx) => {
-      const adminTools = (typeof isAdminMode !== 'undefined' && isAdminMode && it.row)
-        ? `<span style="float:right;display:flex;gap:8px" onclick="event.stopPropagation();event.preventDefault();">
-             <i class="fas fa-pen" title="Düzenle" style="color:#fabb00;cursor:pointer" onclick="techAdminEdit('${tabKey}',${it.row})"></i>
-             <i class="fas fa-trash" title="Sil" style="color:#d32f2f;cursor:pointer" onclick="techAdminDelete('${tabKey}',${it.row})"></i>
-           </span>`
-        : ``;
       const body = [
         it.icerik ? `<div class="q-doc-body">${it.icerik}</div>` : "",
         it.adim ? `<div class="q-doc-meta"><b>Adım:</b> ${__escapeHtml(it.adim)}</div>` : "",
@@ -4693,7 +4580,7 @@ function __renderTechList(tabKey, items){
       ].join("");
       return `
         <details class="q-accordion" style="margin-bottom:10px;background:#fff;border-radius:12px;border:1px solid rgba(0,0,0,.08);padding:10px 12px">
-          <summary style="cursor:pointer;font-weight:800">${__escapeHtml(it.baslik)}${adminTools}</summary>
+          <summary style="cursor:pointer;font-weight:800">${__escapeHtml(it.baslik)}</summary>
           <div style="padding:10px 2px 2px 2px">${body}</div>
         </details>
       `;
