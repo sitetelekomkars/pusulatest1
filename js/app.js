@@ -16,15 +16,33 @@ function showGlobalError(message){
 let SCRIPT_URL = localStorage.getItem("PUSULA_SCRIPT_URL") || "https://script.google.com/macros/s/AKfycbz6dDFHv-49h-13EwNPVCqpj-H4xjRqNpkz1JPvkixDkOkM_AUyN2cgYpH7-j9a5Tg/exec"; // Apps Script Web App URL
 
 // ---- API CALL helper (Menu/Yetki vs için gerekli) ----
+async function _sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
+
+// NetworkError / geçici Apps Script kesintilerinde otomatik retry
+async function fetchJsonWithRetry(url, options, attempts = 3){
+  let lastErr = null;
+  for(let i=0;i<attempts;i++){
+    try{
+      const res = await fetch(url, options);
+      const json = await res.json();
+      return json;
+    }catch(err){
+      lastErr = err;
+      // 0: 0ms, 1: 450ms, 2: 900ms
+      if(i < attempts-1) await _sleep(450 * (i+1));
+    }
+  }
+  throw lastErr || new Error('NetworkError');
+}
+
 async function apiCall(action, payload = {}) {
   const username = (typeof currentUser !== "undefined" && currentUser) ? currentUser : (localStorage.getItem("sSportUser") || "");
   const token = (typeof getToken === "function" ? getToken() : localStorage.getItem("sSportToken")) || "";
-  const res = await fetch(SCRIPT_URL, {
+  const json = await fetchJsonWithRetry(SCRIPT_URL, {
     method: "POST",
     headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: JSON.stringify({ action, username, token, ...payload })
-  });
-  const json = await res.json();
+  }, 3);
   if (json.result !== "success") throw new Error(json.message || json.error || "API error");
   return json;
 }
@@ -126,6 +144,83 @@ function loadMenuPermissions(){
     }
   }).catch(()=>{});
 }
+
+
+// -------------------- HomeBlocks (Ana Sayfa blokları) --------------------
+let homeBlocksCache = null; // { key: {title,content,visibleGroups,updatedAt,updatedBy} }
+
+function _decodeUnicodeEscapes(v){
+  const s = (v ?? '').toString();
+  return s
+    .replace(/\\u003c/g,'<')
+    .replace(/\\u003e/g,'>')
+    .replace(/\\u0026/g,'&')
+    .replace(/\\n/g,'\n');
+}
+
+function renderHomeBlocks(){
+  try{
+    const quoteEl = document.getElementById('home-quote');
+    if(quoteEl){
+      const q = homeBlocksCache && homeBlocksCache.quote ? (homeBlocksCache.quote.content||'') : '';
+      const qText = _decodeUnicodeEscapes(q).trim();
+      quoteEl.textContent = qText ? qText : 'Bugün için bir söz eklenmemiş.';
+    }
+    const showEd = !!(isAdminMode && isEditingActive);
+    const b1=document.getElementById('home-edit-today'); if(b1) b1.style.display = showEd ? 'inline-flex' : 'none';
+    const b2=document.getElementById('home-edit-ann');   if(b2) b2.style.display = showEd ? 'inline-flex' : 'none';
+    const b3=document.getElementById('home-edit-quote'); if(b3) b3.style.display = showEd ? 'inline-flex' : 'none';
+  }catch(e){}
+}
+
+function loadHomeBlocks(){
+  return apiCall('getHomeBlocks',{}).then(res=>{
+    const items = (res.items || []);
+    homeBlocksCache = {};
+    items.forEach(it=>{
+      if(!it || !it.key) return;
+      homeBlocksCache[it.key] = it;
+    });
+    renderHomeBlocks();
+  }).catch(()=>{});
+}
+
+async function editHomeBlock(key){
+  if(!isAdminMode) return;
+  if(!isEditingActive){
+    Swal.fire('Düzenleme Kapalı','Önce "Düzenlemeyi Aç" yapmalısın.','info');
+    return;
+  }
+  const current = (homeBlocksCache && homeBlocksCache[key] ? (homeBlocksCache[key].content||'') : '');
+  const curText = _decodeUnicodeEscapes(current);
+
+  const titleMap = { today:'Bugün Neler Var?', ann:'Duyurular', quote:'Günün Sözü' };
+  const { value: v } = await Swal.fire({
+    title: (titleMap[key]||'Blok') + ' Düzenle',
+    input: 'textarea',
+    inputValue: curText,
+    inputPlaceholder: 'İçerik...',
+    showCancelButton: true,
+    confirmButtonText: 'Kaydet',
+    cancelButtonText: 'Vazgeç'
+  });
+  if(v === undefined) return;
+
+  Swal.fire({ title:'Kaydediliyor...', didOpen:()=>Swal.showLoading(), showConfirmButton:false });
+  try{
+    await apiCall('updateHomeBlock', {
+      key,
+      title: (homeBlocksCache && homeBlocksCache[key] && homeBlocksCache[key].title) ? homeBlocksCache[key].title : (titleMap[key]||key),
+      content: (v||'').toString(),
+      visibleGroups: (homeBlocksCache && homeBlocksCache[key] && homeBlocksCache[key].visibleGroups) ? homeBlocksCache[key].visibleGroups : ''
+    });
+    await loadHomeBlocks();
+    Swal.fire({ icon:'success', title:'Kaydedildi', timer:1100, showConfirmButton:false });
+  }catch(e){
+    Swal.fire('Hata', (e && e.message) ? e.message : 'Kaydedilemedi', 'error');
+  }
+}
+// -------------------- /HomeBlocks --------------------
 
 // LocAdmin panel
 function openMenuPermissions(){
@@ -358,13 +453,6 @@ window.recalcTotalSliderScore = function() {
 };
 // --- YARDIMCI FONKSİYONLAR ---
 function getToken() { return localStorage.getItem("sSportToken"); }
-function setHomeWelcomeUser(name){
-  try{
-    const el = document.getElementById("home-welcome-user");
-    if(el) el.textContent = (name||"Misafir");
-  }catch(e){}
-}
-
 function getFavs() { return JSON.parse(localStorage.getItem('sSportFavs') || '[]'); }
 function toggleFavorite(title) {
     event.stopPropagation();
@@ -475,7 +563,6 @@ function checkSession() {
         currentUser = savedUser;
         document.getElementById("login-screen").style.display = "none";
         document.getElementById("user-display").innerText = currentUser;
-        setHomeWelcomeUser(currentUser);
 
         checkAdmin(savedRole);
 
@@ -526,12 +613,11 @@ function girisYap() {
     document.querySelector('.login-btn').disabled = true;
     
     const hashedPass = CryptoJS.SHA256(uPass).toString();
-    fetch(SCRIPT_URL, {
+    fetchJsonWithRetry(SCRIPT_URL, {
         method: 'POST',
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({ action: "login", username: uName, password: hashedPass })
-    }).then(response => response.json())
-    .then(data => {
+    }, 3).then(data => {
         loadingMsg.style.display = "none";
         document.querySelector('.login-btn').disabled = false;
         
@@ -552,7 +638,6 @@ function girisYap() {
             } else {
                 document.getElementById("login-screen").style.display = "none";
                 document.getElementById("user-display").innerText = currentUser;
-                setHomeWelcomeUser(currentUser);
                 const savedGroup = data.group || localStorage.getItem('sSportGroup') || '';
                 checkAdmin(savedRole);
                 startSessionTimer();
@@ -583,7 +668,7 @@ function girisYap() {
     }).catch(error => {
         loadingMsg.style.display = "none";
         document.querySelector('.login-btn').disabled = false;
-        errorMsg.innerText = "Sunucu hatası! Lütfen sayfayı yenileyin.";
+        errorMsg.innerText = "Bağlantı sorunu! Lütfen tekrar deneyin.";
         errorMsg.style.display = "block";
     });
 }
@@ -623,7 +708,11 @@ function checkAdmin(role) {
         if(addCardDropdown) addCardDropdown.style.display = 'flex';
         if(quickEditDropdown) {
             quickEditDropdown.style.display = 'flex';
-        const perms = document.getElementById('dropdownPerms'); if(perms) perms.style.display = 'flex';
+
+            // Yetki Yönetimi sadece locadmin'e görünsün
+            const perms = document.getElementById('dropdownPerms');
+            if(perms) perms.style.display = (String(localStorage.getItem('sSportRole')||'').toLowerCase()==='locadmin') ? 'flex' : 'none';
+
             quickEditDropdown.innerHTML = '<i class="fas fa-pen" style="color:var(--secondary);"></i> Düzenlemeyi Aç';
             quickEditDropdown.classList.remove('active');
         }
@@ -634,8 +723,6 @@ function checkAdmin(role) {
 }
 function logout() {
     currentUser = ""; isAdminMode = false; isEditingActive = false;
-    try{ document.getElementById("user-display").innerText = "Misafir"; }catch(e){}
-    setHomeWelcomeUser("Misafir");
     document.body.classList.remove('editing');
     localStorage.removeItem("sSportUser"); localStorage.removeItem("sSportToken"); localStorage.removeItem("sSportRole");
     if (sessionTimeout) clearTimeout(sessionTimeout);
@@ -702,20 +789,21 @@ function loadContentData() {
         document.getElementById('loading').style.display = 'none';
         if (data.result === "success") {
             const rawData = data.data;
+            const __decAll = (s)=> (s ?? '').toString().replace(/\\u003c/g,'<').replace(/\\u003e/g,'>').replace(/\\u0026/g,'&').replace(/\\n/g,'\n');
             database = rawData.filter(i => ['card','bilgi','teknik','kampanya','ikna'].includes(i.Type.toLowerCase())).map(i => ({
-                title: i.Title, category: i.Category, text: i.Text, script: i.Script, code: i.Code, link: i.Link, date: formatDateToDDMMYYYY(i.Date)
+                title: i.Title, category: i.Category, text: __decAll(i.Text), script: __decAll(i.Script), code: __decAll(i.Code), link: __decAll(i.Link), date: formatDateToDDMMYYYY(i.Date)
             }));
             // Yeni eklenenleri üstte göstermek için tarihe göre (azalan) sırala
             database.sort((a,b) => parseDateTRToTS(b.date) - parseDateTRToTS(a.date));
             newsData = rawData.filter(i => i.Type.toLowerCase() === 'news').map(i => ({
-                date: formatDateToDDMMYYYY(i.Date), title: i.Title, desc: i.Text, type: i.Category, status: i.Status
+                date: formatDateToDDMMYYYY(i.Date), title: i.Title, desc: __decAll(i.Text), type: i.Category, status: i.Status
             }));
             sportsData = rawData.filter(i => i.Type.toLowerCase() === 'sport').map(i => ({
-                title: i.Title, icon: i.Icon, desc: i.Text, tip: i.Tip, detail: i.Detail, pronunciation: i.Pronunciation
+                title: i.Title, icon: i.Icon, desc: __decAll(i.Text), tip: __decAll(i.Tip), detail: __decAll(i.Detail), pronunciation: __decAll(i.Pronunciation)
             }));
             try{ applySportsRights(); }catch(e){}
 
-            salesScripts = rawData.filter(i => i.Type.toLowerCase() === 'sales').map(i => ({ title: i.Title, text: i.Text }));
+            salesScripts = rawData.filter(i => i.Type.toLowerCase() === 'sales').map(i => ({ title: i.Title, text: __decAll(i.Text) }));
             quizQuestions = rawData.filter(i => i.Type.toLowerCase() === 'quiz').map(i => ({
                 q: i.Text, opts: i.QuizOptions ? i.QuizOptions.split(',').map(o => o.trim()) : [], a: parseInt(i.QuizAnswer)
             }));
@@ -889,14 +977,21 @@ function showCardDetail(title, text) {
         const t = c.title || c.name || 'Detay';
         const body = (c.text || c.desc || '').toString();
         const script = (c.script || '').toString();
+        const __dec = (s)=> (s ?? '').toString()
+          .replace(/\\u003c/g,'<')
+          .replace(/\\u003e/g,'>')
+          .replace(/\\u0026/g,'&')
+          .replace(/\\n/g,'\n');
+        const bodyNorm = __dec(body).replace(/<br\s*\/?>/gi,'\n');
+        const scriptNorm = __dec(script).replace(/<br\s*\/?>/gi,'\n');
         const alertTxt = (c.alert || '').toString();
         const link = (c.link || '').toString();
         const html = `
           <div style="text-align:left; font-size:1rem; line-height:1.6; white-space:pre-line;">
-            ${escapeHtml(body).replace(/\n/g,'<br>')}
+            ${sanitizeBasicHtml(bodyNorm).replace(/\n/g,'<br>')}
             ${link ? `<div style="margin-top:12px"><a href="${escapeHtml(link)}" target="_blank" rel="noreferrer" style="font-weight:800;color:var(--info);text-decoration:none"><i class=\"fas fa-link\"></i> Link</a></div>` : ''}
             ${script ? `<div class="tech-script-box" style="margin-top:12px">
-                <span class="tech-script-label">Müşteriye iletilecek:</span>${escapeHtml(script).replace(/\n/g,'<br>')}
+                <span class="tech-script-label">Müşteriye iletilecek:</span>${escapeHtml(scriptNorm).replace(/\n/g,'<br>')}
               </div>` : ''}
             ${alertTxt ? `<div class="tech-alert" style="margin-top:12px">${escapeHtml(alertTxt).replace(/\n/g,'<br>')}</div>` : ''}
           </div>`;
@@ -927,7 +1022,6 @@ function toggleEditMode() {
         btn.innerHTML = '<i class="fas fa-pen" style="color:var(--secondary);"></i> Düzenlemeyi Aç';
     }
     filterContent();
-    try{ if(currentCategory==='home') renderHomePanels(); }catch(e){}
     if(document.getElementById('guide-modal').style.display === 'flex') openGuide();
     if(document.getElementById('sales-modal').style.display === 'flex') openSales();
     if(document.getElementById('news-modal').style.display === 'flex') openNews();
@@ -1230,20 +1324,7 @@ function openNews() {
 // ✅ Yayın Akışı (E-Tablo'dan)
 // =========================
 async function fetchBroadcastFlow() {
-    const r = await fetch(SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({
-            action: "getBroadcastFlow",
-            username: (typeof currentUser !== "undefined" ? currentUser : ""),
-            token: (typeof getToken === "function" ? getToken() : "")
-        })
-    });
-
-    const d = await r.json();
-    if (!d || d.result !== "success") {
-        throw new Error((d && d.message) ? d.message : "Yayın akışı alınamadı.");
-    }
+    const d = await apiCall('getBroadcastFlow', {});
     return d.items || [];
 }
 
@@ -1397,7 +1478,15 @@ async function openBroadcastFlow() {
     });
 
   } catch (err) {
-    Swal.fire("Hata", err?.message || "Yayın akışı alınamadı.", "error");
+    const msg = (err && err.message) ? err.message : "Yayın akışı alınamadı.";
+    Swal.fire({
+      icon: 'error',
+      title: 'Bağlantı sorunu',
+      html: `<div style="text-align:left;line-height:1.6">${escapeHtml(msg)}<br><br>İstersen tekrar deneyebilirim.</div>`,
+      showCancelButton: true,
+      confirmButtonText: 'Tekrar Dene',
+      cancelButtonText: 'Kapat'
+    }).then(r=>{ if(r.isConfirmed) openBroadcastFlow(); });
   }
 }
 
@@ -1435,6 +1524,41 @@ function escapeHtml(str) {
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
+}
+
+// Basit HTML allowlist (b, strong, i, em, u, br, ul/ol/li, a)
+// Kampanya/teknik detaylarında <b>...</b> gibi etiketlerin düz metin olarak görünmesini engeller.
+function sanitizeBasicHtml(input){
+  let html = (input ?? '').toString();
+  // script/style bloklarını tamamen kaldır
+  html = html
+    .replace(/<\s*script[^>]*>[\s\S]*?<\s*\/\s*script\s*>/gi, '')
+    .replace(/<\s*style[^>]*>[\s\S]*?<\s*\/\s*style\s*>/gi, '');
+
+  // event handler attribute'larını kaldır
+  html = html
+    .replace(/\s+on\w+\s*=\s*"[^"]*"/gi, '')
+    .replace(/\s+on\w+\s*=\s*'[^']*'/gi, '')
+    .replace(/\s+on\w+\s*=\s*[^\s>]+/gi, '');
+
+  // javascript: linklerini temizle
+  html = html.replace(/href\s*=\s*"\s*javascript:[^"]*"/gi, 'href="#"');
+  html = html.replace(/href\s*=\s*'\s*javascript:[^']*'/gi, "href='#'");
+
+  // allowlist dışındaki tag'leri kaldır
+  html = html.replace(/<(?!\/?(b|strong|i|em|u|br|ul|ol|li|a)(\s|\/|>))[^>]+>/gi, '');
+
+  // <a> tag'lerinde sadece href/target/rel kalsın
+  html = html.replace(/<a\s+([^>]+)>/gi, (m, attrs)=>{
+    let href = (attrs.match(/href\s*=\s*"([^"]*)"/i) || attrs.match(/href\s*=\s*'([^']*)'/i) || [null,''])[1] || '#';
+    let target = (attrs.match(/target\s*=\s*"([^"]*)"/i) || attrs.match(/target\s*=\s*'([^']*)'/i) || [null,''])[1] || '_blank';
+    // güvenli varsayılanlar
+    if(!href) href = '#';
+    if(/^\s*javascript:/i.test(href)) href = '#';
+    return `<a href="${escapeHtml(href)}" target="${escapeHtml(target)}" rel="noreferrer">`;
+  });
+
+  return html;
 }
 
 function openGuide() {
@@ -3682,6 +3806,9 @@ function hideHomeScreen(){
 }
 
 function renderHomePanels(){
+    // HomeBlocks (quote/today/ann) sheet'ten çek
+    if(!homeBlocksCache){ try{ loadHomeBlocks(); }catch(e){} }
+
     // --- BUGÜN NELER VAR? (Yayın Akışı / bugünün maçları) ---
     const todayEl = document.getElementById('home-today');
     if(todayEl){
@@ -3727,7 +3854,7 @@ function renderHomePanels(){
                         const title = escapeHtml(it.match || it.title || it.event || '');
                         const ch = escapeHtml(it.channel || it.platform || '');
                         const league = escapeHtml(it.league || it.category || '');
-                        const spk = escapeHtml(it.spiker || it.spikers || it.commentator || it.commentators || '');
+                        const spk = escapeHtml(it.announcer || it.spiker || it.spikers || it.commentator || it.commentators || '');
                         return `
                           <div class="home-mini-item">
                             <div class="home-mini-date">${time}${league?` • ${league}`:''}${ch?` • ${ch}`:''}</div>
@@ -3737,34 +3864,6 @@ function renderHomePanels(){
                         `;
                     }).join('') + (todays.length>shown.length ? `<div style="color:#666;font-size:.9rem;margin-top:6px">+${todays.length-shown.length} maç daha…</div>` : '');
                 }
-
-function editHomeBlock(kind){
-    if(!isAdminMode){
-        Swal.fire("Yetkisiz", "Bu işlem için admin yetkisi gerekli.", "warning");
-        return;
-    }
-    if(kind !== 'quote'){
-        Swal.fire("Bilgi", "Bu alan artık otomatik güncelleniyor.", "info");
-        return;
-    }
-    const cur = (localStorage.getItem('homeQuote') || '').trim();
-    Swal.fire({
-        title: "Günün Sözü",
-        input: "textarea",
-        inputValue: cur,
-        inputPlaceholder: "Bugünün sözünü yaz…",
-        showCancelButton: true,
-        confirmButtonText: "Kaydet",
-        cancelButtonText: "Vazgeç",
-        preConfirm: (val)=> (val||'').trim()
-    }).then(res=>{
-        if(!res.isConfirmed) return;
-        localStorage.setItem('homeQuote', res.value || '');
-        renderHomePanels();
-        Swal.fire("Kaydedildi", "Günün sözü güncellendi.", "success");
-    });
-}
-
                 // kartı tıklayınca yayın akışına git
                 const card = todayEl.closest('.home-card');
                 if(card){
@@ -3799,22 +3898,8 @@ function editHomeBlock(kind){
         }
     }
 
-    // --- GÜNÜN SÖZÜ ---
-    const quoteEl = document.getElementById('home-quote');
-    if(quoteEl){
-        const q = (localStorage.getItem('homeQuote') || '').trim();
-        quoteEl.innerHTML = q ? escapeHtml(q) : '<span style="color:#999">Bugün için bir söz eklenmemiş.</span>';
-    }
-
-    // Admin: edit butonlarını aç
-    try{
-        const b1 = document.getElementById('home-edit-today');
-        const b2 = document.getElementById('home-edit-ann');
-        const b3 = document.getElementById('home-edit-quote');
-        if(b1) b1.style.display = 'none'; // artık dinamik
-        if(b2) b2.style.display = 'none'; // duyuru dinamik
-        if(b3) b3.style.display = (isAdminMode && isEditingActive ? 'inline-flex' : 'none');
-    }catch(e){}
+    // HomeBlocks (Günün Sözü vb.) render
+    try{ renderHomeBlocks(); }catch(e){}
 }
 
 // Kart detayını doğrudan açmak için küçük bir yardımcı
@@ -3833,12 +3918,11 @@ function safeGetToken(){
 }
 async function fetchSheetObjects(actionName){
     const payload = { action: actionName, username: (currentUser||''), token: safeGetToken() };
-    const r = await fetch(SCRIPT_URL, {
+    const d = await fetchJsonWithRetry(SCRIPT_URL, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(payload)
-    });
-    const d = await r.json();
+    }, 3);
     if(!d || d.result !== "success") throw new Error((d && d.message) ? d.message : "Veri alınamadı.");
     // backend handleFetchData returns {data:[...]} ; other handlers may use {items:[...]}
     return d.data || d.items || [];
@@ -3859,6 +3943,13 @@ async function openTelesalesArea(){
     wrap.style.display = 'flex';
     document.body.classList.add('fs-open');
     document.body.style.overflow='hidden';
+
+    // İlk açılışta "geç geliyor" algısını azalt: kısa bir süre global veri bariyerini bekle
+    try{
+        if(window.__dataLoadedPromise){
+            await Promise.race([window.__dataLoadedPromise, _sleep(1200)]);
+        }
+    }catch(e){}
 
     // Sidebar profil
     const av = document.getElementById('t-side-avatar');
@@ -3895,6 +3986,9 @@ async function openTelesalesArea(){
     renderTelesalesDataOffers();
     renderTelesalesScripts();
     switchTelesalesTab('data');
+    // HomeBlocks render (quote edit buttons vb.)
+    renderHomeBlocks();
+
 }
 
 function closeFullTelesales(){
@@ -4120,7 +4214,7 @@ function renderTelesalesScripts(){
         if(Array.isArray(ov) && ov.length) list = ov;
     }catch(e){}
 
-    const bar = (isAdminMode ? `
+    const bar = ((isAdminMode && isEditingActive) ? `
         <div style="display:flex;gap:10px;align-items:center;margin:6px 0 12px;">
           <button class="x-btn x-btn-admin" onclick="toggleTelesalesEdit()"><i class="fas fa-pen"></i> ${window.telesalesEditMode ? 'Düzenlemeyi Kapat' : 'Düzenlemeyi Aç'}</button>
           ${window.telesalesEditMode ? `<button class="x-btn x-btn-admin" onclick="addTelesalesScript()"><i class="fas fa-plus"></i> Script Ekle</button>` : ``}
@@ -4147,6 +4241,20 @@ function renderTelesalesScripts(){
         </div>
       </div>
     `).join('');
+}
+
+// TeleSatış script düzenleme modu (global "Düzenlemeyi Aç" açıkken çalışır)
+function toggleTelesalesEdit(){
+    if(!isAdminMode){
+        Swal.fire('Yetkisiz', 'Bu işlem için admin yetkisi gerekli.', 'warning');
+        return;
+    }
+    if(!isEditingActive){
+        Swal.fire('Düzenleme kapalı', 'Önce üst menüden "Düzenlemeyi Aç" seçeneğini aç.', 'info');
+        return;
+    }
+    window.telesalesEditMode = !window.telesalesEditMode;
+    renderTelesalesScripts();
 }
 
 function getTelesalesScriptsStore(){
@@ -4730,18 +4838,14 @@ async function addTechCardSheet(){
       preConfirm: ()=>{
         const title = (document.getElementById('tc-title').value||'').trim();
         if(!title) return Swal.showValidationMessage('Başlık zorunlu');
-        const today = new Date();
-        const dateStr = today.getDate() + "." + (today.getMonth()+1) + "." + today.getFullYear();
         return {
-          cardType: 'card',
+          type: 'card',
           category: 'Teknik',
           title,
           text: (document.getElementById('tc-text').value||'').trim(),
           script: (document.getElementById('tc-script').value||'').trim(),
-          code: '',
           link: (document.getElementById('tc-link').value||'').trim(),
-          status: 'Aktif',
-          date: dateStr
+          status: 'Aktif'
         };
       }
     });
@@ -4901,6 +5005,7 @@ function __normalizeTechTab(tab){
 }
 function __normalizeTechCategory(cat){
   const c = (cat||"").toString().trim().toLowerCase();
+  if(['broadcast','access','app','activation','info'].includes(c)) return c;
   if(c.startsWith("yay")) return "broadcast";
   if(c.startsWith("eri")) return "access";
   if(c.startsWith("app")) return "app";
@@ -4922,16 +5027,45 @@ async function __fetchTechDocs(){
   const data = await res.json();
   if(data.result !== "success") throw new Error(data.message || "getTechDocs failed");
   const rows = Array.isArray(data.data) ? data.data : [];
+  const decodeRich = (v)=>{
+    const s = (v||"").toString();
+    return s
+      .replace(/\\u003c/g,'<')
+      .replace(/\\u003e/g,'>')
+      .replace(/\\n/g,'\n');
+  };
+  const tryParseJsonBody = (v)=>{
+    const raw = (v||"").toString().trim();
+    if(!raw) return { text:"", extra:{} };
+    if(raw.startsWith('{') && raw.endsWith('}')){
+      try{
+        const obj = JSON.parse(raw);
+        const text = obj.text || obj.icerik || obj.content || obj.description || "";
+        return { text: text.toString(), extra: obj };
+      }catch(e){}
+    }
+    return { text: raw, extra:{} };
+  };
+
   return rows
     .filter(r => (r.Durum||"").toString().trim().toLowerCase() !== "pasif")
     .map(r => ({
       categoryKey: __normalizeTechCategory(r.Kategori),
       kategori: (r.Kategori||"").trim(),
       baslik: (r.Başlık || r.Baslik || r.Title || r["Başlık"] || "").toString().trim(),
-      icerik: (r.İçerik || r.Icerik || r.Content || r["İçerik"] || "").toString(),
-      adim: (r.Adım || r.Adim || r.Step || r["Adım"] || "").toString(),
-      not: (r.Not || "").toString(),
-      link: (r.Link || "").toString(),
+      ...(function(){
+        const bodyRaw = (r.İçerik || r.Icerik || r.Content || r["İçerik"] || "");
+        const parsed = tryParseJsonBody(bodyRaw);
+        const text = decodeRich(parsed.text);
+        const ex = parsed.extra || {};
+        const adim = decodeRich((r.Adım || r.Adim || r.Step || r["Adım"] || ex.step || ex.adim || ex.Adım || ""));
+        const not = decodeRich((r.Not || ex.note || ex.not || ""));
+        const link = decodeRich((r.Link || ex.link || ""));
+        return {
+          icerik: text,
+          adim, not, link
+        };
+      })(),
       durum: (r.Durum || "").toString()
     }))
     .filter(x => x.categoryKey && x.baslik);
@@ -5024,6 +5158,16 @@ async function filterTechDocList(tabKey){
 }
 
 // ---------------------------
+function __techTabToLabel(tabKey){
+  const k = (tabKey||'').toString().trim().toLowerCase();
+  if(k==='broadcast') return 'Yayın';
+  if(k==='access') return 'Erişim';
+  if(k==='app') return 'App Hataları';
+  if(k==='activation') return 'Aktivasyon';
+  if(k==='info') return 'Bilgi';
+  return tabKey;
+}
+
 // TECH DOCS (Sheet) - Admin CRUD
 // ---------------------------
 async function addTechDoc(tabKey){
@@ -5044,7 +5188,7 @@ async function addTechDoc(tabKey){
       const title = (document.getElementById('td-title').value||'').trim();
       if(!title) return Swal.showValidationMessage('Başlık zorunlu');
       return {
-        kategori: tabKey,
+        kategori: __techTabToLabel(tabKey),
         baslik: title,
         icerik: (document.getElementById('td-content').value||'').trim(),
         adim: (document.getElementById('td-step').value||'').trim(),
@@ -5097,7 +5241,7 @@ async function editTechDoc(tabKey, baslik){
       const title = (document.getElementById('td-title').value||'').trim();
       if(!title) return Swal.showValidationMessage('Başlık zorunlu');
       return {
-        kategori: tabKey,
+        kategori: __techTabToLabel(tabKey),
         baslik: title,
         icerik: (document.getElementById('td-content').value||'').trim(),
         adim: (document.getElementById('td-step').value||'').trim(),
@@ -5114,7 +5258,7 @@ async function editTechDoc(tabKey, baslik){
     const r = await fetch(SCRIPT_URL, {
       method:'POST',
       headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body: JSON.stringify({ action:'upsertTechDoc', username: currentUser, token: getToken(), keyKategori: tabKey, keyBaslik: baslik, ...v })
+      body: JSON.stringify({ action:'upsertTechDoc', username: currentUser, token: getToken(), keyKategori: __techTabToLabel(tabKey), keyBaslik: baslik, ...v })
     });
     const d = await r.json();
     if(d.result==='success'){
@@ -5144,7 +5288,7 @@ function deleteTechDoc(tabKey, baslik){
       const r = await fetch(SCRIPT_URL, {
         method:'POST',
         headers:{'Content-Type':'text/plain;charset=utf-8'},
-        body: JSON.stringify({ action:'deleteTechDoc', username: currentUser, token: getToken(), keyKategori: tabKey, keyBaslik: baslik })
+        body: JSON.stringify({ action:'deleteTechDoc', username: currentUser, token: getToken(), keyKategori: __techTabToLabel(tabKey), keyBaslik: baslik })
       });
       const d = await r.json();
       if(d.result==='success'){
