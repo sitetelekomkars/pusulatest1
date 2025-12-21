@@ -1000,6 +1000,7 @@ body.editing .edit-icon { display: block !important; }
   box-shadow: 0 12px 28px rgba(0,0,0,0.10);
 }
 .home-hero-title{ font-size: 1.35rem; font-weight: 900; letter-spacing:.2px; }
+.home-hero-title #home-welcome-user{ color: var(--secondary); font-weight:900; }
 .home-hero-sub{ opacity:.8; margin-top:4px; font-size:.95rem; }
 .home-hero-actions{ display:flex; flex-wrap:wrap; gap:10px; justify-content:flex-end; }
 .home-pill{
