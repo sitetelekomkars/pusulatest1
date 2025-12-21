@@ -245,7 +245,7 @@ body {
     100% { transform: translateX(-100%) translateX(-200px); } 
 }
 /* --- CARDS & GRID --- */
-.container { padding: 15px 25px 25px; max-width: 1600px; margin: 0 auto; }
+.container { padding: 25px; max-width: 1600px; margin: 0 auto; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
 .card { background: var(--card-bg); border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #eaedf2; border-left: 4px solid var(--info); display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s; position: relative; }
 .card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.06); border-color: #dfe3e8; }
@@ -991,7 +991,7 @@ body.editing .edit-icon { display: block !important; }
    HOME (ANA SAYFA)
 ====================== */
 .home-screen{ width:100%; animation: fadeIn .25s ease; }
-.home-hero {
+.home-hero{
   display:flex; align-items:center; justify-content:space-between; gap:16px;
   background: linear-gradient(135deg, rgba(14,27,66,0.92), rgba(14,27,66,0.75));
   border: 1px solid rgba(255,255,255,0.08);
@@ -1144,71 +1144,3 @@ body.editing .edit-icon { display: block !important; }
 .q-logout:hover{filter:brightness(.95)}
 /* --- HOME: Bugün Neler Var & Duyurular düzenleme butonlarını kapat --- */
 #home-edit-today, #home-edit-ann { display: none !important; }
-
-
-/* --- vNext tweaks (Home / Tech / TeleSatış) --- */
-.home-card.clickable { cursor: pointer; }
-.home-card.clickable:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
-.home-mini-item { padding: 10px 12px; border: 1px solid #eee; border-radius: 10px; margin-bottom: 10px; background:#fff; }
-.home-mini-date { font-size: 0.78rem; color:#999; font-weight:700; }
-.home-mini-title { font-size: 1.05rem; font-weight:800; color: var(--primary); margin-top: 2px; }
-.home-mini-desc { font-size: 0.92rem; color:#555; margin-top: 6px; line-height: 1.4; }
-
-.q-module-title{
-  width:100%;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  color:#fabb00;
-  font-weight:900;
-  letter-spacing:0.3px;
-  margin-bottom:10px;
-}
-.q-module-title i{ font-size: 1.1rem; }
-
-/* Tech card layout (Ikna-like) */
-.x-card-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 18px; }
-.x-card{
-  background:#fff;
-  border:1px solid #eee;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  overflow:hidden;
-}
-.x-card-head{
-  padding: 14px 16px;
-  display:flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #f0f0f0;
-}
-.x-card-title{ font-weight: 900; color: var(--primary); font-size: 1.02rem; line-height:1.2; }
-.x-card-badge{ font-size: 0.72rem; font-weight: 800; padding: 4px 10px; border-radius: 999px; background: #e3f2fd; color: var(--info); }
-.x-card-body{ padding: 14px 16px; color:#444; font-size: 0.95rem; line-height:1.55; }
-.x-card-link{ display:inline-flex; gap:8px; align-items:center; color: var(--info); text-decoration:none; font-weight: 700; margin-top: 10px; }
-.x-card-link:hover{ text-decoration: underline; }
-.x-script{
-  margin-top: 12px;
-  background: #fffdf4;
-  border: 1px solid #f0e4b6;
-  border-radius: 10px;
-  padding: 12px;
-}
-.x-script label{ display:block; font-size:0.82rem; font-weight:900; color:#8a6d00; margin-bottom:8px; }
-.x-script pre{
-  margin:0;
-  white-space: pre-wrap;
-  word-break: break-word;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  font-size: 0.86rem;
-  color:#2b2b2b;
-}
-.x-card-actions{ display:flex; gap:10px; padding: 12px 16px 16px; }
-.x-btn{ border:none; border-radius: 10px; padding: 10px 12px; cursor:pointer; font-weight:900; }
-.x-btn-copy{ background: var(--primary); color:#fff; }
-.x-btn-copy:hover{ opacity:0.92; }
-.x-btn-admin{ background: #fabb00; color:#0e1b42; }
-.x-btn-admin:hover{ background:#ffc107; }
-
-/* Hide TeleSatış segment filter row (in case html remains) */
-#t-segment-filter{ display:none !important; }
