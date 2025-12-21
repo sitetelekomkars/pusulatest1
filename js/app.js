@@ -3928,7 +3928,8 @@ function renderTelesalesDataOffers(){
         return okQ;
     });
 
-    const bar = (isAdminMode && isEditingActive) ? `
+    // TeleSatış'ta ayrı bir düzenleme modu yok; yalnızca global Düzenlemeyi Aç (isEditingActive) açıksa admin kontrolleri görünür.
+    const bar = ((isAdminMode && isEditingActive) ?&& isEditingActive) ? `
         <div style="grid-column:1/-1;display:flex;gap:10px;align-items:center;margin:6px 0 12px;">
           <button class="x-btn x-btn-admin" onclick="addTelesalesOffer()"><i class="fas fa-plus"></i> Teklif Ekle</button>
         </div>
@@ -4113,10 +4114,10 @@ function renderTelesalesScripts(){
         if(Array.isArray(ov) && ov.length) list = ov;
     }catch(e){}
 
-    const bar = (isAdminMode ? `
+    // TeleSatış'ta ayrı bir "düzenleme modu" yok: yalnızca global Düzenlemeyi Aç (isEditingActive) açıksa admin kontrolleri görünür.
+    const bar = ((isAdminMode && isEditingActive) ? `
         <div style="display:flex;gap:10px;align-items:center;margin:6px 0 12px;">
-          <button class="x-btn x-btn-admin" onclick="toggleTelesalesEdit()"><i class="fas fa-pen"></i> ${window.telesalesEditMode ? 'Düzenlemeyi Kapat' : 'Düzenlemeyi Aç'}</button>
-          ${window.telesalesEditMode ? `<button class="x-btn x-btn-admin" onclick="addTelesalesScript()"><i class="fas fa-plus"></i> Script Ekle</button>` : ``}
+          <button class="x-btn x-btn-admin" onclick="addTelesalesScript()"><i class="fas fa-plus"></i> Script Ekle</button>
         </div>
     ` : '');
 
@@ -4131,7 +4132,7 @@ function renderTelesalesScripts(){
         <div class="news-desc" style="white-space:pre-line">${escapeHtml(s.text||'')}</div>
         <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:10px">
           <div class="news-tag" style="background:rgba(16,185,129,.08);color:#10b981;border:1px solid rgba(16,185,129,.25)">Tıkla & Kopyala</div>
-          ${(isAdminMode && window.telesalesEditMode) ? `
+          ${(isAdminMode && isEditingActive) ? `
             <div style="display:flex;gap:8px">
               <button class="x-btn x-btn-admin" onclick="event.stopPropagation(); editTelesalesScript(${i});"><i class="fas fa-pen"></i></button>
               <button class="x-btn x-btn-admin" onclick="event.stopPropagation(); deleteTelesalesScript(${i});"><i class="fas fa-trash"></i></button>
@@ -4345,7 +4346,8 @@ function renderTechList(bucketKey, q, listId){
         return hay.includes(query);
     });
 
-    const bar = (isAdminMode ? `
+    // TeleSatış'ta ayrı bir düzenleme modu yok; yalnızca global Düzenlemeyi Aç (isEditingActive) açıksa admin kontrolleri görünür.
+    const bar = ((isAdminMode && isEditingActive) ?? `
         <div style="display:flex;gap:10px;align-items:center;margin:10px 0 14px;">
           <button class="x-btn x-btn-admin" onclick="toggleTechEdit()"><i class="fas fa-pen"></i> ${techEditMode ? 'Düzenlemeyi Kapat' : 'Düzenlemeyi Aç'}</button>
           ${techEditMode ? `<button class="x-btn x-btn-admin" onclick="addTechCard('${bucketKey}')"><i class="fas fa-plus"></i> Kart Ekle</button>` : ``}
@@ -4819,7 +4821,8 @@ function renderTechCardsTab(q=''){
       return hay.includes(query);
     });
 
-    const bar = (isAdminMode && isEditingActive)
+    // TeleSatış'ta ayrı bir düzenleme modu yok; yalnızca global Düzenlemeyi Aç (isEditingActive) açıksa admin kontrolleri görünür.
+    const bar = ((isAdminMode && isEditingActive) ?&& isEditingActive)
       ? `<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
            <button class="x-btn x-btn-admin" onclick="addTechCardSheet()"><i class="fas fa-plus"></i> Kart Ekle</button>
          </div>`
@@ -4909,18 +4912,18 @@ function __parseTechDocContent(raw){
   return { html: __normalizeTechHtml(s), script: '', link: '' };
 }
 
-function __normalizeTechHtml(s) {
-    if (s == null) return '';
-    let out = String(s);
-
-    // Hem unicode kaçışlarını hem de gerçek <br> varyasyonlarını tek seferde yakalar
-    // <br>, <br/>, <br  />, \u003cbr\u003e gibi...
-    out = out.replace(/(<br\s*\/?>|\\u003cbr\s*\/?\\u003e)/gi, '<br>');
-
-    // Yeni satır karakterlerini br'ye çevir
-    out = out.replace(/\n/g, '<br>');
-
-    return out;
+function __normalizeTechHtml(s){
+  let out = (s==null ? '' : String(s));
+  // \u003cbr> (ve benzeri) kaçışlarını <br> yap
+  out = out
+    .replace(/\\u003cbr\\s*\\/?\\u003e/gi,'<br>')
+    .replace(/\\u003cbr\\s*\\/?/gi,'<br>')
+    .replace(/\\u003cbr>/gi,'<br>')
+    .replace(/\u003cbr\s*\/?\u003e/gi,'<br>')
+    .replace(/\u003cbr>/gi,'<br>');
+  // \n yeni satırları br'e çevir (textarea kayıtları)
+  out = out.replace(/\\n/g,'<br>').replace(/\n/g,'<br>');
+  return out;
 }
 
 function __normalizeTechTab(tab){
