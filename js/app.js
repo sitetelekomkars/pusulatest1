@@ -56,25 +56,6 @@ let currentUser = "";
 // -------------------- Menu Permissions (LocAdmin) --------------------
 let menuPermissions = null; // { key: {allowedGroups:[], allowedRoles:[]} }
 
-// -------------------- HomeBlocks (Ana Sayfa blok içerikleri) --------------------
-let homeBlocks = {}; // { quote:{...}, ... }
-
-function loadHomeBlocks(){
-  // herkes için okunabilir (sheet'ten)
-  return apiCall("getHomeBlocks", {}).then(res=>{
-    homeBlocks = (res && res.blocks) ? res.blocks : {};
-    // local fallback cache
-    try{ localStorage.setItem('homeBlocksCache', JSON.stringify(homeBlocks||{})); }catch(e){}
-    try{ renderHomePanels(); }catch(e){}
-    return homeBlocks;
-  }).catch(e=>{
-    // sessiz fallback
-    try{ homeBlocks = JSON.parse(localStorage.getItem('homeBlocksCache')||'{}') || {}; }catch(_){ homeBlocks = {}; }
-    try{ renderHomePanels(); }catch(_){}
-    return homeBlocks;
-  });
-}
-
 function normalizeRole(v){
   return String(v||'').trim().toLowerCase();
 }
@@ -149,9 +130,8 @@ function loadMenuPermissions(){
 // LocAdmin panel
 function openMenuPermissions(){
   const role=getMyRole();
-  // İstek: Yetki Yönetimi sadece LocAdmin rolünde görünsün ve çalışsın
-  if(role!=="locadmin"){
-    Swal.fire("Yetkisiz", "Yetki Yönetimi sadece LocAdmin rolünde kullanılabilir.", "warning");
+  if(role!=="locadmin" && role!=="admin"){
+    Swal.fire("Yetkisiz", "Bu ekrana erişimin yok.", "warning");
     return;
   }
   apiCall("getMenuPermissions",{}).then(res=>{
@@ -643,17 +623,13 @@ function checkAdmin(role) {
         if(addCardDropdown) addCardDropdown.style.display = 'flex';
         if(quickEditDropdown) {
             quickEditDropdown.style.display = 'flex';
-            // İstek: Yetki Yönetimi sadece LocAdmin rolünde görünsün
-            const perms = document.getElementById('dropdownPerms');
-            if(perms) perms.style.display = (isLocAdmin ? 'flex' : 'none');
+        const perms = document.getElementById('dropdownPerms'); if(perms) perms.style.display = 'flex';
             quickEditDropdown.innerHTML = '<i class="fas fa-pen" style="color:var(--secondary);"></i> Düzenlemeyi Aç';
             quickEditDropdown.classList.remove('active');
         }
     } else {
         if(addCardDropdown) addCardDropdown.style.display = 'none';
         if(quickEditDropdown) quickEditDropdown.style.display = 'none';
-        const perms = document.getElementById('dropdownPerms');
-        if(perms) perms.style.display = 'none';
     }
 }
 function logout() {
@@ -3534,7 +3510,13 @@ async function logEvaluationPopup() {
         </div>`;
     
     const { value: formValues } = await Swal.fire({
-        html: contentHtml, width: '600px', showCancelButton: true, confirmButtonText: ' 💾  Kaydet',
+        html: contentHtml,
+        width: '600px',
+        showCancelButton: true,
+        confirmButtonText: ' 💾  Kaydet',
+        // Kalite formu: dışarı tıklayınca / ESC ile kapanıp kayıtsız çıkmasın
+        allowOutsideClick: false,
+        allowEscapeKey: false,
         didOpen: () => { 
             if (isTelesatis) window.recalcTotalSliderScore(); 
             else if (isChat) window.recalcTotalScore(); 
@@ -3632,7 +3614,13 @@ async function editEvaluation(targetCallId) {
     contentHtml += `<div><label>Revize Feedback</label><textarea id="eval-feedback" class="swal2-textarea">${evalData.feedback||''}</textarea></div></div>`;
     
     const { value: formValues } = await Swal.fire({
-        html: contentHtml, width: '600px', showCancelButton: true, confirmButtonText: ' 💾  Güncelle',
+        html: contentHtml,
+        width: '600px',
+        showCancelButton: true,
+        confirmButtonText: ' 💾  Güncelle',
+        // Kalite formu: dışarı tıklayınca / ESC ile kapanıp kayıtsız çıkmasın
+        allowOutsideClick: false,
+        allowEscapeKey: false,
         didOpen: () => { if (isTelesatis) window.recalcTotalSliderScore(); else if (isChat) window.recalcTotalScore(); },
         preConfirm: () => {
             const callId = document.getElementById('eval-callid').value;
@@ -3797,10 +3785,10 @@ function renderHomePanels(){
         }
     }
 
-    // --- GÜNÜN SÖZÜ (HomeBlocks -> e-tabla) ---
+    // --- GÜNÜN SÖZÜ ---
     const quoteEl = document.getElementById('home-quote');
     if(quoteEl){
-        const q = String((homeBlocks && homeBlocks.quote && homeBlocks.quote.content) ? homeBlocks.quote.content : (localStorage.getItem('homeQuote')||'')).trim();
+        const q = (localStorage.getItem('homeQuote') || '').trim();
         quoteEl.innerHTML = q ? escapeHtml(q) : '<span style="color:#999">Bugün için bir söz eklenmemiş.</span>';
     }
 
@@ -3831,7 +3819,7 @@ function editHomeBlock(kind){
         Swal.fire("Bilgi", "Bu alan artık otomatik güncelleniyor.", "info");
         return;
     }
-    const cur = String((homeBlocks && homeBlocks.quote && homeBlocks.quote.content) ? homeBlocks.quote.content : (localStorage.getItem('homeQuote') || '')).trim();
+    const cur = (localStorage.getItem('homeQuote') || '').trim();
     Swal.fire({
         title: "Günün Sözü",
         input: "textarea",
@@ -3843,22 +3831,9 @@ function editHomeBlock(kind){
         preConfirm: (val)=> (val||'').trim()
     }).then(res=>{
         if(!res.isConfirmed) return;
-        const val = res.value || '';
-        // local fallback
-        try{ localStorage.setItem('homeQuote', val); }catch(e){}
-        // e-tabla (HomeBlocks)
-        apiCall('updateHomeBlock', { key:'quote', title:'Günün Sözü', content: val, visibleGroups:'' })
-          .then(()=>{
-            homeBlocks = homeBlocks || {};
-            homeBlocks.quote = { key:'quote', title:'Günün Sözü', content: val, visibleGroups:'' };
-            try{ localStorage.setItem('homeBlocksCache', JSON.stringify(homeBlocks||{})); }catch(e){}
-            renderHomePanels();
-            Swal.fire("Kaydedildi", "Günün sözü güncellendi.", "success");
-          })
-          .catch(()=>{
-            renderHomePanels();
-            Swal.fire("Kaydedildi", "Günün sözü güncellendi (yerel).", "success");
-          });
+        localStorage.setItem('homeQuote', res.value || '');
+        renderHomePanels();
+        Swal.fire("Kaydedildi", "Günün sözü güncellendi.", "success");
     });
 }
 
@@ -3996,11 +3971,9 @@ function renderTelesalesDataOffers(){
     if(cnt) cnt.innerText = `${list.length} kayıt`;
 
     grid.innerHTML = bar + list.map((o, idx)=>`
-        <div class="q-training-card" onclick="showTelesalesOfferDetail(${idx})" style="cursor:pointer">
-          <div class="t-training-head">
-            <div style="min-width:0">
-              <div class="q-item-title" style="font-size:1.02rem">${escapeHtml(o.title||'Teklif')}</div>
-            </div>
+        <div class="t-training-card" onclick="showTelesalesOfferDetail(${idx})" style="cursor:pointer">
+          <div class="t-training-top">
+            <div class="t-training-title">${escapeHtml(o.title||'Teklif')}</div>
             <div class="t-training-badge">${escapeHtml(o.segment||o.tag||'')}</div>
           </div>
           <div class="t-training-desc">${escapeHtml((o.desc||'').slice(0,140))}${(o.desc||'').length>140?'...':''}</div>
@@ -4167,13 +4140,12 @@ function renderTelesalesScripts(){
         if(Array.isArray(ov) && ov.length) list = ov;
     }catch(e){}
 
-    // İstek: TeleSatış Scriptler'deki ayrı "Düzenlemeyi Aç" kalksın.
-    // Düzenleme sadece üst kullanıcı menüsündeki global "Düzenlemeyi Aç" aktifken yapılabilsin.
-    const bar = (isAdminMode && isEditingActive) ? `
+    const bar = (isAdminMode ? `
         <div style="display:flex;gap:10px;align-items:center;margin:6px 0 12px;">
-          <button class="x-btn x-btn-admin" onclick="addTelesalesScript()"><i class="fas fa-plus"></i> Script Ekle</button>
+          <button class="x-btn x-btn-admin" onclick="toggleTelesalesEdit()"><i class="fas fa-pen"></i> ${window.telesalesEditMode ? 'Düzenlemeyi Kapat' : 'Düzenlemeyi Aç'}</button>
+          ${window.telesalesEditMode ? `<button class="x-btn x-btn-admin" onclick="addTelesalesScript()"><i class="fas fa-plus"></i> Script Ekle</button>` : ``}
         </div>
-    ` : '';
+    ` : '');
 
     if(list.length===0){
         area.innerHTML = bar + '<div style="padding:16px;opacity:.7">Script bulunamadı.</div>';
@@ -4186,7 +4158,7 @@ function renderTelesalesScripts(){
         <div class="news-desc" style="white-space:pre-line">${escapeHtml(s.text||'')}</div>
         <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:10px">
           <div class="news-tag" style="background:rgba(16,185,129,.08);color:#10b981;border:1px solid rgba(16,185,129,.25)">Tıkla & Kopyala</div>
-          ${(isAdminMode && isEditingActive) ? `
+          ${(isAdminMode && window.telesalesEditMode) ? `
             <div style="display:flex;gap:8px">
               <button class="x-btn x-btn-admin" onclick="event.stopPropagation(); editTelesalesScript(${i});"><i class="fas fa-pen"></i></button>
               <button class="x-btn x-btn-admin" onclick="event.stopPropagation(); deleteTelesalesScript(${i});"><i class="fas fa-trash"></i></button>
@@ -4942,16 +4914,6 @@ window.afterDataLoaded = function(){
 // ======================
 let __techDocsCache = null;
 let __techDocsLoadedAt = 0;
-let __techCatsCache = null;
-let __techCatsLoadedAt = 0;
-
-const TECH_TAB_LABELS = {
-  broadcast: 'Yayın',
-  access: 'Erişim Sorunları',
-  app: 'App Hataları',
-  activation: 'Aktivasyon',
-  info: 'Bilgi'
-};
 
 function __normalizeTechTab(tab){
   // tab ids: broadcast, access, app, activation
@@ -4995,32 +4957,6 @@ async function __fetchTechDocs(){
     .filter(x => x.categoryKey && x.baslik);
 }
 
-async function __fetchTechDocCategories(){
-  // K sütunundan okunan kategori listesi (boşsa A sütunundan türetilir)
-  if(!SCRIPT_URL) return [];
-  try{
-    const r = await fetch(SCRIPT_URL, {
-      method:'POST',
-      headers:{"Content-Type":"text/plain;charset=utf-8"},
-      body: JSON.stringify({ action: 'getTechDocCategories' })
-    });
-    const d = await r.json();
-    if(d && d.result === 'success' && Array.isArray(d.categories)) return d.categories;
-    return [];
-  }catch(e){
-    return [];
-  }
-}
-
-async function getTechDocCategoryOptions(force=false){
-  const now = Date.now();
-  if(!force && __techCatsCache && (now-__techCatsLoadedAt) < 300000) return __techCatsCache; // 5dk
-  const cats = await __fetchTechDocCategories();
-  __techCatsCache = cats;
-  __techCatsLoadedAt = now;
-  return cats;
-}
-
 function __escapeHtml(s){
   return (s||"").toString().replace(/[&<>"']/g, m => ({
     "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
@@ -5032,8 +4968,7 @@ function __renderTechList(tabKey, items){
     tabKey==="broadcast" ? "x-broadcast-list" :
     tabKey==="access" ? "x-access-list" :
     tabKey==="app" ? "x-app-list" :
-    tabKey==="activation" ? "x-activation-list" :
-    tabKey==="info" ? "x-info-list" : ""
+    tabKey==="activation" ? "x-activation-list" : ""
   );
   if(!listEl) return;
 
@@ -5108,48 +5043,14 @@ async function filterTechDocList(tabKey){
   }
 }
 
-// Teknik_Dokumanlar kategori listesi (Sheet K sütunu)
-let __techCategoryOptions = null;
-async function loadTechCategoryOptions(){
-  if(__techCategoryOptions) return __techCategoryOptions;
-  try{
-    const r = await fetch(SCRIPT_URL, {
-      method:'POST',
-      headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body: JSON.stringify({ action:'getTechDocCategories' })
-    });
-    const d = await r.json();
-    if(d && d.result==='success' && Array.isArray(d.categories)){
-      __techCategoryOptions = d.categories.filter(Boolean);
-      return __techCategoryOptions;
-    }
-  }catch(e){ console.error('[TECH CATS]', e); }
-  __techCategoryOptions = [];
-  return __techCategoryOptions;
-}
-
-function techTabLabel(tabKey){
-  const m = { broadcast:'Yayın', access:'Erişim Sorunları', app:'App Hataları', activation:'Aktivasyon', info:'Bilgi' };
-  return m[tabKey] || 'Yayın';
-}
-
 // ---------------------------
 // TECH DOCS (Sheet) - Admin CRUD
 // ---------------------------
 async function addTechDoc(tabKey){
   if(!isAdminMode) return;
-  const cats = await getTechDocCategoryOptions(false);
-  const defaultLabel = TECH_TAB_LABELS[tabKey] || '';
-  const opts = (cats && cats.length ? cats : Object.values(TECH_TAB_LABELS))
-    .map(c=>String(c||'').trim()).filter(Boolean);
-  const uniq = Array.from(new Set(opts.map(x=>x.toLowerCase()))).map(k=>opts.find(x=>x.toLowerCase()===k));
-  const optionsHtml = uniq.map(c=>`<option value="${__escapeHtml(c)}" ${c===defaultLabel?'selected':''}>${__escapeHtml(c)}</option>`).join('');
   const { value: v } = await Swal.fire({
     title: 'Teknik Konu Ekle',
     html: `
-      <select id="td-cat" class="swal2-select" style="width:100%;max-width:420px">
-        ${optionsHtml}
-      </select>
       <input id="td-title" class="swal2-input" placeholder="Başlık">
       <textarea id="td-content" class="swal2-textarea" placeholder="İçerik"></textarea>
       <input id="td-step" class="swal2-input" placeholder="Adım (opsiyonel)">
@@ -5160,12 +5061,10 @@ async function addTechDoc(tabKey){
     confirmButtonText:'Ekle',
     cancelButtonText:'Vazgeç',
     preConfirm: ()=>{
-      const cat = (document.getElementById('td-cat')?.value || defaultLabel || '').trim();
-      if(!cat) return Swal.showValidationMessage('Kategori zorunlu');
       const title = (document.getElementById('td-title').value||'').trim();
       if(!title) return Swal.showValidationMessage('Başlık zorunlu');
       return {
-        kategori: cat,
+        kategori: tabKey,
         baslik: title,
         icerik: (document.getElementById('td-content').value||'').trim(),
         adim: (document.getElementById('td-step').value||'').trim(),
@@ -5202,17 +5101,9 @@ async function editTechDoc(tabKey, baslik){
   const all = await loadTechDocsIfNeeded(false);
   const it = all.find(x=>x.categoryKey===tabKey && (x.baslik||'')===baslik);
   if(!it) return;
-  const cats = await getTechDocCategoryOptions(false);
-  const opts = (cats && cats.length ? cats : Object.values(TECH_TAB_LABELS))
-    .map(c=>String(c||'').trim()).filter(Boolean);
-  const uniq = Array.from(new Set(opts.map(x=>x.toLowerCase()))).map(k=>opts.find(x=>x.toLowerCase()===k));
-  const optionsHtml = uniq.map(c=>`<option value="${__escapeHtml(c)}" ${(c===it.kategori)?'selected':''}>${__escapeHtml(c)}</option>`).join('');
   const { value: v } = await Swal.fire({
     title: 'Teknik Konuyu Düzenle',
     html: `
-      <select id="td-cat" class="swal2-select" style="width:100%;max-width:420px">
-        ${optionsHtml}
-      </select>
       <input id="td-title" class="swal2-input" placeholder="Başlık" value="${__escapeHtml(it.baslik||'')}">
       <textarea id="td-content" class="swal2-textarea" placeholder="İçerik">${__escapeHtml(it.icerik||'')}</textarea>
       <input id="td-step" class="swal2-input" placeholder="Adım" value="${__escapeHtml(it.adim||'')}">
@@ -5223,12 +5114,10 @@ async function editTechDoc(tabKey, baslik){
     confirmButtonText:'Kaydet',
     cancelButtonText:'Vazgeç',
     preConfirm: ()=>{
-      const cat = (document.getElementById('td-cat')?.value || it.kategori || '').trim();
-      if(!cat) return Swal.showValidationMessage('Kategori zorunlu');
       const title = (document.getElementById('td-title').value||'').trim();
       if(!title) return Swal.showValidationMessage('Başlık zorunlu');
       return {
-        kategori: cat,
+        kategori: tabKey,
         baslik: title,
         icerik: (document.getElementById('td-content').value||'').trim(),
         adim: (document.getElementById('td-step').value||'').trim(),
@@ -5245,7 +5134,7 @@ async function editTechDoc(tabKey, baslik){
     const r = await fetch(SCRIPT_URL, {
       method:'POST',
       headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body: JSON.stringify({ action:'upsertTechDoc', username: currentUser, token: getToken(), keyKategori: it.kategori, keyBaslik: it.baslik, ...v })
+      body: JSON.stringify({ action:'upsertTechDoc', username: currentUser, token: getToken(), keyKategori: tabKey, keyBaslik: baslik, ...v })
     });
     const d = await r.json();
     if(d.result==='success'){
@@ -5272,13 +5161,10 @@ function deleteTechDoc(tabKey, baslik){
   }).then(async res=>{
     if(!res.isConfirmed) return;
     try{
-      const all = await loadTechDocsIfNeeded(false);
-      const it = all.find(x=>x.categoryKey===tabKey && (x.baslik||'')===baslik);
-      const keyKategori = it ? it.kategori : tabKey;
       const r = await fetch(SCRIPT_URL, {
         method:'POST',
         headers:{'Content-Type':'text/plain;charset=utf-8'},
-        body: JSON.stringify({ action:'deleteTechDoc', username: currentUser, token: getToken(), keyKategori: keyKategori, keyBaslik: baslik })
+        body: JSON.stringify({ action:'deleteTechDoc', username: currentUser, token: getToken(), keyKategori: tabKey, keyBaslik: baslik })
       });
       const d = await r.json();
       if(d.result==='success'){
@@ -5299,18 +5185,18 @@ window.switchTechTab = async function(tab){
   try{
     // existing visual tab switch
     document.querySelectorAll('#tech-fullscreen .q-nav-item').forEach(li => li.classList.remove('active'));
-    const tabMap = {broadcast:'x-view-broadcast',access:'x-view-access',app:'x-view-app',activation:'x-view-activation',info:'x-view-info',wizard:'x-view-wizard',cards:'x-view-cards'};
+    const tabMap = {broadcast:'x-view-broadcast',access:'x-view-access',app:'x-view-app',activation:'x-view-activation',wizard:'x-view-wizard',cards:'x-view-cards'};
     const viewId = tabMap[tab];
     // activate clicked item
     const items = Array.from(document.querySelectorAll('#tech-fullscreen .q-nav-menu .q-nav-item'));
-    const idx = ['broadcast','access','app','activation','info','wizard','cards'].indexOf(tab);
+    const idx = ['broadcast','access','app','activation','wizard','cards'].indexOf(tab);
     if(idx>=0 && items[idx]) items[idx].classList.add('active');
 
     document.querySelectorAll('#tech-fullscreen .q-view-section').forEach(v => v.classList.remove('active'));
     const viewEl = document.getElementById(viewId);
     if(viewEl) viewEl.classList.add('active');
 
-    if(['broadcast','access','app','activation','info'].includes(tab)){
+    if(['broadcast','access','app','activation'].includes(tab)){
       const all = await loadTechDocsIfNeeded(false);
       const filtered = all.filter(x => x.categoryKey === tab);
       __renderTechList(tab, filtered);
