@@ -1243,3 +1243,6 @@ body.editing .edit-icon { display: block !important; }
 
 /* Hide TeleSatış segment filter row (in case html remains) */
 #t-segment-filter{ display:none !important; }
+.q-refund-badge {
+    display: none !important;
+}
