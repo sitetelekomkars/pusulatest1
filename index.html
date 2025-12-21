@@ -144,6 +144,7 @@
       <div class="q-nav-item" onclick="switchTechTab('access')"><i class="fas fa-wifi"></i> Erişim</div>
       <div class="q-nav-item" onclick="switchTechTab('app')"><i class="fas fa-mobile-screen"></i> App Hataları</div>
       <div class="q-nav-item" onclick="switchTechTab('activation')"><i class="fas fa-bolt"></i> Aktivasyon</div>
+      <div class="q-nav-item" onclick="switchTechTab('payment')"><i class="fas fa-credit-card"></i> Ödeme Sorunları</div>
       <div class="q-nav-item" onclick="switchTechTab('info')"><i class="fas fa-circle-info"></i> Bilgi</div>
       <div class="q-nav-item" onclick="switchTechTab('wizard')"><i class="fas fa-magic"></i> Teknik Sihirbaz</div>
       <div class="q-nav-item" onclick="switchTechTab('cards')"><i class="fas fa-layer-group"></i> Teknik Kartlar</div>
@@ -189,6 +190,16 @@
             <div class="q-pane-title">Aktivasyon</div>
             <div class="q-pane-search"><input id="x-activation-search" class="q-input" placeholder="Sorunlarda ara..." oninput="filterTechDocList('activation')"></div>
             <div id="x-activation-list" class="q-accordion"></div>
+          </div>
+          <!-- Detay paneli kaldırıldı -->
+        </div>
+      </section>
+      <section id="x-view-payment" class="q-view-section">
+        <div class="q-split">
+          <div class="q-pane">
+            <div class="q-pane-title">Ödeme Sorunları</div>
+            <div class="q-pane-search"><input id="x-payment-search" class="q-input" placeholder="Sorunlarda ara..." oninput="filterTechDocList('payment')"></div>
+            <div id="x-payment-list" class="q-accordion"></div>
           </div>
           <!-- Detay paneli kaldırıldı -->
         </div>
