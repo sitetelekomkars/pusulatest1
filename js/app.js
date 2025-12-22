@@ -13,7 +13,7 @@ function showGlobalError(message){
 }
 
 // Apps Script URL'si
-let SCRIPT_URL = localStorage.getItem("PUSULA_SCRIPT_URL") || "https://script.google.com/macros/s/AKfycbx9LV5bCnRRu4sBx9z6mZqUiDCqRI3yJeh4td4ba1n8Zx4ebSRQ2FvtwSVEg4zsbVeZ/exec"; // Apps Script Web App URL
+let SCRIPT_URL = localStorage.getItem("PUSULA_SCRIPT_URL") || "https://script.google.com/macros/s/AKfycby3kd04k2u9XdVDD1-vdbQQAsHNW6WLIn8bNYxTlVCL3U1a0WqZo6oPp9zfBWIpwJEinQ/exec"; // Apps Script Web App URL
 
 // ---- API CALL helper (Menu/Yetki vs için gerekli) ----
 async function apiCall(action, payload = {}) {
@@ -268,14 +268,6 @@ let sessionTimeout;
 let activeCards = [];
 let currentCategory = "home";
 let adminUserList = [];
-function getDisplayNameOf(u){
-  u=String(u||'').trim();
-  try{
-    const found=(adminUserList||[]).find(x=>String(x.name||'').trim()===u);
-    return (found && (found.fullName||found.displayName||found.name)) ? String(found.fullName||found.displayName||found.name) : u;
-  }catch(e){ return u; }
-}
-
 let allEvaluationsData = [];
 let wizardStepsData = {};
 let trainingData = [];
@@ -386,6 +378,19 @@ window.recalcTotalSliderScore = function() {
 };
 // --- YARDIMCI FONKSİYONLAR ---
 function getToken() { return localStorage.getItem("sSportToken"); }
+function getMyFullName(){ return (localStorage.getItem("sSportFullName")||"").trim(); }
+function getMyDisplayName(){
+  const fn=getMyFullName();
+  return fn ? fn : (currentUser||localStorage.getItem("sSportUser")||"Misafir");
+}
+// username -> full name map (admin user list loads this)
+let userDisplayMap = {};
+function resolveUserDisplay(u){
+  const key=String(u||"").trim();
+  if(!key) return "";
+  if(key===currentUser) return getMyDisplayName();
+  return userDisplayMap[key] || key;
+}
 function setHomeWelcomeUser(name){
   try{
     const el = document.getElementById("home-welcome-user");
@@ -524,12 +529,9 @@ function checkSession() {
         }
 
         currentUser = savedUser;
-        const displayName = localStorage.getItem("sSportFullName") || savedUser;
         document.getElementById("login-screen").style.display = "none";
-        document.getElementById("user-display").innerText = displayName;
-        setHomeWelcomeUser(displayName);
-        try{ const qn=document.getElementById("q-side-name"); if(qn) qn.textContent=displayName; }catch(e){}
-        try{ const qa=document.getElementById("q-side-avatar"); if(qa) qa.textContent=(displayName||currentUser||"U").trim().charAt(0).toUpperCase(); }catch(e){}
+        document.getElementById("user-display").innerText = getMyDisplayName();
+        setHomeWelcomeUser(getMyDisplayName());
 
         checkAdmin(savedRole);
 
@@ -592,10 +594,10 @@ function girisYap() {
         if (data.result === "success") {
             currentUser = data.username;
             localStorage.setItem("sSportUser", currentUser);
-            if (data.fullName) localStorage.setItem("sSportFullName", data.fullName);
             localStorage.setItem("sSportToken", data.token);
             localStorage.setItem("sSportRole", data.role);
             if (data.group) localStorage.setItem("sSportGroup", data.group);
+            if (data.fullName) localStorage.setItem("sSportFullName", data.fullName);
             // ✅ Oturum zaman damgası (ertesi gün otomatik çıkış için)
             localStorage.setItem("sSportSessionDay", new Date().toISOString().slice(0, 10));
             localStorage.setItem("sSportLoginAt", String(Date.now()));
@@ -609,8 +611,8 @@ function girisYap() {
                 }).then(() => { changePasswordPopup(true); });
             } else {
                 document.getElementById("login-screen").style.display = "none";
-                document.getElementById("user-display").innerText = displayName;
-                setHomeWelcomeUser(currentUser);
+                document.getElementById("user-display").innerText = getMyDisplayName();
+                setHomeWelcomeUser(getMyDisplayName());
                 const savedGroup = data.group || localStorage.getItem('sSportGroup') || '';
                 checkAdmin(savedRole);
                 startSessionTimer();
@@ -699,7 +701,7 @@ function logout() {
     try{ document.getElementById("user-display").innerText = "Misafir"; }catch(e){}
     setHomeWelcomeUser("Misafir");
     document.body.classList.remove('editing');
-    localStorage.removeItem("sSportUser"); localStorage.removeItem("sSportToken"); localStorage.removeItem("sSportRole"); localStorage.removeItem("sSportGroup"); localStorage.removeItem("sSportSessionDay"); localStorage.removeItem("sSportLoginAt");
+    localStorage.removeItem("sSportUser"); localStorage.removeItem("sSportToken"); localStorage.removeItem("sSportRole"); localStorage.removeItem("sSportGroup"); localStorage.removeItem("sSportFullName"); localStorage.removeItem("sSportSessionDay"); localStorage.removeItem("sSportLoginAt");
     if (sessionTimeout) clearTimeout(sessionTimeout);
     document.getElementById("main-app").style.display = "none";
     document.getElementById("login-screen").style.display = "flex";
@@ -845,7 +847,7 @@ function renderCards(data) {
         
         container.innerHTML += `<div class="card ${item.category}">${newBadge}
             <div class="icon-wrapper">${editIconHtml}<i class="${favClass} fav-icon" onclick="toggleFavorite('${safeTitle}')"></i></div>
-            <div class="card-header"><h3 class="card-title">${highlightText(item.title)}</h3><span class="badge">${getDisplayNameOf(item.category)}</span></div>
+            <div class="card-header"><h3 class="card-title">${highlightText(item.title)}</h3><span class="badge">${item.category}</span></div>
             <div class="card-content" onclick="showCardDetail('${safeTitle}', '${escapeForJsString(item.text)}')">
                 <div class="card-text-truncate">${highlightText(formattedText)}</div>
                 <div style="font-size:0.8rem; color:#999; margin-top:5px; text-align:right;">(Tamamını oku)</div>
@@ -1283,7 +1285,7 @@ function openNews() {
         let passiveStyle = i.status === 'Pasif' ? 'opacity:0.5; background:#eee;' : '';
         let passiveBadge = i.status === 'Pasif' ? '<span class="news-tag" style="background:#555; color:white;">PASİF</span>' : '';
         let editBtn = (isAdminMode && isEditingActive) ? `<i class="fas fa-pencil-alt edit-icon" style="top:0; right:0; font-size:0.9rem; padding:4px;" onclick="event.stopPropagation(); editNews(${index})"></i>` : '';
-        c.innerHTML += `<div class="news-item" style="${passiveStyle}">${editBtn}<span class="news-date">${i.date}</span><span class="news-title">${i.title} ${passiveBadge}</span><div class="news-desc">${i.desc}</div><span class="news-tag ${cl}">${getDisplayNameOf(tx)}</span></div>`;
+        c.innerHTML += `<div class="news-item" style="${passiveStyle}">${editBtn}<span class="news-date">${i.date}</span><span class="news-title">${i.title} ${passiveBadge}</span><div class="news-desc">${i.desc}</div><span class="news-tag ${cl}">${tx}</span></div>`;
     });
 }
 
@@ -1898,7 +1900,7 @@ function fetchLeaderboard() {
             html = '<tr><td colspan="4" style="text-align:center;">Henüz maç yapılmadı.</td></tr>';
         } else {
             data.leaderboard.forEach((u, i) => {
-                const medal = i===0 ? '🥇' : (i===1 ? '🥈' : (i===2 ? '🥉' : `<span class="rank-badge">${getDisplayNameOf(i+1)}</span>`));
+                const medal = i===0 ? '🥇' : (i===1 ? '🥈' : (i===2 ? '🥉' : `<span class="rank-badge">${i+1}</span>`));
                 const bgStyle = (u.username === currentUser) ? 'background:rgba(250, 187, 0, 0.1);' : '';
                 html += `<tr style="${bgStyle}"><td>${medal}</td><td>${u.username}</td><td>${u.games}</td><td>${u.average}</td></tr>`;
             });
@@ -2217,9 +2219,9 @@ function openQualityArea() {
     const fullScreen = document.getElementById('quality-fullscreen');
     fullScreen.style.display = 'flex';
     // Kullanıcı bilgisini güncelle
-    document.getElementById('q-side-name').innerText = (localStorage.getItem('sSportFullName') || currentUser);
+    document.getElementById('q-side-name').innerText = getMyDisplayName();
     document.getElementById('q-side-role').innerText = isAdminMode ? 'Yönetici' : 'Temsilci';
-    document.getElementById('q-side-avatar').innerText = String((localStorage.getItem('sSportFullName') || currentUser) || 'U').trim().charAt(0).toUpperCase();
+    document.getElementById('q-side-avatar').innerText = getMyDisplayName().charAt(0).toUpperCase();
     // Dönem filtresini doldur
     populateMonthFilterFull();
     // Yetki kontrolü (Admin butonlarını göster/gizle)
@@ -2359,8 +2361,8 @@ function updateDashAgentList() {
     }
     filteredUsers.forEach(u => {
         const opt = document.createElement('option');
-        opt.value = u.name; 
-        opt.innerText = (u.fullName || u.displayName || u.name);
+        opt.value = u.username;
+        opt.innerText = (u.fullName || u.username);
         agentSelect.appendChild(opt);
     });
     
@@ -2514,15 +2516,14 @@ function updateFeedbackAgentList(shouldRefresh=true) {
     });
 
     const agents = filteredUsers
-        .map(u => u.username)
-        .filter(a => a)
-        .sort((a,b) => a.localeCompare(b, 'tr'));
+        .slice()
+        .sort((a,b) => (a.fullName||a.username).localeCompare((b.fullName||b.username), 'tr'));
 
     agentSelect.innerHTML = '<option value="all">Tüm Temsilciler</option>';
-    agents.forEach(a => {
+    agents.forEach(u => {
         const opt = document.createElement('option');
-        opt.value = a;
-        opt.textContent = getDisplayNameOf(a);
+        opt.value = u.username;
+        opt.textContent = (u.fullName || u.username);
         agentSelect.appendChild(opt);
     });
 
@@ -2633,7 +2634,7 @@ function loadQualityDashboard() {
                     if (e.group) {
                         matchGroup = (e.group === selectedGroup);
                     } else {
-                        const user = adminUserList.find(u => u.name === e.agent);
+                        const user = adminUserList.find(u => u.username === e.agent);
                         matchGroup = (user && user.group === selectedGroup);
                     }
                 }
@@ -2951,7 +2952,7 @@ async function assignTrainingPopup() {
                 const agentSelect = document.getElementById('swal-t-agent');
                 agentSelect.style.display = val === 'Individual' ? 'block' : 'none';
                 if (val === 'Individual') {
-                    agentSelect.innerHTML = adminUserList.map(u => `<option value="${getDisplayNameOf(u.name)}">${getDisplayNameOf(u.name)}</option>`).join('');
+                    agentSelect.innerHTML = adminUserList.map(u => `<option value="${u.username}">${escapeHtml(u.fullName||u.username)}</option>`).join('');
                 }
             };
             updateTrainingTarget('Genel');
@@ -3091,9 +3092,9 @@ function loadFeedbackList() {
         listEl.innerHTML += `
             <div class="feedback-card" style="border-left-color: ${feedbackClass};">
                 <div class="feedback-header">
-                    <div style="font-weight:bold; color:#0e1b42; font-size:1.1rem;">${getDisplayNameOf(e.agent)}</div>
+                    <div style="font-weight:bold; color:#0e1b42; font-size:1.1rem;">${resolveUserDisplay(e.agent)}</div>
                     <div class="feedback-info-right">
-                        <span><i class="fas fa-user-check"></i> Değerleyen: ${e.evaluator}</span>
+                        <span><i class="fas fa-user-check"></i> Değerleyen: ${resolveUserDisplay(e.evaluator)}</span>
                         <span><i class="fas fa-id-badge"></i> Çağrı ID: ${cleanCallId}</span>
                         <span><i class="fas fa-calendar-alt"></i> Tarih: ${e.callDate}</span>
                     </div>
@@ -3254,7 +3255,7 @@ async function addManualFeedbackPopup() {
         confirmButtonText: '<i class="fas fa-save"></i> Kaydet',
         didOpen: () => {
             const sel = document.getElementById('manual-q-agent');
-            adminUserList.forEach(u => sel.innerHTML += `<option value="${getDisplayNameOf(u.name)}">${getDisplayNameOf(u.name)}</option>`);
+            adminUserList.forEach(u => sel.innerHTML += `<option value="${u.username}">${escapeHtml(u.fullName||u.username)}</option>`);
         },
         preConfirm: () => {
             const agentName = document.getElementById('manual-q-agent').value;
@@ -3401,8 +3402,7 @@ async function fetchEvaluationsForAgent(forcedName, silent=false) {
             normalEvaluations.forEach((evalItem, index) => {
                 const scoreColor = evalItem.score >= 90 ? '#2e7d32' : (evalItem.score >= 70 ? '#ed6c02' : '#d32f2f');
                 let editBtn = isAdminMode ? `<i class="fas fa-pen" style="font-size:1rem; color:#fabb00; cursor:pointer; margin-right:5px;" onclick="event.stopPropagation(); editEvaluation('${evalItem.callId}')"></i>` : '';
-                const agentDisp = getDisplayNameOf(evalItem.agent);
-                let agentNameDisplay = '';
+                let agentNameDisplay = (targetAgent === 'all' || targetAgent === targetGroup) ? `<span style="font-size:0.8rem; font-weight:bold; color:#555; background:#eee; padding:2px 6px; border-radius:4px; margin-left:10px;">${evalItem.agent}</span>` : '';
                 
                 // Detay HTML oluşturma
                 let detailHtml = '';
@@ -3437,7 +3437,7 @@ async function fetchEvaluationsForAgent(forcedName, silent=false) {
                 <div class="evaluation-summary" id="eval-summary-${index}" style="border-left:4px solid ${scoreColor}; padding:15px; margin-bottom:10px; border-radius:8px; background:#fff; cursor:pointer;" onclick="toggleEvaluationDetail(${index})">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <div>
-                            <div style="font-weight:700; color:#2c3e50;">${agentDisp} ${agentNameDisplay}</div>
+                            <div style="font-weight:700; color:#2c3e50;">${evalItem.agent} ${agentNameDisplay}</div>
                             <!-- Geliştirme: Çağrı Tarihi ve Dinlenme Tarihi -->
                             <div class="eval-date-info">
                                 <span><i class="fas fa-phone"></i> Çağrı: ${callDateDisplay}</span>
@@ -3474,7 +3474,7 @@ function updateAgentListBasedOnGroup() {
     } else {
         agentSelect.innerHTML = `<option value="all">-- Tüm Temsilciler --</option>`;
     }
-    filteredUsers.forEach(u => { const label = (u.fullName || u.displayName || u.name); agentSelect.innerHTML += `<option value="${getDisplayNameOf(u.name)}">${label}</option>`; });
+    filteredUsers.forEach(u => { agentSelect.innerHTML += `<option value="${u.username}">${escapeHtml(u.fullName||u.username)}</option>`; });
     fetchEvaluationsForAgent();
 }
 function fetchUserListForAdmin() {
@@ -3483,7 +3483,14 @@ function fetchUserListForAdmin() {
             method: 'POST', headers: { "Content-Type": "text/plain;charset=utf-8" },
             body: JSON.stringify({ action: "getUserList", username: currentUser, token: getToken() })
         }).then(response => response.json()).then(data => {
-            if (data.result === "success") { adminUserList = data.users.filter(u => u.group !== 'Yönetim'); resolve(adminUserList); } 
+            if (data.result === "success") {
+                adminUserList = (data.users || []).filter(u => u && u.group !== 'Yönetim');
+                // map for display names
+                userDisplayMap = {};
+                adminUserList.forEach(u => { if(u && u.username) userDisplayMap[u.username] = (u.fullName || u.username); });
+                if(currentUser) userDisplayMap[currentUser] = getMyDisplayName();
+                resolve(adminUserList);
+            } 
             else resolve([]);
         }).catch(err => resolve([]));
     });
@@ -3539,7 +3546,7 @@ async function logEvaluationPopup() {
     if (!agentName || agentName === 'all') { Swal.fire('Uyarı', 'Lütfen listeden bir temsilci seçiniz.', 'warning'); return; }
     
     let agentGroup = 'Genel';
-    const foundUser = adminUserList.find(u => u.name.toLowerCase() === agentName.toLowerCase());
+    const foundUser = adminUserList.find(u => String(u.username||'').toLowerCase() === String(agentName||'').toLowerCase());
     if (foundUser && foundUser.group) { agentGroup = foundUser.group; }
     
     const isChat = agentGroup.indexOf('Chat') > -1;
@@ -3563,9 +3570,9 @@ async function logEvaluationPopup() {
             const fullText = escapeForJsString(c.text); 
             if (isChat) {
                 let mPts = parseInt(c.mediumScore) || 0; let bPts = parseInt(c.badScore) || 0;
-                criteriaFieldsHtml += `<div class="criteria-row" id="row-${i}" data-max-score="${pts}"><div class="criteria-header"><span title="${fullText}">${i+1}. ${c.text}</span><span style="font-size:0.8rem;">Max: ${pts}</span></div><div class="criteria-controls"><div class="eval-button-group"><button class="eval-button eval-good active" data-score="${pts}" onclick="setButtonScore(${i}, ${pts}, ${pts})">İyi (${pts})</button>${mPts > 0 ? `<button class="eval-button eval-medium" data-score="${mPts}" onclick="setButtonScore(${i}, ${mPts}, ${pts})">Orta (${mPts})</button>` : ''}${bPts > 0 ? `<button class="eval-button eval-bad" data-score="${bPts}" onclick="setButtonScore(${i}, ${bPts}, ${pts})">Kötü (${bPts})</button>` : ''}</div><span class="score-badge" id="badge-${i}" style="margin-top:8px; display:block; background:#2e7d32;">${getDisplayNameOf(pts)}</span></div><input type="text" id="note-${i}" class="note-input" placeholder="Not..." style="display:none;"></div>`;
+                criteriaFieldsHtml += `<div class="criteria-row" id="row-${i}" data-max-score="${pts}"><div class="criteria-header"><span title="${fullText}">${i+1}. ${c.text}</span><span style="font-size:0.8rem;">Max: ${pts}</span></div><div class="criteria-controls"><div class="eval-button-group"><button class="eval-button eval-good active" data-score="${pts}" onclick="setButtonScore(${i}, ${pts}, ${pts})">İyi (${pts})</button>${mPts > 0 ? `<button class="eval-button eval-medium" data-score="${mPts}" onclick="setButtonScore(${i}, ${mPts}, ${pts})">Orta (${mPts})</button>` : ''}${bPts > 0 ? `<button class="eval-button eval-bad" data-score="${bPts}" onclick="setButtonScore(${i}, ${bPts}, ${pts})">Kötü (${bPts})</button>` : ''}</div><span class="score-badge" id="badge-${i}" style="margin-top:8px; display:block; background:#2e7d32;">${pts}</span></div><input type="text" id="note-${i}" class="note-input" placeholder="Not..." style="display:none;"></div>`;
             } else if (isTelesatis) {
-                 criteriaFieldsHtml += `<div class="criteria-row" id="row-${i}" data-max-score="${pts}"><div class="criteria-header"><span title="${fullText}">${i+1}. ${c.text}</span><span>Max: ${pts}</span></div><div class="criteria-controls" style="display:flex; align-items:center; gap:15px; background:#f9f9f9;"><input type="range" class="custom-range slider-input" id="slider-${i}" min="0" max="${pts}" value="${pts}" data-index="${i}" oninput="updateRowSliderScore(${i}, ${pts})" style="flex-grow:1;"><span class="score-badge" id="badge-${i}" style="background:#2e7d32;">${getDisplayNameOf(pts)}</span></div><input type="text" id="note-${i}" class="note-input" placeholder="Not..." style="display:none;"></div>`;
+                 criteriaFieldsHtml += `<div class="criteria-row" id="row-${i}" data-max-score="${pts}"><div class="criteria-header"><span title="${fullText}">${i+1}. ${c.text}</span><span>Max: ${pts}</span></div><div class="criteria-controls" style="display:flex; align-items:center; gap:15px; background:#f9f9f9;"><input type="range" class="custom-range slider-input" id="slider-${i}" min="0" max="${pts}" value="${pts}" data-index="${i}" oninput="updateRowSliderScore(${i}, ${pts})" style="flex-grow:1;"><span class="score-badge" id="badge-${i}" style="background:#2e7d32;">${pts}</span></div><input type="text" id="note-${i}" class="note-input" placeholder="Not..." style="display:none;"></div>`;
             }
         });
         criteriaFieldsHtml += `</div>`;
@@ -3574,7 +3581,7 @@ async function logEvaluationPopup() {
     // GÜNCELLENMİŞ MODAL: Call ID zorunlu yapıldı
     const contentHtml = `
         <div class="eval-modal-wrapper">
-            <div class="score-dashboard"><div><div style="font-size:0.9rem;">Değerlendirilen</div><div style="font-size:1.2rem; font-weight:bold; color:#fabb00;">${getDisplayNameOf(agentName)}</div></div><div class="score-circle-outer" id="score-ring"><div class="score-circle-inner" id="live-score">${isCriteriaBased ? '100' : '100'}</div></div></div>
+            <div class="score-dashboard"><div><div style="font-size:0.9rem;">Değerlendirilen</div><div style="font-size:1.2rem; font-weight:bold; color:#fabb00;">${agentName}</div></div><div class="score-circle-outer" id="score-ring"><div class="score-circle-inner" id="live-score">${isCriteriaBased ? '100' : '100'}</div></div></div>
             <div class="eval-header-card"><div><label>Call ID <span style="color:red;">*</span></label><input id="eval-callid" class="swal2-input" style="height:35px; margin:0; width:100%;" placeholder="Call ID"></div><div><label>Tarih</label><input type="date" id="eval-calldate" class="swal2-input" style="height:35px; margin:0; width:100%;" value="${new Date().toISOString().substring(0, 10)}"></div></div>
             ${isCriteriaBased ? criteriaFieldsHtml : `<div style="padding:15px; border:1px dashed #ccc; text-align:center;"><label>Manuel Puan</label><br><input id="eval-manual-score" type="number" class="swal2-input" value="100" min="0" max="100" style="width:100px; text-align:center;"></div><textarea id="eval-details" class="swal2-textarea" placeholder="Detaylar..."></textarea>`}
             <div style="margin-top:15px; padding:10px; background:#fafafa; border:1px solid #eee;"><label>Geri Bildirim Tipi</label><select id="feedback-type" class="swal2-input" style="width:100%; height:40px; margin:0;"><option value="Yok" selected>Yok</option><option value="Sözlü">Sözlü</option><option value="Mail">Mail</option></select></div>
@@ -3658,7 +3665,7 @@ async function editEvaluation(targetCallId) {
     let oldDetails = []; try { oldDetails = JSON.parse(evalData.details || "[]"); } catch(e) { oldDetails = []; }
     
     // GÜNCELLENMİŞ MODAL: Call ID gösteriliyor
-    let contentHtml = `<div class="eval-modal-wrapper" style="border-top:5px solid #1976d2;"><div class="score-dashboard"><div><div style="font-size:0.9rem;">DÜZENLENEN</div><div style="font-size:1.2rem; font-weight:bold; color:#1976d2;">${getDisplayNameOf(agentName)}</div></div><div class="score-circle-outer" id="score-ring"><div class="score-circle-inner" id="live-score">${evalData.score}</div></div></div><div class="eval-header-card"><div><label>Call ID</label><input id="eval-callid" class="swal2-input" value="${evalData.callId}" readonly style="background:#eee; height:35px; width:100%;"></div></div>`;
+    let contentHtml = `<div class="eval-modal-wrapper" style="border-top:5px solid #1976d2;"><div class="score-dashboard"><div><div style="font-size:0.9rem;">DÜZENLENEN</div><div style="font-size:1.2rem; font-weight:bold; color:#1976d2;">${agentName}</div></div><div class="score-circle-outer" id="score-ring"><div class="score-circle-inner" id="live-score">${evalData.score}</div></div></div><div class="eval-header-card"><div><label>Call ID</label><input id="eval-callid" class="swal2-input" value="${evalData.callId}" readonly style="background:#eee; height:35px; width:100%;"></div></div>`;
     
     if (isCriteriaBased) {
         contentHtml += `<div class="criteria-container">`;
@@ -3673,9 +3680,9 @@ async function editEvaluation(targetCallId) {
             if (isChat) {
                 let gAct = cVal === pts ? 'active' : ''; let mAct = (cVal===mPts && mPts!==0) ? 'active' : ''; let bAct = (cVal===bPts && bPts!==0) ? 'active' : '';
                 if(cVal===0 && bPts===0) bAct = 'active'; else if (cVal===0 && bPts>0) { gAct=''; mAct=''; bAct=''; }
-                contentHtml += `<div class="criteria-row" id="row-${i}" data-max-score="${pts}"><div class="criteria-header"><span title="${fullText}">${i+1}. ${c.text}</span><span>Max: ${pts}</span></div><div class="criteria-controls"><div class="eval-button-group"><button class="eval-button eval-good ${gAct}" data-score="${pts}" onclick="setButtonScore(${i}, ${pts}, ${pts})">İyi</button>${mPts>0?`<button class="eval-button eval-medium ${mAct}" data-score="${mPts}" onclick="setButtonScore(${i}, ${mPts}, ${pts})">Orta</button>`:''}${bPts>0?`<button class="eval-button eval-bad ${bAct}" data-score="${bPts}" onclick="setButtonScore(${i}, ${bPts}, ${pts})">Kötü</button>`:''}</div><span class="score-badge" id="badge-${i}">${getDisplayNameOf(cVal)}</span></div><input type="text" id="note-${i}" class="note-input" value="${cNote}" style="display:${cVal<pts?'block':'none'}"></div>`;
+                contentHtml += `<div class="criteria-row" id="row-${i}" data-max-score="${pts}"><div class="criteria-header"><span title="${fullText}">${i+1}. ${c.text}</span><span>Max: ${pts}</span></div><div class="criteria-controls"><div class="eval-button-group"><button class="eval-button eval-good ${gAct}" data-score="${pts}" onclick="setButtonScore(${i}, ${pts}, ${pts})">İyi</button>${mPts>0?`<button class="eval-button eval-medium ${mAct}" data-score="${mPts}" onclick="setButtonScore(${i}, ${mPts}, ${pts})">Orta</button>`:''}${bPts>0?`<button class="eval-button eval-bad ${bAct}" data-score="${bPts}" onclick="setButtonScore(${i}, ${bPts}, ${pts})">Kötü</button>`:''}</div><span class="score-badge" id="badge-${i}">${cVal}</span></div><input type="text" id="note-${i}" class="note-input" value="${cNote}" style="display:${cVal<pts?'block':'none'}"></div>`;
             } else if (isTelesatis) {
-                contentHtml += `<div class="criteria-row" id="row-${i}" data-max-score="${pts}"><div class="criteria-header"><span title="${fullText}">${i+1}. ${c.text}</span><span>Max: ${pts}</span></div><div class="criteria-controls" style="display:flex; background:#f9f9f9;"><input type="range" class="custom-range slider-input" id="slider-${i}" min="0" max="${pts}" value="${cVal}" data-index="${i}" oninput="updateRowSliderScore(${i}, ${pts})" style="flex-grow:1;"><span class="score-badge" id="badge-${i}">${getDisplayNameOf(cVal)}</span></div><input type="text" id="note-${i}" class="note-input" value="${cNote}" style="display:${cVal<pts?'block':'none'}"></div>`;
+                contentHtml += `<div class="criteria-row" id="row-${i}" data-max-score="${pts}"><div class="criteria-header"><span title="${fullText}">${i+1}. ${c.text}</span><span>Max: ${pts}</span></div><div class="criteria-controls" style="display:flex; background:#f9f9f9;"><input type="range" class="custom-range slider-input" id="slider-${i}" min="0" max="${pts}" value="${cVal}" data-index="${i}" oninput="updateRowSliderScore(${i}, ${pts})" style="flex-grow:1;"><span class="score-badge" id="badge-${i}">${cVal}</span></div><input type="text" id="note-${i}" class="note-input" value="${cNote}" style="display:${cVal<pts?'block':'none'}"></div>`;
             }
         });
         contentHtml += `</div>`;
@@ -3969,8 +3976,8 @@ async function openTelesalesArea(){
     const av = document.getElementById('t-side-avatar');
     const nm = document.getElementById('t-side-name');
     const rl = document.getElementById('t-side-role');
-    if(av) av.innerText = (currentUser||'U').trim().slice(0,1).toUpperCase();
-    if(nm) nm.innerText = currentUser || 'Kullanıcı';
+    if(av) av.innerText = (getMyDisplayName()||'U').trim().slice(0,1).toUpperCase();
+    if(nm) nm.innerText = getMyDisplayName() || 'Kullanıcı';
     if(rl) rl.innerText = isAdminMode ? 'Admin' : 'Temsilci';
 
     // Data teklifleri: önce e-tabladan çekmeyi dene, olmazsa fallback
@@ -4361,8 +4368,8 @@ async function openTechArea(tab){
     const av = document.getElementById('x-side-avatar');
     const nm = document.getElementById('x-side-name');
     const rl = document.getElementById('x-side-role');
-    if(av) av.innerText = (currentUser||'U').trim().slice(0,1).toUpperCase();
-    if(nm) nm.innerText = currentUser || 'Kullanıcı';
+    if(av) av.innerText = (getMyDisplayName()||'U').trim().slice(0,1).toUpperCase();
+    if(nm) nm.innerText = getMyDisplayName() || 'Kullanıcı';
     if(rl) rl.innerText = isAdminMode ? 'Admin' : 'Temsilci';
 
     // İlk açılışta "bozuk görünüm" (flicker) olmasın: veri gelene kadar bekle
@@ -4672,7 +4679,7 @@ function renderTechList(targetId, list, showCategory=false){
     el.innerHTML = list.map((c)=>`
       <div class="news-item" style="cursor:pointer" onclick="showCardDetail(${JSON.stringify(c).replace(/</g,'\u003c')})">
         <span class="news-title">${escapeHtml(c.title||'')}</span>
-        ${showCategory ? `<span class="news-tag" style="background:#eef2ff;color:#2b3a8a;border:1px solid #dde3ff">${getDisplayNameOf(escapeHtml(c.category||''))}</span>`:''}
+        ${showCategory ? `<span class="news-tag" style="background:#eef2ff;color:#2b3a8a;border:1px solid #dde3ff">${escapeHtml(c.category||'')}</span>`:''}
         <div class="news-desc" style="white-space:pre-line">${escapeHtml(c.text||'')}</div>
         ${c.script ? `<div class="script-box" style="margin-top:10px"><b>Script:</b><div style="margin-top:6px;white-space:pre-line">${escapeHtml(c.script||'')}</div><div style="text-align:right;margin-top:10px"><button class="btn btn-copy" onclick="event.stopPropagation(); copyText('${escapeForJsString(c.script||'')}')">Kopyala</button></div></div>`:''}
       </div>
