@@ -268,6 +268,14 @@ let sessionTimeout;
 let activeCards = [];
 let currentCategory = "home";
 let adminUserList = [];
+function getDisplayNameOf(u){
+  u=String(u||'').trim();
+  try{
+    const found=(adminUserList||[]).find(x=>String(x.name||'').trim()===u);
+    return (found && (found.fullName||found.name)) ? String(found.fullName||found.name) : u;
+  }catch(e){ return u; }
+}
+
 let allEvaluationsData = [];
 let wizardStepsData = {};
 let trainingData = [];
@@ -2209,9 +2217,9 @@ function openQualityArea() {
     const fullScreen = document.getElementById('quality-fullscreen');
     fullScreen.style.display = 'flex';
     // Kullanıcı bilgisini güncelle
-    document.getElementById('q-side-name').innerText = currentUser;
+    document.getElementById('q-side-name').innerText = (localStorage.getItem('sSportFullName') || currentUser);
     document.getElementById('q-side-role').innerText = isAdminMode ? 'Yönetici' : 'Temsilci';
-    document.getElementById('q-side-avatar').innerText = currentUser.charAt(0).toUpperCase();
+    document.getElementById('q-side-avatar').innerText = String((localStorage.getItem('sSportFullName') || currentUser) || 'U').trim().charAt(0).toUpperCase();
     // Dönem filtresini doldur
     populateMonthFilterFull();
     // Yetki kontrolü (Admin butonlarını göster/gizle)
@@ -2352,7 +2360,7 @@ function updateDashAgentList() {
     filteredUsers.forEach(u => {
         const opt = document.createElement('option');
         opt.value = u.name; 
-        opt.innerText = u.name;
+        opt.innerText = (u.fullName || u.name);
         agentSelect.appendChild(opt);
     });
     
@@ -2514,8 +2522,7 @@ function updateFeedbackAgentList(shouldRefresh=true) {
     agents.forEach(a => {
         const opt = document.createElement('option');
         opt.value = a;
-        const found = (adminUserList||[]).find(x=>x.name===a);
-        opt.textContent = (found && (found.fullName||found.name)) ? (found.fullName||found.name) : a;
+        opt.textContent = getDisplayNameOf(a);
         agentSelect.appendChild(opt);
     });
 
@@ -2944,7 +2951,7 @@ async function assignTrainingPopup() {
                 const agentSelect = document.getElementById('swal-t-agent');
                 agentSelect.style.display = val === 'Individual' ? 'block' : 'none';
                 if (val === 'Individual') {
-                    agentSelect.innerHTML = adminUserList.map(u => `<option value="${u.name}">${u.name}</option>`).join('');
+                    agentSelect.innerHTML = adminUserList.map(u => `<option value="${u.name}">${(u.fullName||u.name)}</option>`).join('');
                 }
             };
             updateTrainingTarget('Genel');
@@ -3247,7 +3254,7 @@ async function addManualFeedbackPopup() {
         confirmButtonText: '<i class="fas fa-save"></i> Kaydet',
         didOpen: () => {
             const sel = document.getElementById('manual-q-agent');
-            adminUserList.forEach(u => sel.innerHTML += `<option value="${u.name}">${u.name}</option>`);
+            adminUserList.forEach(u => sel.innerHTML += `<option value="${u.name}">${(u.fullName||u.name)}</option>`);
         },
         preConfirm: () => {
             const agentName = document.getElementById('manual-q-agent').value;
@@ -3566,7 +3573,7 @@ async function logEvaluationPopup() {
     // GÜNCELLENMİŞ MODAL: Call ID zorunlu yapıldı
     const contentHtml = `
         <div class="eval-modal-wrapper">
-            <div class="score-dashboard"><div><div style="font-size:0.9rem;">Değerlendirilen</div><div style="font-size:1.2rem; font-weight:bold; color:#fabb00;">${agentName}</div></div><div class="score-circle-outer" id="score-ring"><div class="score-circle-inner" id="live-score">${isCriteriaBased ? '100' : '100'}</div></div></div>
+            <div class="score-dashboard"><div><div style="font-size:0.9rem;">Değerlendirilen</div><div style="font-size:1.2rem; font-weight:bold; color:#fabb00;">${getDisplayNameOf(agentName)}</div></div><div class="score-circle-outer" id="score-ring"><div class="score-circle-inner" id="live-score">${isCriteriaBased ? '100' : '100'}</div></div></div>
             <div class="eval-header-card"><div><label>Call ID <span style="color:red;">*</span></label><input id="eval-callid" class="swal2-input" style="height:35px; margin:0; width:100%;" placeholder="Call ID"></div><div><label>Tarih</label><input type="date" id="eval-calldate" class="swal2-input" style="height:35px; margin:0; width:100%;" value="${new Date().toISOString().substring(0, 10)}"></div></div>
             ${isCriteriaBased ? criteriaFieldsHtml : `<div style="padding:15px; border:1px dashed #ccc; text-align:center;"><label>Manuel Puan</label><br><input id="eval-manual-score" type="number" class="swal2-input" value="100" min="0" max="100" style="width:100px; text-align:center;"></div><textarea id="eval-details" class="swal2-textarea" placeholder="Detaylar..."></textarea>`}
             <div style="margin-top:15px; padding:10px; background:#fafafa; border:1px solid #eee;"><label>Geri Bildirim Tipi</label><select id="feedback-type" class="swal2-input" style="width:100%; height:40px; margin:0;"><option value="Yok" selected>Yok</option><option value="Sözlü">Sözlü</option><option value="Mail">Mail</option></select></div>
@@ -3650,7 +3657,7 @@ async function editEvaluation(targetCallId) {
     let oldDetails = []; try { oldDetails = JSON.parse(evalData.details || "[]"); } catch(e) { oldDetails = []; }
     
     // GÜNCELLENMİŞ MODAL: Call ID gösteriliyor
-    let contentHtml = `<div class="eval-modal-wrapper" style="border-top:5px solid #1976d2;"><div class="score-dashboard"><div><div style="font-size:0.9rem;">DÜZENLENEN</div><div style="font-size:1.2rem; font-weight:bold; color:#1976d2;">${agentName}</div></div><div class="score-circle-outer" id="score-ring"><div class="score-circle-inner" id="live-score">${evalData.score}</div></div></div><div class="eval-header-card"><div><label>Call ID</label><input id="eval-callid" class="swal2-input" value="${evalData.callId}" readonly style="background:#eee; height:35px; width:100%;"></div></div>`;
+    let contentHtml = `<div class="eval-modal-wrapper" style="border-top:5px solid #1976d2;"><div class="score-dashboard"><div><div style="font-size:0.9rem;">DÜZENLENEN</div><div style="font-size:1.2rem; font-weight:bold; color:#1976d2;">${getDisplayNameOf(agentName)}</div></div><div class="score-circle-outer" id="score-ring"><div class="score-circle-inner" id="live-score">${evalData.score}</div></div></div><div class="eval-header-card"><div><label>Call ID</label><input id="eval-callid" class="swal2-input" value="${evalData.callId}" readonly style="background:#eee; height:35px; width:100%;"></div></div>`;
     
     if (isCriteriaBased) {
         contentHtml += `<div class="criteria-container">`;
