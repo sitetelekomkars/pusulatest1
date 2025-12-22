@@ -13,7 +13,7 @@ function showGlobalError(message){
 }
 
 // Apps Script URL'si
-let SCRIPT_URL = localStorage.getItem("PUSULA_SCRIPT_URL") || "https://script.google.com/macros/s/AKfycby3kd04k2u9XdVDD1-vdbQQAsHNW6WLIn8bNYxTlVCL3U1a0WqZo6oPp9zfBWIpwJEinQ/exec"; // Apps Script Web App URL
+let SCRIPT_URL = localStorage.getItem("PUSULA_SCRIPT_URL") || "https://script.google.com/macros/s/AKfycbx9LV5bCnRRu4sBx9z6mZqUiDCqRI3yJeh4td4ba1n8Zx4ebSRQ2FvtwSVEg4zsbVeZ/exec"; // Apps Script Web App URL
 
 // ---- API CALL helper (Menu/Yetki vs için gerekli) ----
 async function apiCall(action, payload = {}) {
