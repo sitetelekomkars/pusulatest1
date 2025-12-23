@@ -3437,13 +3437,13 @@ async function fetchEvaluationsForAgent(forcedName, silent=false) {
                 <div class="evaluation-summary" id="eval-summary-${index}" style="border-left:4px solid ${scoreColor}; padding:15px; margin-bottom:10px; border-radius:8px; background:#fff; cursor:pointer;" onclick="toggleEvaluationDetail(${index})">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <div>
-                            <div style="font-weight:700; color:#2c3e50;">${evalItem.agent} ${agentNameDisplay}</div>
+                            <div style="font-weight:700; color:#2c3e50;">${agentNameDisplay}</div>
                             <!-- Geliştirme: Çağrı Tarihi ve Dinlenme Tarihi -->
                             <div class="eval-date-info">
                                 <span><i class="fas fa-phone"></i> Çağrı: ${callDateDisplay}</span>
                                 <span><i class="fas fa-headphones"></i> Dinlenme: ${listenDateDisplay}</span>
                             </div>
-                            <div style="font-size:0.75rem; color:#999; margin-top:2px;">ID: ${evalItem.callId}</div>
+                            <div style="font-size:0.75rem; color:#999; margin-top:2px; cursor:pointer; user-select:none;" title="Çift tıkla kopyala" data-copy-id="${evalItem.callId}">ID: ${evalItem.callId}</div>
                         </div>
                         <div style="text-align:right;">
                              ${editBtn} <span style="font-weight:800; font-size:1.6rem; color:${scoreColor};">${evalItem.score}</span>
@@ -5401,11 +5401,41 @@ window.switchTechTab = async function(tab){
 
 // expose for onclick
 try{ window.openMenuPermissions = openMenuPermissions; }catch(e){}
+// ==========================================================
 // Değerlendirme geçmişi: ID üzerine çift tıkla kopyala
-document.addEventListener('dblclick', function(e){
-  const el = e.target.closest('[data-copy-id]');
-  if(!el) return;
-  const val = el.getAttribute('data-copy-id');
-  if(!val) return;
-  copyText(val);
-});
+// ==========================================================
+(function __bindCopyIdDblClick(){
+  if(window.__copyIdDblBound) return;
+  window.__copyIdDblBound = true;
+
+  async function writeClipboard(text){
+    try{
+      await navigator.clipboard.writeText(text);
+      return true;
+    }catch(e){
+      // fallback
+      try{
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.focus(); ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        return true;
+      }catch(e2){ return false; }
+    }
+  }
+
+  document.addEventListener('dblclick', async function(e){
+    const el = e.target.closest('[data-copy-id]');
+    if(!el) return;
+    const val = el.getAttribute('data-copy-id');
+    if(!val) return;
+    const ok = await writeClipboard(val);
+    if(ok){
+      try{ Swal.fire({toast:true,position:'top',icon:'success',title:'Kopyalandı',showConfirmButton:false,timer:1200}); }catch(err){}
+    }
+  });
+})();
