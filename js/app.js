@@ -38,13 +38,13 @@ if (typeof Swal === "undefined") {
 
 
 
-// Oyun DeÄiÅkenleri
+// Oyun DeÄiÅkenleri
 let jokers = { call: 1, half: 1, double: 1 };
 let doubleChanceUsed = false;
 let firstAnswerIndex = -1;
 const VALID_CATEGORIES = ['Teknik', 'Ä°kna', 'Kampanya', 'Bilgi'];
-const MONTH_NAMES = ["Ocak", "Åubat", "Mart", "Nisan", "MayÄ±s", "Haziran", "Temmuz", "AÄustos", "EylÃ¼l", "Ekim", "KasÄ±m", "AralÄ±k"];
-// --- GLOBAL DEÄÄ°ÅKENLER ---
+const MONTH_NAMES = ["Ocak", "Åubat", "Mart", "Nisan", "MayÄ±s", "Haziran", "Temmuz", "AÄustos", "EylÃ¼l", "Ekim", "KasÄ±m", "AralÄ±k"];
+// --- GLOBAL DEÄÄ°ÅKENLER ---
 let database = [], cardsData = [], newsData = [], sportsData = [], salesScripts = [], quizQuestions = [], quickDecisionQuestions = [];
 
 // Data load barrier (prevents Tech/Telesales first-render flicker)
@@ -81,14 +81,14 @@ function normalizeRole(v){
 function normalizeGroup(v){
   // normalize Turkish chars & case so comparisons work
   const s = String(v||'').trim().toLowerCase();
-  const tr = s.replaceAll('Å','s').replaceAll('Å','s')
+  const tr = s.replaceAll('Å','s').replaceAll('Å','s')
               .replaceAll('Ä±','i').replaceAll('Ä°','i')
-              .replaceAll('Ä','g').replaceAll('Ä','g')
-              .replaceAll('Ã¼','u').replaceAll('Ã','u')
-              .replaceAll('Ã¶','o').replaceAll('Ã','o')
-              .replaceAll('Ã§','c').replaceAll('Ã','c');
+              .replaceAll('Ä','g').replaceAll('Ä','g')
+              .replaceAll('Ã¼','u').replaceAll('Ã','u')
+              .replaceAll('Ã¶','o').replaceAll('Ã','o')
+              .replaceAll('Ã§','c').replaceAll('Ã','c');
   // map common variants to display names used in permissions table
-  if(tr.includes('telesat')) return 'TelesatÄ±Å';
+  if(tr.includes('telesat')) return 'TelesatÄ±Å';
   if(tr.includes('teknik')) return 'Teknik';
   if(tr.includes('chat')) return 'Chat';
   return String(v||'').trim();
@@ -149,7 +149,7 @@ function loadMenuPermissions(){
 // LocAdmin panel
 function openMenuPermissions(){
   const role=getMyRole();
-  // Ä°stek: Yetki YÃ¶netimi sadece LocAdmin rolÃ¼nde gÃ¶rÃ¼nsÃ¼n ve Ã§alÄ±ÅsÄ±n
+  // Ä°stek: Yetki YÃ¶netimi sadece LocAdmin rolÃ¼nde gÃ¶rÃ¼nsÃ¼n ve Ã§alÄ±ÅsÄ±n
   if(role!=="locadmin"){
     Swal.fire("Yetkisiz", "Yetki YÃ¶netimi sadece LocAdmin rolÃ¼nde kullanÄ±labilir.", "warning");
     return;
@@ -172,8 +172,8 @@ function openMenuPermissions(){
       });
       groups=[...set];
     }
-    // Hepsini baÅ harf bÃ¼yÃ¼t, yaygÄ±n isimleri normalize et
-    const normMap={"chat":"Chat","telesatÄ±Å":"TelesatÄ±Å","telesatis":"TelesatÄ±Å","yÃ¶netim":"YÃ¶netim","yonetim":"YÃ¶netim","teknik":"Teknik"};
+    // Hepsini baÅ harf bÃ¼yÃ¼t, yaygÄ±n isimleri normalize et
+    const normMap={"chat":"Chat","telesatÄ±Å":"TelesatÄ±Å","telesatis":"TelesatÄ±Å","yÃ¶netim":"YÃ¶netim","yonetim":"YÃ¶netim","teknik":"Teknik"};
     groups = groups.map(g=>{
       const k=g.toLowerCase();
       return normMap[k] || (g.charAt(0).toUpperCase()+g.slice(1));
@@ -199,7 +199,7 @@ function openMenuPermissions(){
 
     const tableHtml = `
       <div style="text-align:left;margin-bottom:10px;color:#444">
-        MenÃ¼/sekme bazlÄ± âhangi grup gÃ¶rsÃ¼nâ ayarÄ±. Ä°Åaretli olmayan gruplar menÃ¼yÃ¼ gÃ¶rmez.
+        MenÃ¼/sekme bazlÄ± âhangi grup gÃ¶rsÃ¼nâ ayarÄ±. Ä°Åaretli olmayan gruplar menÃ¼yÃ¼ gÃ¶rmez.
       </div>
       <div style="max-height:420px;overflow:auto;border:1px solid rgba(0,0,0,.08);border-radius:12px">
         <table style="width:100%;border-collapse:collapse">
@@ -278,7 +278,7 @@ let dashboardChartTele = null;
 // YENÄ°: Feedback Log Verisi (Manuel kayÄ±t detaylarÄ± iÃ§in)
 let feedbackLogsData = [];
 // ==========================================================
-// --- KALÄ°TE PUANLAMA LOGÄ°ÄÄ°: CHAT (BUTON TABANLI) ---
+// --- KALÄ°TE PUANLAMA LOGÄ°ÄÄ°: CHAT (BUTON TABANLI) ---
 // ==========================================================
 window.setButtonScore = function(index, score, max) {
     const row = document.getElementById(`row-${index}`);
@@ -331,7 +331,7 @@ window.recalcTotalScore = function() {
     }
 };
 // ==========================================================
-// --- KALÄ°TE PUANLAMA LOGÄ°ÄÄ°: TELE SATIÅ (SLIDER TABANLI) ---
+// --- KALÄ°TE PUANLAMA LOGÄ°ÄÄ°: TELE SATIÅ (SLIDER TABANLI) ---
 // ==========================================================
 window.updateRowSliderScore = function(index, max) {
     const slider = document.getElementById(`slider-${index}`);
@@ -406,7 +406,7 @@ function toggleFavorite(title) {
 function isFav(title) { return getFavs().includes(title); }
 function formatDateToDDMMYYYY(dateString) {
     if (!dateString) return 'N/A';
-    // EÄer format dd.MM.yyyy olarak geliyorsa direkt dÃ¶n
+    // EÄer format dd.MM.yyyy olarak geliyorsa direkt dÃ¶n
     if (dateString.match(/^\d{2}\.\d{2}\.\d{4}/)) { return dateString.split(' ')[0]; }
     try {
         const date = new Date(dateString);
@@ -470,7 +470,7 @@ function copyScriptContent(encodedText) {
     copyText(text);
 }
 function copyText(t) {
-    // navigator.clipboard.writeText yerine execCommand kullanÄ±ldÄ± (iFrame uyumluluÄu iÃ§in)
+    // navigator.clipboard.writeText yerine execCommand kullanÄ±ldÄ± (iFrame uyumluluÄu iÃ§in)
     const textarea = document.createElement('textarea');
     textarea.value = t.replace(/\\n/g, '\n');
     document.body.appendChild(textarea);
@@ -493,9 +493,9 @@ function checkSession() {
     const savedRole = localStorage.getItem("sSportRole");
     const savedGroup = localStorage.getItem("sSportGroup");
 
-    // â Oturumun tarayÄ±cÄ±/PC kapat-aÃ§ sonrasÄ± ertesi gÃ¼ne sarkmamasÄ± iÃ§in:
-    // - AynÄ± gÃ¼n deÄilse otomatik Ã§Ä±kÄ±Å
-    // - AyrÄ±ca 12 saati geÃ§tiyse otomatik Ã§Ä±kÄ±Å
+    // â Oturumun tarayÄ±cÄ±/PC kapat-aÃ§ sonrasÄ± ertesi gÃ¼ne sarkmamasÄ± iÃ§in:
+    // - AynÄ± gÃ¼n deÄilse otomatik Ã§Ä±kÄ±Å
+    // - AyrÄ±ca 12 saati geÃ§tiyse otomatik Ã§Ä±kÄ±Å
     const todayKey = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
     const sessionDay = localStorage.getItem("sSportSessionDay") || "";
     const loginAt = parseInt(localStorage.getItem("sSportLoginAt") || "0", 10);
@@ -533,7 +533,7 @@ function checkSession() {
 
         startSessionTimer();
 
-        // â YENÄ°: Yenilemede de menÃ¼/blok yetkilerini uygula
+        // â YENÄ°: Yenilemede de menÃ¼/blok yetkilerini uygula
         try{ loadMenuPermissions(); }catch(e){}
         try{ loadHomeBlocks(); }catch(e){}
 
@@ -546,7 +546,7 @@ function checkSession() {
             loadWizardData();
             loadTechWizardData();
 
-            // EÄer qusers rolÃ¼ndeyse, ana iÃ§eriÄi gizle ve kalite modÃ¼lÃ¼nÃ¼ aÃ§
+            // EÄer qusers rolÃ¼ndeyse, ana iÃ§eriÄi gizle ve kalite modÃ¼lÃ¼nÃ¼ aÃ§
             if (savedRole === 'qusers') {
                 const grid = document.getElementById('cardGrid'); if (grid) grid.style.display = 'none';
                 const controls = document.querySelector('.control-wrapper'); if (controls) controls.style.display = 'none';
@@ -566,7 +566,7 @@ function girisYap() {
     if(!uName || !uPass) { errorMsg.innerText = "LÃ¼tfen bilgileri giriniz."; errorMsg.style.display = "block"; return; }
     
     loadingMsg.style.display = "block";
-    loadingMsg.innerText = "DoÄrulanÄ±yor...";
+    loadingMsg.innerText = "DoÄrulanÄ±yor...";
     errorMsg.style.display = "none";
     document.querySelector('.login-btn').disabled = true;
     
@@ -586,16 +586,16 @@ function girisYap() {
             localStorage.setItem("sSportToken", data.token);
             localStorage.setItem("sSportRole", data.role);
             if (data.group) localStorage.setItem("sSportGroup", data.group);
-            // â Oturum zaman damgasÄ± (ertesi gÃ¼n otomatik Ã§Ä±kÄ±Å iÃ§in)
+            // â Oturum zaman damgasÄ± (ertesi gÃ¼n otomatik Ã§Ä±kÄ±Å iÃ§in)
             localStorage.setItem("sSportSessionDay", new Date().toISOString().slice(0, 10));
             localStorage.setItem("sSportLoginAt", String(Date.now()));
             
             const savedRole = data.role;
             if (data.forceChange === true) {
                 Swal.fire({
-                    icon: 'warning', title: ' â ï¸  GÃ¼venlik UyarÄ±sÄ±',
-                    text: 'Ä°lk giriÅiniz. LÃ¼tfen Åifrenizi deÄiÅtirin.',
-                    allowOutsideClick: false, allowEscapeKey: false, confirmButtonText: 'Åifremi DeÄiÅtir'
+                    icon: 'warning', title: ' â ï¸  GÃ¼venlik UyarÄ±sÄ±',
+                    text: 'Ä°lk giriÅiniz. LÃ¼tfen Åifrenizi deÄiÅtirin.',
+                    allowOutsideClick: false, allowEscapeKey: false, confirmButtonText: 'Åifremi DeÄiÅtir'
                 }).then(() => { changePasswordPopup(true); });
             } else {
                 document.getElementById("login-screen").style.display = "none";
@@ -625,7 +625,7 @@ function girisYap() {
                 }
             }
         } else {
-            errorMsg.innerText = data.message || "HatalÄ± giriÅ!";
+            errorMsg.innerText = data.message || "HatalÄ± giriÅ!";
             errorMsg.style.display = "block";
         }
     }).catch(error => {
@@ -657,7 +657,7 @@ function checkAdmin(role) {
             } else { btn.style.filter = 'none'; }
         });
         const searchInput = document.getElementById('searchInput');
-        if (searchInput) { searchInput.disabled = true; searchInput.placeholder = "Arama devre dÄ±ÅÄ± (Kalite Modu)"; searchInput.style.opacity = '0.6'; }
+        if (searchInput) { searchInput.disabled = true; searchInput.placeholder = "Arama devre dÄ±ÅÄ± (Kalite Modu)"; searchInput.style.opacity = '0.6'; }
     } else {
         filterButtons.forEach(btn => {
             btn.style.opacity = '1';
@@ -707,25 +707,25 @@ function startSessionTimer() {
     if (sessionTimeout) clearTimeout(sessionTimeout);
     // 8 saat (28800000 ms)
     sessionTimeout = setTimeout(() => {
-        Swal.fire({ icon: 'warning', title: 'Oturum SÃ¼resi Doldu', text: 'GÃ¼venlik nedeniyle otomatik Ã§Ä±kÄ±Å yapÄ±ldÄ±.', confirmButtonText: 'Tamam' }).then(() => { logout(); });
+        Swal.fire({ icon: 'warning', title: 'Oturum SÃ¼resi Doldu', text: 'GÃ¼venlik nedeniyle otomatik Ã§Ä±kÄ±Å yapÄ±ldÄ±.', confirmButtonText: 'Tamam' }).then(() => { logout(); });
     },  28800000); 
 }
 function openUserMenu() { toggleUserDropdown(); }
 async function changePasswordPopup(isMandatory = false) {
     const { value: formValues } = await Swal.fire({
-        title: isMandatory ? 'Yeni Åifre Belirleyin' : 'Åifre DeÄiÅtir',
-        html: `${isMandatory ? '<p style="font-size:0.9rem; color:#d32f2f;">Ä°lk giriÅ Åifrenizi deÄiÅtirmeden devam edemezsiniz.</p>' : ''}<input id="swal-old-pass" type="password" class="swal2-input" placeholder="Eski Åifre (Mevcut)"><input id="swal-new-pass" type="password" class="swal2-input" placeholder="Yeni Åifre">`,
+        title: isMandatory ? 'Yeni Åifre Belirleyin' : 'Åifre DeÄiÅtir',
+        html: `${isMandatory ? '<p style="font-size:0.9rem; color:#d32f2f;">Ä°lk giriÅ Åifrenizi deÄiÅtirmeden devam edemezsiniz.</p>' : ''}<input id="swal-old-pass" type="password" class="swal2-input" placeholder="Eski Åifre (Mevcut)"><input id="swal-new-pass" type="password" class="swal2-input" placeholder="Yeni Åifre">`,
         focusConfirm: false, showCancelButton: !isMandatory, allowOutsideClick: !isMandatory, allowEscapeKey: !isMandatory,
-        confirmButtonText: 'DeÄiÅtir', cancelButtonText: 'Ä°ptal',
+        confirmButtonText: 'DeÄiÅtir', cancelButtonText: 'Ä°ptal',
         preConfirm: () => {
             const o = document.getElementById('swal-old-pass').value;
             const n = document.getElementById('swal-new-pass').value;
-            if(!o || !n) { Swal.showValidationMessage('Alanlar boÅ bÄ±rakÄ±lamaz'); }
+            if(!o || !n) { Swal.showValidationMessage('Alanlar boÅ bÄ±rakÄ±lamaz'); }
             return [ o, n ]
         }
     });
     if (formValues) {
-        Swal.fire({ title: 'Ä°Åleniyor...', didOpen: () => { Swal.showLoading() } });
+        Swal.fire({ title: 'Ä°Åleniyor...', didOpen: () => { Swal.showLoading() } });
         fetch(SCRIPT_URL, {
             method: 'POST',
             headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -737,9 +737,9 @@ async function changePasswordPopup(isMandatory = false) {
             })
         }).then(response => response.json()).then(data => {
             if(data.result === "success") {
-                Swal.fire('BaÅarÄ±lÄ±!', 'Åifreniz gÃ¼ncellendi. Yeniden giriÅ yapÄ±nÄ±z.', 'success').then(() => { logout(); });
+                Swal.fire('BaÅarÄ±lÄ±!', 'Åifreniz gÃ¼ncellendi. Yeniden giriÅ yapÄ±nÄ±z.', 'success').then(() => { logout(); });
             } else {
-                Swal.fire('Hata', data.message || 'Ä°Ålem baÅarÄ±sÄ±z.', 'error').then(() => { if(isMandatory) changePasswordPopup(true); });
+                Swal.fire('Hata', data.message || 'Ä°Ålem baÅarÄ±sÄ±z.', 'error').then(() => { if(isMandatory) changePasswordPopup(true); });
             }
         }).catch(err => { Swal.fire('Hata', 'Sunucu hatasÄ±.', 'error'); if(isMandatory) changePasswordPopup(true); });
     } else if (isMandatory) { changePasswordPopup(true); }
@@ -773,7 +773,7 @@ function loadContentData() {
                 q: i.Text, opts: i.QuizOptions ? i.QuizOptions.split(',').map(o => o.trim()) : [], a: parseInt(i.QuizAnswer)
             }));
             // HÄ±zlÄ± Karar sorularÄ± (Google Sheet'ten): Type = quickdecision
-            // Beklenen: Text | QuizOptions (| ile ayrÄ±lmÄ±Å) | QuizAnswer (0-based index) | Detail (opsiyonel)
+            // Beklenen: Text | QuizOptions (| ile ayrÄ±lmÄ±Å) | QuizAnswer (0-based index) | Detail (opsiyonel)
             quickDecisionQuestions = rawData
                 .filter(i => (i.Type || '').toLowerCase() === 'quickdecision')
                 .map(i => {
@@ -793,7 +793,7 @@ function loadContentData() {
             startTicker();
             try { updateSearchResultCount(activeCards.length || database.length, database.length); } catch(e) {}
         } else { document.getElementById('loading').innerHTML = `Veriler alÄ±namadÄ±: ${data.message || 'Bilinmeyen Hata'}`; }
-    }).catch(error => { document.getElementById('loading').innerHTML = 'BaÄlantÄ± HatasÄ±! Sunucuya ulaÅÄ±lamÄ±yor.'; }).finally(()=>{ try{ __dataLoadedResolve && __dataLoadedResolve(); }catch(e){} });
+    }).catch(error => { document.getElementById('loading').innerHTML = 'BaÄlantÄ± HatasÄ±! Sunucuya ulaÅÄ±lamÄ±yor.'; }).finally(()=>{ try{ __dataLoadedResolve && __dataLoadedResolve(); }catch(e){} });
             cardsData = database; // geriye dÃ¶nÃ¼k uyumluluk
 
 }
@@ -860,12 +860,12 @@ function highlightText(htmlContent) {
 function updateSearchResultCount(count, total) {
     const el = document.getElementById('searchResultCount');
     if(!el) return;
-    // sadece arama yazÄ±ldÄ±ÄÄ±nda veya filtre fav/tekil seÃ§ildiÄinde gÃ¶ster
+    // sadece arama yazÄ±ldÄ±ÄÄ±nda veya filtre fav/tekil seÃ§ildiÄinde gÃ¶ster
     const search = (document.getElementById('searchInput')?.value || '').trim();
     const show = !!search || (currentCategory && currentCategory !== 'all');
     if(!show) { el.style.display = 'none'; el.innerText = ''; return; }
     el.style.display = 'block';
-    el.innerText = `ð ${count} sonuÃ§${total != null ? ' / ' + total : ''}`;
+    el.innerText = `ð ${count} sonuÃ§${total != null ? ' / ' + total : ''}`;
 }
 
 
@@ -894,7 +894,7 @@ function filterCategory(btn, cat) {
     }
     if (catNorm.includes('kalite')) {
         hideHomeScreen();
-        // kalite iÃ§in mevcut davranÄ±Å: card list (varsa) - burada Ã¶zel modÃ¼l yoksa devam
+        // kalite iÃ§in mevcut davranÄ±Å: card list (varsa) - burada Ã¶zel modÃ¼l yoksa devam
     }
     currentCategory = cat;
     hideHomeScreen();
@@ -906,7 +906,7 @@ function filterCategory(btn, cat) {
 function filterContent() {
     const search = document.getElementById('searchInput').value.toLocaleLowerCase('tr-TR').trim();
     // Ana sayfa (home) Ã¶zel ekran:
-    // - Arama boÅsa ana sayfa kartlarÄ± gÃ¶rÃ¼nÃ¼r (home-screen)
+    // - Arama boÅsa ana sayfa kartlarÄ± gÃ¶rÃ¼nÃ¼r (home-screen)
     // - Arama yapÄ±lÄ±rsa ana sayfadan Ã§Ä±kÄ±p kartlar Ã¼zerinde filtre uygulanÄ±r
     if (currentCategory === 'home') {
         if (!search) {
@@ -936,7 +936,7 @@ function filterContent() {
     renderCards(filtered);
 }
 function showCardDetail(title, text) {
-    // Geriye dÃ¶nÃ¼k uyumluluk: showCardDetail(cardObj) Ã§aÄrÄ±sÄ±nÄ± da destekle
+    // Geriye dÃ¶nÃ¼k uyumluluk: showCardDetail(cardObj) Ã§aÄrÄ±sÄ±nÄ± da destekle
     if (title && typeof title === 'object') {
         const c = title;
         const t = c.title || c.name || 'Detay';
@@ -949,7 +949,7 @@ function showCardDetail(title, text) {
             ${escapeHtml(body).replace(/\n/g,'<br>')}
             ${link ? `<div style="margin-top:12px"><a href="${escapeHtml(link)}" target="_blank" rel="noreferrer" style="font-weight:800;color:var(--info);text-decoration:none"><i class=\"fas fa-link\"></i> Link</a></div>` : ''}
             ${script ? `<div class="tech-script-box" style="margin-top:12px">
-                <span class="tech-script-label">MÃ¼Återiye iletilecek:</span>${escapeHtml(script).replace(/\n/g,'<br>')}
+                <span class="tech-script-label">MÃ¼Återiye iletilecek:</span>${escapeHtml(script).replace(/\n/g,'<br>')}
               </div>` : ''}
             ${alertTxt ? `<div class="tech-alert" style="margin-top:12px">${escapeHtml(alertTxt).replace(/\n/g,'<br>')}</div>` : ''}
           </div>`;
@@ -974,7 +974,7 @@ function toggleEditMode() {
     if(isEditingActive) {
         btn.classList.add('active');
         btn.innerHTML = '<i class="fas fa-times" style="color:var(--accent);"></i> DÃ¼zenlemeyi Kapat';
-        Swal.fire({ icon: 'success', title: 'DÃ¼zenleme Modu AÃIK', text: 'Kalem ikonlarÄ±na tÄ±klayarak iÃ§erikleri dÃ¼zenleyebilirsiniz.', timer: 1500, showConfirmButton: false });
+        Swal.fire({ icon: 'success', title: 'DÃ¼zenleme Modu AÃIK', text: 'Kalem ikonlarÄ±na tÄ±klayarak iÃ§erikleri dÃ¼zenleyebilirsiniz.', timer: 1500, showConfirmButton: false });
     } else {
         btn.classList.remove('active');
         btn.innerHTML = '<i class="fas fa-pen" style="color:var(--secondary);"></i> DÃ¼zenlemeyi AÃ§';
@@ -992,7 +992,7 @@ function sendUpdate(o, c, v, t='card') {
         body: JSON.stringify({ action: "updateContent", title: o, column: c, value: v, type: t, originalText: o, username: currentUser, token: getToken() })
     }).then(r => r.json()).then(data => {
         if (data.result === "success") {
-            Swal.fire({icon: 'success', title: 'BaÅarÄ±lÄ±', timer: 1500, showConfirmButton: false});
+            Swal.fire({icon: 'success', title: 'BaÅarÄ±lÄ±', timer: 1500, showConfirmButton: false});
             setTimeout(loadContentData, 1600);
         } else { Swal.fire('Hata', 'Kaydedilemedi: ' + (data.message || 'Bilinmeyen Hata'), 'error'); }
     }).catch(err => Swal.fire('Hata', 'Sunucu hatasÄ±.', 'error'));
@@ -1006,23 +1006,23 @@ async function addNewCardPopup() {
         <div style="margin-bottom:15px; text-align:left;">
             <label style="font-weight:bold; font-size:0.9rem;">Ne Ekleyeceksin?</label>
             <select id="swal-type-select" class="swal2-input" style="width:100%; margin-top:5px; height:35px; font-size:0.9rem;" onchange="toggleAddFields()">
-                <option value="card"> ð  Bilgi KartÄ±</option>
-                <option value="news"> ð¢  Duyuru</option>
-                <option value="sales"> ð  TelesatÄ±Å Scripti</option>
-                <option value="sport"> ð  Spor Ä°Ã§eriÄi</option>
-                <option value="quiz"> â  Quiz Sorusu</option>
+                <option value="card"> ð  Bilgi KartÄ±</option>
+                <option value="news"> ð¢  Duyuru</option>
+                <option value="sales"> ð  TelesatÄ±Å Scripti</option>
+                <option value="sport"> ð  Spor Ä°Ã§eriÄi</option>
+                <option value="quiz"> â  Quiz Sorusu</option>
             </select>
         </div>
         <div id="preview-card" class="card Bilgi" style="text-align:left; box-shadow:none; border:1px solid #e0e0e0; margin-top:10px;">
             <div class="card-header" style="align-items: center; gap: 10px;">
-                <input id="swal-new-title" class="swal2-input" style="margin:0; height:40px; flex-grow:1; border:none; border-bottom:2px solid #eee; padding:0 5px; font-weight:bold; color:#0e1b42;" placeholder="BaÅlÄ±k Giriniz...">
+                <input id="swal-new-title" class="swal2-input" style="margin:0; height:40px; flex-grow:1; border:none; border-bottom:2px solid #eee; padding:0 5px; font-weight:bold; color:#0e1b42;" placeholder="BaÅlÄ±k Giriniz...">
                 <div id="cat-container" style="width: 110px;">${catSelectHTML}</div>
             </div>
             <div class="card-content" style="margin-bottom:10px;">
                 <textarea id="swal-new-text" class="swal2-textarea" style="margin:0; width:100%; box-sizing:border-box; border:none; resize:none; font-family:inherit; min-height:100px; padding:10px; background:#f9f9f9;" placeholder="Ä°Ã§erik metni..."></textarea>
             </div>
             <div id="script-container" class="script-box" style="padding:0; border:1px solid #f0e68c;">
-                <textarea id="swal-new-script" class="swal2-textarea" style="margin:0; width:100%; box-sizing:border-box; border:none; background:transparent; font-style:italic; min-height:80px; font-size:0.9rem;" placeholder="Script metni (Ä°steÄe baÄlÄ±)..."></textarea>
+                <textarea id="swal-new-script" class="swal2-textarea" style="margin:0; width:100%; box-sizing:border-box; border:none; background:transparent; font-style:italic; min-height:80px; font-size:0.9rem;" placeholder="Script metni (Ä°steÄe baÄlÄ±)..."></textarea>
             </div>
             <div id="extra-container" class="card-actions" style="margin-top:15px; display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                 <div style="position:relative;"><i class="fas fa-code" style="position:absolute; left:10px; top:10px; color:#aaa;"></i><input id="swal-new-code" class="swal2-input" style="margin:0; height:35px; font-size:0.85rem; padding-left:30px;" placeholder="Kod"></div>
@@ -1031,17 +1031,17 @@ async function addNewCardPopup() {
             <div id="sport-extra" style="display:none; padding:10px;">
                 <label style="font-weight:bold;">KÄ±sa AÃ§Ä±klama (Desc)</label><input id="swal-sport-tip" class="swal2-input" placeholder="KÄ±sa Ä°pucu/Tip">
                 <label style="font-weight:bold;">DetaylÄ± Metin (Detail)</label><input id="swal-sport-detail" class="swal2-input" placeholder="DetaylÄ± AÃ§Ä±klama (Alt Metin)">
-                <label style="font-weight:bold;">OkunuÅu (Pronunciation)</label><input id="swal-sport-pron" class="swal2-input" placeholder="OkunuÅu">
+                <label style="font-weight:bold;">OkunuÅu (Pronunciation)</label><input id="swal-sport-pron" class="swal2-input" placeholder="OkunuÅu">
                 <label style="font-weight:bold;">Ä°kon SÄ±nÄ±fÄ± (Icon)</label><input id="swal-sport-icon" class="swal2-input" placeholder="FontAwesome Ä°kon SÄ±nÄ±fÄ± (e.g., fa-futbol)">
             </div>
             <div id="news-extra" style="display:none; padding:10px;">
-                <label style="font-weight:bold;">Duyuru Tipi</label><select id="swal-news-type" class="swal2-input"><option value="info">Bilgi</option><option value="update">DeÄiÅiklik</option><option value="fix">ÃÃ¶zÃ¼ldÃ¼</option></select>
+                <label style="font-weight:bold;">Duyuru Tipi</label><select id="swal-news-type" class="swal2-input"><option value="info">Bilgi</option><option value="update">DeÄiÅiklik</option><option value="fix">ÃÃ¶zÃ¼ldÃ¼</option></select>
                 <label style="font-weight:bold;">Durum</label><select id="swal-news-status" class="swal2-input"><option value="Aktif">Aktif</option><option value="Pasif">Pasif (Gizle)</option></select>
             </div>
             <div id="quiz-extra" style="display:none; padding:10px;">
                 <label style="font-weight:bold;">Soru Metni (Text)</label><textarea id="swal-quiz-q" class="swal2-textarea" placeholder="Quiz sorusu..."></textarea>
-                <label style="font-weight:bold;">SeÃ§enekler (VirgÃ¼lle AyÄ±rÄ±n)</label><input id="swal-quiz-opts" class="swal2-input" placeholder="Ãrn: ÅÄ±k A,ÅÄ±k B,ÅÄ±k C,ÅÄ±k D">
-                <label style="font-weight:bold;">DoÄru Cevap Ä°ndeksi</label><input id="swal-quiz-ans" type="number" class="swal2-input" placeholder="0 (A), 1 (B), 2 (C) veya 3 (D)" min="0" max="3">
+                <label style="font-weight:bold;">SeÃ§enekler (VirgÃ¼lle AyÄ±rÄ±n)</label><input id="swal-quiz-opts" class="swal2-input" placeholder="Ãrn: ÅÄ±k A,ÅÄ±k B,ÅÄ±k C,ÅÄ±k D">
+                <label style="font-weight:bold;">DoÄru Cevap Ä°ndeksi</label><input id="swal-quiz-ans" type="number" class="swal2-input" placeholder="0 (A), 1 (B), 2 (C) veya 3 (D)" min="0" max="3">
             </div>
         </div>`,
         width: '700px', showCancelButton: true, confirmButtonText: '<i class="fas fa-plus"></i> Ekle', cancelButtonText: 'Ä°ptal', focusConfirm: false,
@@ -1069,23 +1069,23 @@ async function addNewCardPopup() {
                 if (type === 'card') {
                     catCont.style.display = 'block'; scriptCont.style.display = 'block'; extraCont.style.display = 'grid';
                     cardPreview.className = 'card ' + document.getElementById('swal-new-cat').value;
-                    document.getElementById('swal-new-title').placeholder = "BaÅlÄ±k Giriniz..."; document.getElementById('swal-new-text').placeholder = "Ä°Ã§erik metni...";
+                    document.getElementById('swal-new-title').placeholder = "BaÅlÄ±k Giriniz..."; document.getElementById('swal-new-text').placeholder = "Ä°Ã§erik metni...";
                 } else if (type === 'sales') {
                     scriptCont.style.display = 'block';
-                    document.getElementById('swal-new-script').placeholder = "SatÄ±Å Metni...";
+                    document.getElementById('swal-new-script').placeholder = "SatÄ±Å Metni...";
                     cardPreview.style.borderLeft = "5px solid var(--sales)";
-                    document.getElementById('swal-new-title').placeholder = "Script BaÅlÄ±ÄÄ±..."; document.getElementById('swal-new-text').placeholder = "Sadece buraya metin girilecek.";
+                    document.getElementById('swal-new-title').placeholder = "Script BaÅlÄ±ÄÄ±..."; document.getElementById('swal-new-text').placeholder = "Sadece buraya metin girilecek.";
                 } else if (type === 'sport') {
                     sportExtra.style.display = 'block';
                     cardPreview.style.borderLeft = "5px solid var(--primary)";
-                    document.getElementById('swal-new-title').placeholder = "Spor Terimi BaÅlÄ±ÄÄ±..."; document.getElementById('swal-new-text').placeholder = "KÄ±sa AÃ§Ä±klama (Desc)...";
+                    document.getElementById('swal-new-title').placeholder = "Spor Terimi BaÅlÄ±ÄÄ±..."; document.getElementById('swal-new-text').placeholder = "KÄ±sa AÃ§Ä±klama (Desc)...";
                 } else if (type === 'news') {
                     newsExtra.style.display = 'block';
                     cardPreview.style.borderLeft = "5px solid var(--secondary)";
-                    document.getElementById('swal-new-title').placeholder = "Duyuru BaÅlÄ±ÄÄ±..."; document.getElementById('swal-new-text').placeholder = "Duyuru Metni (Desc)...";
+                    document.getElementById('swal-new-title').placeholder = "Duyuru BaÅlÄ±ÄÄ±..."; document.getElementById('swal-new-text').placeholder = "Duyuru Metni (Desc)...";
                 } else if (type === 'quiz') {
                     quizExtra.style.display = 'block';
-                    document.getElementById('swal-new-title').placeholder = "Quiz BaÅlÄ±ÄÄ± (Ãrn: Soru 1)"; document.getElementById('swal-new-text').placeholder = "Bu alan boÅ bÄ±rakÄ±lacak.";
+                    document.getElementById('swal-new-title').placeholder = "Quiz BaÅlÄ±ÄÄ± (Ãrn: Soru 1)"; document.getElementById('swal-new-text').placeholder = "Bu alan boÅ bÄ±rakÄ±lacak.";
                     cardPreview.style.borderLeft = "5px solid var(--quiz)";
                 }
             };
@@ -1116,14 +1116,14 @@ async function addNewCardPopup() {
         }
     });
     if (formValues) {
-        if(!formValues.title) { Swal.fire('Hata', 'BaÅlÄ±k zorunlu!', 'error'); return; }
+        if(!formValues.title) { Swal.fire('Hata', 'BaÅlÄ±k zorunlu!', 'error'); return; }
         Swal.fire({ title: 'Ekleniyor...', didOpen: () => { Swal.showLoading() } });
         fetch(SCRIPT_URL, {
             method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify({ action: "addCard", username: currentUser, token: getToken(), ...formValues })
         }).then(response => response.json()).then(data => {
             if (data.result === "success") {
-                Swal.fire({icon: 'success', title: 'BaÅarÄ±lÄ±', text: 'Ä°Ã§erik eklendi.', timer: 2000, showConfirmButton: false});
+                Swal.fire({icon: 'success', title: 'BaÅarÄ±lÄ±', text: 'Ä°Ã§erik eklendi.', timer: 2000, showConfirmButton: false});
                 setTimeout(loadContentData, 3500);
             } else { Swal.fire('Hata', data.message || 'Eklenemedi.', 'error'); }
         }).catch(err => Swal.fire('Hata', 'Sunucu hatasÄ±: ' + err, 'error'));
@@ -1137,7 +1137,7 @@ async function editContent(index) {
         html: `
         <div id="preview-card-edit" class="card ${item.category}" style="text-align:left; box-shadow:none; border:1px solid #e0e0e0; margin-top:10px;">
             <div class="card-header" style="align-items: center; gap: 10px;">
-                <input id="swal-title" class="swal2-input" style="margin:0; height:40px; flex-grow:1; border:none; border-bottom:2px solid #eee; padding:0 5px; font-weight:bold; color:#0e1b42;" value="${item.title}" placeholder="BaÅlÄ±k">
+                <input id="swal-title" class="swal2-input" style="margin:0; height:40px; flex-grow:1; border:none; border-bottom:2px solid #eee; padding:0 5px; font-weight:bold; color:#0e1b42;" value="${item.title}" placeholder="BaÅlÄ±k">
                 <div style="width: 110px;">${catSelectHTML}</div>
             </div>
             <div class="card-content" style="margin-bottom:10px;">
@@ -1183,14 +1183,14 @@ async function editSport(title) {
     const s = sportsData.find(item => item.title === title);
     if (!s) return Swal.fire('Hata', 'Ä°Ã§erik bulunamadÄ±.', 'error');
     const { value: formValues } = await Swal.fire({
-        title: 'Spor Ä°Ã§eriÄini DÃ¼zenle',
+        title: 'Spor Ä°Ã§eriÄini DÃ¼zenle',
         html: `
         <div class="card" style="text-align:left; border-left: 5px solid var(--primary); padding:15px; background:#f8f9fa;">
-            <label style="font-weight:bold;">BaÅlÄ±k</label><input id="swal-title" class="swal2-input" style="width:100%; margin-bottom:10px;" value="${s.title}">
+            <label style="font-weight:bold;">BaÅlÄ±k</label><input id="swal-title" class="swal2-input" style="width:100%; margin-bottom:10px;" value="${s.title}">
             <label style="font-weight:bold;">AÃ§Ä±klama (KÄ±sa)</label><textarea id="swal-desc" class="swal2-textarea" style="margin-bottom:10px;">${s.desc || ''}</textarea>
             <label style="font-weight:bold;">Ä°pucu (Tip)</label><input id="swal-tip" class="swal2-input" style="width:100%; margin-bottom:10px;" value="${s.tip || ''}">
             <label style="font-weight:bold;">Detay (Alt Metin)</label><textarea id="swal-detail" class="swal2-textarea" style="margin-bottom:10px;">${s.detail || ''}</textarea>
-            <label style="font-weight:bold;">OkunuÅu</label><input id="swal-pron" class="swal2-input" style="width:100%; margin-bottom:10px;" value="${s.pronunciation || ''}">
+            <label style="font-weight:bold;">OkunuÅu</label><input id="swal-pron" class="swal2-input" style="width:100%; margin-bottom:10px;" value="${s.pronunciation || ''}">
             <label style="font-weight:bold;">Ä°kon SÄ±nÄ±fÄ±</label><input id="swal-icon" class="swal2-input" style="width:100%;" value="${s.icon || ''}">
         </div>`,
         width: '700px', showCancelButton: true, confirmButtonText: 'Kaydet',
@@ -1214,8 +1214,8 @@ async function editSales(title) {
     const s = salesScripts.find(item => item.title === title);
     if (!s) return Swal.fire('Hata', 'Ä°Ã§erik bulunamadÄ±.', 'error');
     const { value: formValues } = await Swal.fire({
-        title: 'SatÄ±Å Metnini DÃ¼zenle',
-        html: `<div class="card" style="text-align:left; border-left: 5px solid var(--sales); padding:15px; background:#ecfdf5;"><label style="font-weight:bold;">BaÅlÄ±k</label><input id="swal-title" class="swal2-input" style="width:100%; margin-bottom:10px;"
+        title: 'SatÄ±Å Metnini DÃ¼zenle',
+        html: `<div class="card" style="text-align:left; border-left: 5px solid var(--sales); padding:15px; background:#ecfdf5;"><label style="font-weight:bold;">BaÅlÄ±k</label><input id="swal-title" class="swal2-input" style="width:100%; margin-bottom:10px;"
         value="${s.title}"><label style="font-weight:bold;">Metin</label><textarea id="swal-text" class="swal2-textarea" style="min-height:150px;">${s.text || ''}</textarea></div>`,
         width: '700px', showCancelButton: true, confirmButtonText: 'Kaydet',
         preConfirm: () => [ document.getElementById('swal-title').value, document.getElementById('swal-text').value ]
@@ -1229,11 +1229,11 @@ async function editSales(title) {
 async function editNews(index) {
     const i = newsData[index];
     let statusOptions = `<option value="Aktif" ${i.status !== 'Pasif' ? 'selected' : ''}>Aktif</option><option value="Pasif" ${i.status === 'Pasif' ? 'selected' : ''}>Pasif</option>`;
-    let typeOptions = `<option value="info" ${i.type === 'info' ? 'selected' : ''}>Bilgi</option><option value="update" ${i.type === 'update' ? 'selected' : ''}>DeÄiÅiklik</option><option value="fix" ${i.type === 'fix' ? 'selected' : ''}>ÃÃ¶zÃ¼ldÃ¼</option>`;
+    let typeOptions = `<option value="info" ${i.type === 'info' ? 'selected' : ''}>Bilgi</option><option value="update" ${i.type === 'update' ? 'selected' : ''}>DeÄiÅiklik</option><option value="fix" ${i.type === 'fix' ? 'selected' : ''}>ÃÃ¶zÃ¼ldÃ¼</option>`;
     
     const { value: formValues } = await Swal.fire({
         title: 'Duyuruyu DÃ¼zenle',
-        html: `<div class="card" style="text-align:left; border-left: 5px solid var(--secondary); padding:15px; background:#fff8e1;"><label style="font-weight:bold;">BaÅlÄ±k</label><input id="swal-title" class="swal2-input" style="width:100%; margin-bottom:10px;"
+        html: `<div class="card" style="text-align:left; border-left: 5px solid var(--secondary); padding:15px; background:#fff8e1;"><label style="font-weight:bold;">BaÅlÄ±k</label><input id="swal-title" class="swal2-input" style="width:100%; margin-bottom:10px;"
         value="${i.title || ''}"><div style="display:flex; gap:10px; margin-bottom:10px;"><div style="flex:1;"><label style="font-weight:bold;">Tarih</label><input id="swal-date" class="swal2-input" style="width:100%;"
         value="${i.date || ''}"></div><div style="flex:1;"><label style="font-weight:bold;">TÃ¼r</label><select id="swal-type" class="swal2-input" style="width:100%;">${typeOptions}</select></div></div><label style="font-weight:bold;">Metin</label><textarea id="swal-desc" class="swal2-textarea" style="margin-bottom:10px;">${i.desc || ''}</textarea><label style="font-weight:bold;">Durum</label><select id="swal-status" class="swal2-input" style="width:100%;">${statusOptions}</select></div>`,
         width: '600px', showCancelButton: true, confirmButtonText: 'Kaydet',
@@ -1260,8 +1260,8 @@ function startTicker() {
     
     let tickerText = activeNews.map(i => {
         return `<span style="color:#fabb00; font-weight:bold;">[${i.date}]</span> <span style="color:#fff;">${i.title}:</span> <span style="color:#ddd;">${i.desc}</span>`;
-    }).join(' &nbsp;&nbsp;&nbsp;&nbsp; â¢ &nbsp;&nbsp;&nbsp;&nbsp; ');
-    t.innerHTML = tickerText + ' &nbsp;&nbsp;&nbsp;&nbsp; â¢ &nbsp;&nbsp;&nbsp;&nbsp; ' + tickerText;
+    }).join(' &nbsp;&nbsp;&nbsp;&nbsp; â¢ &nbsp;&nbsp;&nbsp;&nbsp; ');
+    t.innerHTML = tickerText + ' &nbsp;&nbsp;&nbsp;&nbsp; â¢ &nbsp;&nbsp;&nbsp;&nbsp; ' + tickerText;
     t.style.animation = 'ticker-scroll 190s linear infinite';
 }
 function openNews() {
@@ -1270,7 +1270,7 @@ function openNews() {
     c.innerHTML = '';
     newsData.forEach((i, index) => {
         let cl = i.type === 'fix' ? 'tag-fix' : (i.type === 'update' ? 'tag-update' : 'tag-info');
-        let tx = i.type === 'fix' ? 'ÃÃ¶zÃ¼ldÃ¼' : (i.type === 'update' ? 'DeÄiÅiklik' : 'Bilgi');
+        let tx = i.type === 'fix' ? 'ÃÃ¶zÃ¼ldÃ¼' : (i.type === 'update' ? 'DeÄiÅiklik' : 'Bilgi');
         let passiveStyle = i.status === 'Pasif' ? 'opacity:0.5; background:#eee;' : '';
         let passiveBadge = i.status === 'Pasif' ? '<span class="news-tag" style="background:#555; color:white;">PASÄ°F</span>' : '';
         let editBtn = (isAdminMode && isEditingActive) ? `<i class="fas fa-pencil-alt edit-icon" style="top:0; right:0; font-size:0.9rem; padding:4px;" onclick="event.stopPropagation(); editNews(${index})"></i>` : '';
@@ -1280,7 +1280,7 @@ function openNews() {
 
 
 // =========================
-// â YayÄ±n AkÄ±ÅÄ± (E-Tablo'dan)
+// â YayÄ±n AkÄ±ÅÄ± (E-Tablo'dan)
 // =========================
 async function fetchBroadcastFlow() {
     const r = await fetch(SCRIPT_URL, {
@@ -1295,14 +1295,14 @@ async function fetchBroadcastFlow() {
 
     const d = await r.json();
     if (!d || d.result !== "success") {
-        throw new Error((d && d.message) ? d.message : "YayÄ±n akÄ±ÅÄ± alÄ±namadÄ±.");
+        throw new Error((d && d.message) ? d.message : "YayÄ±n akÄ±ÅÄ± alÄ±namadÄ±.");
     }
     return d.items || [];
 }
 
 async function openBroadcastFlow() {
   Swal.fire({
-    title: "YayÄ±n AkÄ±ÅÄ±",
+    title: "YayÄ±n AkÄ±ÅÄ±",
     didOpen: () => Swal.showLoading(),
     showConfirmButton: false
   });
@@ -1311,11 +1311,11 @@ async function openBroadcastFlow() {
     const itemsRaw = await fetchBroadcastFlow();
 
     if (!itemsRaw || !itemsRaw.length) {
-      Swal.fire("YayÄ±n AkÄ±ÅÄ±", "KayÄ±t bulunamadÄ±.", "info");
+      Swal.fire("YayÄ±n AkÄ±ÅÄ±", "KayÄ±t bulunamadÄ±.", "info");
       return;
     }
 
-    // â SÄ±ralama (epoch varsa kesin, yoksa tarih+saate gÃ¶re)
+    // â SÄ±ralama (epoch varsa kesin, yoksa tarih+saate gÃ¶re)
     const items = [...itemsRaw].sort((a, b) => {
       const ae = Number(a?.startEpoch || 0);
       const be = Number(b?.startEpoch || 0);
@@ -1328,7 +1328,7 @@ async function openBroadcastFlow() {
 
     const now = Date.now();
 
-    // â Tarihe gÃ¶re grupla (dateISO)
+    // â Tarihe gÃ¶re grupla (dateISO)
     const byDate = {};
     const dateLabelByKey = {};
     items.forEach(it => {
@@ -1341,7 +1341,7 @@ async function openBroadcastFlow() {
       }
     });
 
-    // â Popup CSS (Swal iÃ§i)
+    // â Popup CSS (Swal iÃ§i)
     const css = `
       <style>
         .ba-wrap{ text-align:left; max-height:62vh; overflow:auto; padding-right:6px; }
@@ -1378,12 +1378,12 @@ async function openBroadcastFlow() {
     let html = `${css}<div class="ba-wrap">`;
     html += `
       <div class="ba-legend">
-        <span class="ba-dot"><i class="up"></i> YaklaÅan / Gelecek</span>
-        <span class="ba-dot"><i class="pa"></i> Tarihi GeÃ§miÅ</span>
+        <span class="ba-dot"><i class="up"></i> YaklaÅan / Gelecek</span>
+        <span class="ba-dot"><i class="pa"></i> Tarihi GeÃ§miÅ</span>
       </div>
     `;
 
-        // â YaklaÅan / Gelecek ve GeÃ§miÅ olarak ayÄ±r
+        // â YaklaÅan / Gelecek ve GeÃ§miÅ olarak ayÄ±r
     const upcomingByDate = {};
     const pastByDate = {};
     const dateKeys = Object.keys(byDate);
@@ -1435,22 +1435,22 @@ async function openBroadcastFlow() {
       });
     };
 
-    // â Ãnce yaklaÅanlar, sonra geÃ§miÅler
-    renderSection("YaklaÅan / Gelecek", upcomingByDate, "YaklaÅan yayÄ±n bulunamadÄ±.");
+    // â Ãnce yaklaÅanlar, sonra geÃ§miÅler
+    renderSection("YaklaÅan / Gelecek", upcomingByDate, "YaklaÅan yayÄ±n bulunamadÄ±.");
     html += `<div class="ba-divider"></div>`;
-    renderSection("GeÃ§miÅ", pastByDate, "GeÃ§miÅ yayÄ±n bulunamadÄ±.");
+    renderSection("GeÃ§miÅ", pastByDate, "GeÃ§miÅ yayÄ±n bulunamadÄ±.");
 
     html += `</div>`;
 
     Swal.fire({
-      title: "YayÄ±n AkÄ±ÅÄ±",
+      title: "YayÄ±n AkÄ±ÅÄ±",
       html,
       width: 980,
       confirmButtonText: "Kapat"
     });
 
   } catch (err) {
-    Swal.fire("Hata", err?.message || "YayÄ±n akÄ±ÅÄ± alÄ±namadÄ±.", "error");
+    Swal.fire("Hata", err?.message || "YayÄ±n akÄ±ÅÄ± alÄ±namadÄ±.", "error");
   }
 }
 
@@ -1495,15 +1495,15 @@ function openGuide() {
     const grid = document.getElementById('guide-grid');
     grid.innerHTML = '';
     sportsData.forEach((s, index) => {
-        let pronHtml = s.pronunciation ? `<div class="pronunciation-badge"> ð£ï¸  ${s.pronunciation}</div>` : '';
+        let pronHtml = s.pronunciation ? `<div class="pronunciation-badge"> ð£ï¸  ${s.pronunciation}</div>` : '';
         let editBtn = (isAdminMode && isEditingActive) ? `<i class="fas fa-pencil-alt edit-icon" style="top:5px; right:5px; z-index:50;" onclick="event.stopPropagation(); editSport('${escapeForJsString(s.title)}')"></i>` : '';
         grid.innerHTML += `<div class="guide-item" onclick="showSportDetail(${index})">${editBtn}<i class="fas ${s.icon} guide-icon"></i><span class="guide-title">${s.title}</span>${pronHtml}<div class="guide-desc">${s.desc}</div><div class="guide-tip"><i class="fas fa-lightbulb"></i> ${s.tip}</div><div style="font-size:0.8rem; color:#999; margin-top:5px;">(Detay iÃ§in tÄ±kla)</div></div>`;
     });
 }
 function showSportDetail(index) {
     const sport = sportsData[index];
-    const detailText = sport.detail ? sport.detail.replace(/\n/g,'<br>') : "Bu iÃ§erik iÃ§in henÃ¼z detay eklenmemiÅ.";
-    const pronDetail = sport.pronunciation ? `<div style="color:#e65100; font-weight:bold; margin-bottom:15px;"> ð£ï¸  OkunuÅu: ${sport.pronunciation}</div>` : '';
+    const detailText = sport.detail ? sport.detail.replace(/\n/g,'<br>') : "Bu iÃ§erik iÃ§in henÃ¼z detay eklenmemiÅ.";
+    const pronDetail = sport.pronunciation ? `<div style="color:#e65100; font-weight:bold; margin-bottom:15px;"> ð£ï¸  OkunuÅu: ${sport.pronunciation}</div>` : '';
     Swal.fire({
         title: `<i class="fas ${sport.icon}" style="color:#0e1b42;"></i> ${sport.title}`,
         html: `${pronDetail}<div style="text-align:left; font-size:1rem; line-height:1.6;">${detailText}</div>`,
@@ -1511,7 +1511,7 @@ function showSportDetail(index) {
     });
 }
 function openSales() {
-    // TeleSatÄ±Å artÄ±k tam ekran modÃ¼l
+    // TeleSatÄ±Å artÄ±k tam ekran modÃ¼l
     openTelesalesArea();
 }
 function toggleSales(index) {
@@ -1526,10 +1526,10 @@ function toggleSales(index) {
 // TasarÄ±m/GÃ¼ncelleme: Tekrarlayan soru engeli, akÄ±llÄ± 50:50, double rozet, daha net maÃ§ sonu ekranÄ±
 
 let pScore = 0, pBalls = 10, pCurrentQ = null;
-let pQuestionQueue = [];        // oturum boyunca sorulacak soru indeksleri (karÄ±ÅtÄ±rÄ±lmÄ±Å)
+let pQuestionQueue = [];        // oturum boyunca sorulacak soru indeksleri (karÄ±ÅtÄ±rÄ±lmÄ±Å)
 let pAskedCount = 0;            // kaÃ§ soru soruldu
-let pCorrectCount = 0;          // kaÃ§ doÄru
-let pWrongCount = 0;            // kaÃ§ yanlÄ±Å
+let pCorrectCount = 0;          // kaÃ§ doÄru
+let pWrongCount = 0;            // kaÃ§ yanlÄ±Å
 
 function setDoubleIndicator(isActive) {
     const el = document.getElementById('double-indicator');
@@ -1546,7 +1546,7 @@ function updateJokerButtons() {
     if (halfBtn) halfBtn.disabled = jokers.half === 0;
     if (doubleBtn) doubleBtn.disabled = jokers.double === 0 || firstAnswerIndex !== -1;
 
-    // Double aktifken diÄerleri kilitlensin
+    // Double aktifken diÄerleri kilitlensin
     if (firstAnswerIndex !== -1) {
         if (callBtn) callBtn.disabled = true;
         if (halfBtn) halfBtn.disabled = true;
@@ -1567,11 +1567,11 @@ function useJoker(type) {
     const btns = document.querySelectorAll('.penalty-btn');
 
     if (type === 'call') {
-        const experts = ["Umut Bey", "DoÄuÅ Bey", "Deniz Bey", "Esra HanÄ±m"];
+        const experts = ["Umut Bey", "DoÄuÅ Bey", "Deniz Bey", "Esra HanÄ±m"];
         const expert = experts[Math.floor(Math.random() * experts.length)];
 
         let guess = correctAns;
-        // %80 doÄru, %20 yanlÄ±Å tahmin
+        // %80 doÄru, %20 yanlÄ±Å tahmin
         if (Math.random() > 0.8 && currentQ.opts.length > 1) {
             const incorrect = currentQ.opts.map((_, i) => i).filter(i => i !== correctAns);
             guess = incorrect[Math.floor(Math.random() * incorrect.length)] ?? correctAns;
@@ -1579,19 +1579,19 @@ function useJoker(type) {
 
         Swal.fire({
             icon: 'info',
-            title: ' ð Telefon Jokeri',
-            html: `${expert} soruyu cevaplÄ±yor...<br><br>"Benim tahminim **${String.fromCharCode(65 + guess)}** ÅÄ±kkÄ±. Bundan ${Math.random() < 0.8 ? "Ã§ok eminim" : "emin deÄilim"}."`,
+            title: ' ð Telefon Jokeri',
+            html: `${expert} soruyu cevaplÄ±yor...<br><br>"Benim tahminim **${String.fromCharCode(65 + guess)}** ÅÄ±kkÄ±. Bundan ${Math.random() < 0.8 ? "Ã§ok eminim" : "emin deÄilim"}."`,
             confirmButtonText: 'Kapat'
         });
 
     } else if (type === 'half') {
         const optLen = Array.isArray(currentQ.opts) ? currentQ.opts.length : 0;
         if (optLen <= 2) {
-            Swal.fire({ icon:'info', title:'âï¸ 50:50', text:'Bu soruda 50:50 uygulanamaz.', toast:true, position:'top', showConfirmButton:false, timer:1800 });
+            Swal.fire({ icon:'info', title:'âï¸ 50:50', text:'Bu soruda 50:50 uygulanamaz.', toast:true, position:'top', showConfirmButton:false, timer:1800 });
             return;
         }
 
-        // 4+ ÅÄ±kta 2 yanlÄ±Å, 3 ÅÄ±kta 1 yanlÄ±Å ele
+        // 4+ ÅÄ±kta 2 yanlÄ±Å, 3 ÅÄ±kta 1 yanlÄ±Å ele
         const removeCount = optLen >= 4 ? 2 : 1;
         const incorrect = currentQ.opts.map((_, i) => i).filter(i => i !== correctAns);
         incorrect.sort(() => Math.random() - 0.5).slice(0, removeCount).forEach(idx => {
@@ -1604,8 +1604,8 @@ function useJoker(type) {
 
         Swal.fire({
             icon: 'success',
-            title: ' âï¸ 50:50',
-            text: removeCount === 2 ? 'Ä°ki yanlÄ±Å ÅÄ±k elendi!' : 'Bir yanlÄ±Å ÅÄ±k elendi!',
+            title: ' âï¸ 50:50',
+            text: removeCount === 2 ? 'Ä°ki yanlÄ±Å ÅÄ±k elendi!' : 'Bir yanlÄ±Å ÅÄ±k elendi!',
             toast: true,
             position: 'top',
             showConfirmButton: false,
@@ -1617,8 +1617,8 @@ function useJoker(type) {
         setDoubleIndicator(true);
         Swal.fire({
             icon: 'warning',
-            title: '2ï¸ â£ Ãift Cevap',
-            text: 'Bir kez yanlÄ±Å cevap hakkÄ±n var.',
+            title: '2ï¸ â£ Ãift Cevap',
+            text: 'Bir kez yanlÄ±Å cevap hakkÄ±n var.',
             toast: true,
             position: 'top',
             showConfirmButton: false,
@@ -1657,64 +1657,64 @@ let qdQueue = [];
 
 const QUICK_DECISION_BANK = [
   {
-    q: 'MÃ¼Återi: "Fiyat pahalÄ±, iptal edeceÄim." Ä°lk yaklaÅÄ±mÄ±n ne olmalÄ±?',
+    q: 'MÃ¼Återi: "Fiyat pahalÄ±, iptal edeceÄim." Ä°lk yaklaÅÄ±mÄ±n ne olmalÄ±?',
     opts: [
-      'Hemen iptal iÅlemini baÅlatalÄ±m.',
+      'Hemen iptal iÅlemini baÅlatalÄ±m.',
       'HaklÄ±sÄ±nÄ±z, sizi anlÄ±yorum. Paket/avantajlara gÃ¶re alternatif sunayÄ±m mÄ±?',
-      'Kampanya yok, yapacak bir Åey yok.'
+      'Kampanya yok, yapacak bir Åey yok.'
     ],
     a: 1,
-    exp: 'Empati + ihtiyaÃ§ analizi itirazÄ± yumuÅatÄ±r ve iknayÄ± artÄ±rÄ±r.'
+    exp: 'Empati + ihtiyaÃ§ analizi itirazÄ± yumuÅatÄ±r ve iknayÄ± artÄ±rÄ±r.'
   },
   {
-    q: 'MÃ¼Återi: "Uygulama aÃ§Ä±lmÄ±yor." En hÄ±zlÄ± ilk kontrol ne?',
+    q: 'MÃ¼Återi: "Uygulama aÃ§Ä±lmÄ±yor." En hÄ±zlÄ± ilk kontrol ne?',
     opts: [
-      'Åifreyi sÄ±fÄ±rlat.',
-      'Ä°nternet baÄlantÄ±sÄ± / VPN / DNS kontrolÃ¼ yaptÄ±r.',
+      'Åifreyi sÄ±fÄ±rlat.',
+      'Ä°nternet baÄlantÄ±sÄ± / VPN / DNS kontrolÃ¼ yaptÄ±r.',
       'Hemen cihazÄ± fabrika ayarlarÄ±na dÃ¶ndÃ¼r.'
     ],
     a: 1,
-    exp: 'Ãnce kÃ¶k nedeni daralt: baÄlantÄ± mÄ± uygulama mÄ±? BÃ¼yÃ¼k adÄ±mlarÄ± sona bÄ±rak.'
+    exp: 'Ãnce kÃ¶k nedeni daralt: baÄlantÄ± mÄ± uygulama mÄ±? BÃ¼yÃ¼k adÄ±mlarÄ± sona bÄ±rak.'
   },
   {
-    q: 'MÃ¼Återi: "YayÄ±n donuyor." Teknikte doÄru soru hangisi?',
+    q: 'MÃ¼Återi: "YayÄ±n donuyor." Teknikte doÄru soru hangisi?',
     opts: [
-      'Hangi cihazda (TV/telefon) ve hangi aÄda (WiâFi/kablo) oluyor?',
+      'Hangi cihazda (TV/telefon) ve hangi aÄda (WiâFi/kablo) oluyor?',
       'KaÃ§ gÃ¼ndÃ¼r bÃ¶yle?',
-      'Åimdi kapatÄ±p aÃ§Ä±n.'
+      'Åimdi kapatÄ±p aÃ§Ä±n.'
     ],
     a: 0,
-    exp: 'Cihaz + aÄ bilgisi, sorunu hÄ±zlÄ± izole etmeyi saÄlar.'
+    exp: 'Cihaz + aÄ bilgisi, sorunu hÄ±zlÄ± izole etmeyi saÄlar.'
   },
   {
-    q: 'MÃ¼Återi: "Ä°ade istiyorum." En doÄru yÃ¶nlendirme?',
+    q: 'MÃ¼Återi: "Ä°ade istiyorum." En doÄru yÃ¶nlendirme?',
     opts: [
       'Hemen kapatalÄ±m.',
-      'Ä°ade koÅullarÄ± ve adÄ±mlarÄ± net anlat, doÄru kanala yÃ¶nlendir (asistan/rehber).',
+      'Ä°ade koÅullarÄ± ve adÄ±mlarÄ± net anlat, doÄru kanala yÃ¶nlendir (asistan/rehber).',
       'Tekrar arayÄ±n.'
     ],
     a: 1,
-    exp: 'Net sÃ¼reÃ§ + doÄru kanal = memnuniyet + tekrar aramayÄ± azaltÄ±r.'
+    exp: 'Net sÃ¼reÃ§ + doÄru kanal = memnuniyet + tekrar aramayÄ± azaltÄ±r.'
   },
   {
-    q: 'MÃ¼Återi: "Kampanyadan yararlanamÄ±yorum." Ä°lk adÄ±m?',
+    q: 'MÃ¼Återi: "Kampanyadan yararlanamÄ±yorum." Ä°lk adÄ±m?',
     opts: [
-      'Kampanya koÅullarÄ± (tarih/paket/cihaz) uygun mu kontrol et.',
+      'Kampanya koÅullarÄ± (tarih/paket/cihaz) uygun mu kontrol et.',
       'Direkt kampanyayÄ± tanÄ±mla.',
       'Sorun yok deyip kapat.'
     ],
     a: 0,
-    exp: 'Uygunluk kontrolÃ¼ yapÄ±lmadan iÅlem yapmak hataya sÃ¼rÃ¼kler.'
+    exp: 'Uygunluk kontrolÃ¼ yapÄ±lmadan iÅlem yapmak hataya sÃ¼rÃ¼kler.'
   },
   {
-    q: 'MÃ¼Återi sinirli: "Kimse Ã§Ã¶zmedi!" Ne yaparsÄ±n?',
+    q: 'MÃ¼Återi sinirli: "Kimse Ã§Ã¶zmedi!" Ne yaparsÄ±n?',
     opts: [
-      'SakinleÅtirici bir cÃ¼mle + Ã¶zet + net aksiyon planÄ±.',
+      'SakinleÅtirici bir cÃ¼mle + Ã¶zet + net aksiyon planÄ±.',
       'SÄ±raya alalÄ±m.',
       'Ses yÃ¼kselt.'
     ],
     a: 0,
-    exp: 'KontrolÃ¼ geri almak iÃ§in empati + Ã¶zet + plan Ã¼Ã§lÃ¼sÃ¼ Ã§alÄ±ÅÄ±r.'
+    exp: 'KontrolÃ¼ geri almak iÃ§in empati + Ã¶zet + plan Ã¼Ã§lÃ¼sÃ¼ Ã§alÄ±ÅÄ±r.'
   }
 ];
 
@@ -1793,7 +1793,7 @@ function answerQuick(idx) {
     if (btns[idx]) btns[idx].classList.add(correct ? 'good' : 'bad');
     if (!correct && btns[q.a]) btns[q.a].classList.add('good');
 
-    // puanlama: doÄru +2, yanlÄ±Å -1
+    // puanlama: doÄru +2, yanlÄ±Å -1
     qdScore += correct ? 2 : -1;
     if (qdScore < 0) qdScore = 0;
     updateQuickHud();
@@ -1802,7 +1802,7 @@ function answerQuick(idx) {
         toast: true,
         position: 'top',
         icon: correct ? 'success' : 'warning',
-        title: correct ? 'DoÄru seÃ§im!' : 'YanlÄ±Å seÃ§im',
+        title: correct ? 'DoÄru seÃ§im!' : 'YanlÄ±Å seÃ§im',
         text: q.exp,
         showConfirmButton: false,
         timer: 1800
@@ -1822,10 +1822,10 @@ function finishQuickDecision(timeout) {
     const msg = timeout ? 'SÃ¼re bitti!' : 'Bitti!';
     Swal.fire({
         icon: 'info',
-        title: `ð§  HÄ±zlÄ± Karar ${msg}`,
+        title: `ð§  HÄ±zlÄ± Karar ${msg}`,
         html: `<div style="text-align:center;">
                 <div style="font-size:1.0rem; margin-bottom:8px;">Skorun: <b>${qdScore}</b></div>
-                <div style="color:#666; font-size:0.9rem;">Ä°stersen yeniden baÅlatÄ±p rekor deneyebilirsin.</div>
+                <div style="color:#666; font-size:0.9rem;">Ä°stersen yeniden baÅlatÄ±p rekor deneyebilirsin.</div>
               </div>`,
         confirmButtonText: 'Tamam'
     });
@@ -1889,7 +1889,7 @@ function fetchLeaderboard() {
             html = '<tr><td colspan="4" style="text-align:center;">HenÃ¼z maÃ§ yapÄ±lmadÄ±.</td></tr>';
         } else {
             data.leaderboard.forEach((u, i) => {
-                const medal = i===0 ? 'ð¥' : (i===1 ? 'ð¥' : (i===2 ? 'ð¥' : `<span class="rank-badge">${i+1}</span>`));
+                const medal = i===0 ? 'ð¥' : (i===1 ? 'ð¥' : (i===2 ? 'ð¥' : `<span class="rank-badge">${i+1}</span>`));
                 const bgStyle = (u.username === currentUser) ? 'background:rgba(250, 187, 0, 0.1);' : '';
                 html += `<tr style="${bgStyle}"><td>${medal}</td><td>${u.username}</td><td>${u.games}</td><td>${u.average}</td></tr>`;
             });
@@ -1898,7 +1898,7 @@ function fetchLeaderboard() {
     })
     .catch(() => {
         loader.style.display = 'none';
-        loader.innerText = "BaÄlantÄ± hatasÄ±.";
+        loader.innerText = "BaÄlantÄ± hatasÄ±.";
         loader.style.display = 'block';
     });
 }
@@ -1926,7 +1926,7 @@ function startPenaltySession() {
     firstAnswerIndex = -1;
     setDoubleIndicator(false);
 
-    // Soru kuyruÄu
+    // Soru kuyruÄu
     pQuestionQueue = buildQuestionQueue();
 
     updateJokerButtons();
@@ -1945,7 +1945,7 @@ function startPenaltySession() {
 function pickNextQuestion() {
     if (quizQuestions.length === 0) return null;
 
-    // Ãnce kuyruktan tÃ¼ket
+    // Ãnce kuyruktan tÃ¼ket
     if (pQuestionQueue.length > 0) {
         const i = pQuestionQueue.shift();
         return quizQuestions[i];
@@ -1964,7 +1964,7 @@ function loadPenaltyQuestion() {
 
     pCurrentQ = pickNextQuestion();
     if (!pCurrentQ || !pCurrentQ.opts || pCurrentQ.opts.length < 2) {
-        Swal.fire('Hata', 'Bu soru hatalÄ± formatta (ÅÄ±k yok).', 'error');
+        Swal.fire('Hata', 'Bu soru hatalÄ± formatta (ÅÄ±k yok).', 'error');
         // bir sonraki soruyu dene
         pCurrentQ = pickNextQuestion();
         if (!pCurrentQ) return;
@@ -1993,7 +1993,7 @@ function shootBall(idx) {
     const btns = document.querySelectorAll('.penalty-btn');
     const isCorrect = (idx === pCurrentQ.a);
 
-    // Double joker: ilk yanlÄ±Åta bir hak daha
+    // Double joker: ilk yanlÄ±Åta bir hak daha
     if (!isCorrect && doubleChanceUsed && firstAnswerIndex === -1) {
         firstAnswerIndex = idx;
         if (btns[idx]) {
@@ -2005,7 +2005,7 @@ function shootBall(idx) {
         return;
     }
 
-    // ArtÄ±k atÄ±Å kesinleÅti
+    // ArtÄ±k atÄ±Å kesinleÅti
     btns.forEach(b => b.disabled = true);
 
     const ballWrap = document.getElementById('ball-wrap');
@@ -2045,7 +2045,7 @@ function shootBall(idx) {
                 pCorrectCount++;
                 document.getElementById('p-score').innerText = pScore;
 
-                Swal.fire({ toast:true, position:'top', icon:'success', title:'MÃ¼kemmel Åut!', showConfirmButton:false, timer:900, background:'#a5d6a7' });
+                Swal.fire({ toast:true, position:'top', icon:'success', title:'MÃ¼kemmel Åut!', showConfirmButton:false, timer:900, background:'#a5d6a7' });
             }, 450);
 
         } else {
@@ -2056,7 +2056,7 @@ function shootBall(idx) {
                     goalMsg.style.color = "#ef5350";
                     goalMsg.classList.add('show');
                 }
-                Swal.fire({ icon:'error', title:'KaÃ§Ä±rdÄ±n!', text:`DoÄru: ${String.fromCharCode(65 + pCurrentQ.a)}`, showConfirmButton:true, timer:2400, background:'#ef9a9a' });
+                Swal.fire({ icon:'error', title:'KaÃ§Ä±rdÄ±n!', text:`DoÄru: ${String.fromCharCode(65 + pCurrentQ.a)}`, showConfirmButton:true, timer:2400, background:'#ef9a9a' });
             };
 
             if (Math.random() > 0.5) {
@@ -2068,7 +2068,7 @@ function shootBall(idx) {
                 setTimeout(() => { if (goalMsg) goalMsg.innerText = "KURTARDI!"; showWrong(); }, 450);
             } else {
                 if (ballWrap) ballWrap.classList.add(Math.random() > 0.5 ? 'ball-miss-left' : 'ball-miss-right');
-                setTimeout(() => { if (goalMsg) goalMsg.innerText = "DIÅARI!"; showWrong(); }, 450);
+                setTimeout(() => { if (goalMsg) goalMsg.innerText = "DIÅARI!"; showWrong(); }, 450);
             }
         }
     }, 300);
@@ -2104,23 +2104,23 @@ function resetField() {
 
 function finishPenaltyGame() {
     const totalShots = 10;
-    const title = pScore >= 8 ? "EFSANE! ð" : (pScore >= 5 ? "Ä°yi MaÃ§tÄ±! ð" : "Antrenman LazÄ±m ð¤");
+    const title = pScore >= 8 ? "EFSANE! ð" : (pScore >= 5 ? "Ä°yi MaÃ§tÄ±! ð" : "Antrenman LazÄ±m ð¤");
     const acc = Math.round((pCorrectCount / Math.max(1, (pCorrectCount + pWrongCount))) * 100);
 
     const qEl = document.getElementById('p-question-text');
     if (qEl) {
         qEl.innerHTML = `
-            <div style="font-size:1.5rem; color:#fabb00; font-weight:800;">MAÃ BÄ°TTÄ°!</div>
+            <div style="font-size:1.5rem; color:#fabb00; font-weight:800;">MAÃ BÄ°TTÄ°!</div>
             <div style="margin-top:4px; font-size:1.1rem; color:#fff;">${title}</div>
             <div style="margin-top:8px; font-size:1rem; color:#ddd;">
-                <b>Skor:</b> ${pScore}/${totalShots} &nbsp; â¢ &nbsp;
-                <b>DoÄruluk:</b> ${acc}%
+                <b>Skor:</b> ${pScore}/${totalShots} &nbsp; â¢ &nbsp;
+                <b>DoÄruluk:</b> ${acc}%
             </div>
             <div style="margin-top:6px; font-size:0.9rem; color:#bbb;">
-                DoÄru: ${pCorrectCount} &nbsp; | &nbsp; YanlÄ±Å: ${pWrongCount}
+                DoÄru: ${pCorrectCount} &nbsp; | &nbsp; YanlÄ±Å: ${pWrongCount}
             </div>
             <div style="margin-top:10px; font-size:0.85rem; color:#aaa;">
-                Yeniden oynamak iÃ§in aÅaÄÄ±dan baÅlatabilirsin.
+                Yeniden oynamak iÃ§in aÅaÄÄ±dan baÅlatabilirsin.
             </div>
         `;
     }
@@ -2157,13 +2157,13 @@ function renderStep(k){
     const b = document.getElementById('wizard-body');
     let h = `<h2 style="color:var(--primary);">${s.title || ''}</h2>`;
     if(s.result) {
-        let i = s.result === 'red' ? ' ð ' : (s.result === 'green' ? ' â ' : ' â ï¸ ');
+        let i = s.result === 'red' ? ' ð ' : (s.result === 'green' ? ' â ' : ' â ï¸ ');
         let c = s.result === 'red' ? 'res-red' : (s.result === 'green' ? 'res-green' : 'res-yellow');
-        h += `<div class="result-box ${c}"><div style="font-size:3rem;margin-bottom:10px;">${i}</div><h3>${s.title}</h3><p>${s.text}</p>${s.script ? `<div class="script-box">${s.script}</div>` : ''}</div><button class="restart-btn" onclick="renderStep('start')"><i class="fas fa-redo"></i> BaÅa DÃ¶n</button>`;
+        h += `<div class="result-box ${c}"><div style="font-size:3rem;margin-bottom:10px;">${i}</div><h3>${s.title}</h3><p>${s.text}</p>${s.script ? `<div class="script-box">${s.script}</div>` : ''}</div><button class="restart-btn" onclick="renderStep('start')"><i class="fas fa-redo"></i> BaÅa DÃ¶n</button>`;
     } else {
         h += `<p>${s.text}</p><div class="wizard-options">`;
         s.options.forEach(o => { h += `<button class="option-btn" onclick="renderStep('${o.next}')"><i class="fas fa-chevron-right"></i> ${o.text}</button>`; });
-        h += `</div>`; if(k !== 'start') h += `<button class="restart-btn" onclick="renderStep('start')" style="background:#eee;color:#333;margin-top:15px;">BaÅa DÃ¶n</button>`;
+        h += `</div>`; if(k !== 'start') h += `<button class="restart-btn" onclick="renderStep('start')" style="background:#eee;color:#333;margin-top:15px;">BaÅa DÃ¶n</button>`;
     }
     b.innerHTML = h;
 }
@@ -2183,7 +2183,7 @@ function twRenderStep() {
     if (stepData.text) html += `<p style="font-size:1rem; margin-bottom:15px;">${stepData.text}</p>`;
     if (stepData.script) {
         const safeScript = encodeURIComponent(stepData.script);
-        html += `<div class="tech-script-box"><span class="tech-script-label">MÃ¼Återiye iletilecek:</span>"${stepData.script}"<div style="margin-top:10px; text-align:right;"><button class="btn btn-copy" style="font-size:0.8rem; padding:5px 10px;" onclick="copyScriptContent('${safeScript}')"><i class="fas fa-copy"></i> Kopyala</button></div></div>`;
+        html += `<div class="tech-script-box"><span class="tech-script-label">MÃ¼Återiye iletilecek:</span>"${stepData.script}"<div style="margin-top:10px; text-align:right;"><button class="btn btn-copy" style="font-size:0.8rem; padding:5px 10px;" onclick="copyScriptContent('${safeScript}')"><i class="fas fa-copy"></i> Kopyala</button></div></div>`;
     }
     if (stepData.alert) html += `<div class="tech-alert">${stepData.alert}</div>`;
     if (stepData.buttons && stepData.buttons.length > 0) {
@@ -2197,11 +2197,11 @@ function twChangeStep(newStep) { twState.history.push(twState.currentStep); twSt
 function twGoBack() { if (twState.history.length > 0) { twState.currentStep = twState.history.pop(); twRenderStep(); } }
 function twResetWizard() { twState.currentStep = 'start'; twState.history = []; twRenderStep(); }
 // ==========================================================
-// --- YENÄ° KALÄ°TE LMS MODÃLÃ (TAM EKRAN ENTEGRASYONU) ---
+// --- YENÄ° KALÄ°TE LMS MODÃLÃ (TAM EKRAN ENTEGRASYONU) ---
 // ==========================================================
 // ModÃ¼lÃ¼ AÃ§
 function openQualityArea() {
-    // Eski modalÄ± kapat (eÄer aÃ§Ä±ksa)
+    // Eski modalÄ± kapat (eÄer aÃ§Ä±ksa)
     const oldModal = document.getElementById('quality-modal');
     if(oldModal) oldModal.style.display = 'none';
     // Tam ekranÄ± aÃ§
@@ -2223,7 +2223,7 @@ function openQualityArea() {
         if(assignBtn) assignBtn.style.display = 'block';
         if(manualFeedbackBtn) manualFeedbackBtn.style.display = 'flex';
         
-        // KullanÄ±cÄ± listesi boÅsa Ã§ek, sonra filtreleri doldur
+        // KullanÄ±cÄ± listesi boÅsa Ã§ek, sonra filtreleri doldur
         if (adminUserList.length === 0) {
             fetchUserListForAdmin().then(users => {
                 const groupSelect = document.getElementById('q-admin-group');
@@ -2242,7 +2242,7 @@ function openQualityArea() {
         if(assignBtn) assignBtn.style.display = 'none';
         if(manualFeedbackBtn) manualFeedbackBtn.style.display = 'none';
         
-        // Admin deÄilse filtreleri gizle
+        // Admin deÄilse filtreleri gizle
         const dashFilterArea = document.querySelector('#view-dashboard .q-view-header > div');
         if(dashFilterArea && dashFilterArea.style.display !== 'none') {
              // Burada basitÃ§e dashboard filtre fonksiyonu admin kontrolÃ¼ yapÄ±yor.
@@ -2259,12 +2259,12 @@ function openQualityArea() {
 // ModÃ¼lÃ¼ Kapat
 function closeFullQuality() {
     document.getElementById('quality-fullscreen').style.display = 'none';
-    // EÄer qusers ise (sadece kalite yetkisi varsa) logout yapmalÄ± veya uyarÄ± vermeli
+    // EÄer qusers ise (sadece kalite yetkisi varsa) logout yapmalÄ± veya uyarÄ± vermeli
     if(localStorage.getItem("sSportRole") === 'qusers') {
         logout();
     }
 }
-// Sekme DeÄiÅtirme
+// Sekme DeÄiÅtirme
 function switchQualityTab(tabName, element) {
     // Menu active class
     document.querySelectorAll('.q-nav-item').forEach(item => item.classList.remove('active'));
@@ -2281,7 +2281,7 @@ function switchQualityTab(tabName, element) {
     // Veri YÃ¼kleme
     if (tabName === 'dashboard') loadQualityDashboard();
     else if (tabName === 'evaluations') fetchEvaluationsForAgent();
-    // DÃZELTME: Feedback sekmesi aÃ§Ä±lÄ±rken Ã¶nce Feedback_Logs Ã§ekilmeli
+    // DÃZELTME: Feedback sekmesi aÃ§Ä±lÄ±rken Ã¶nce Feedback_Logs Ã§ekilmeli
     else if (tabName === 'feedback') {
         populateFeedbackFilters();
         refreshFeedbackData();
@@ -2359,7 +2359,7 @@ function updateDashAgentList() {
     refreshQualityData();
 }
 
-// â Dashboard ring baÅlÄ±ÄÄ± + admin temsilci ortalamalarÄ±
+// â Dashboard ring baÅlÄ±ÄÄ± + admin temsilci ortalamalarÄ±
 function updateDashRingTitle() {
     const titleEl = document.getElementById('q-dash-ring-title') || document.getElementById('q-dash-ring-title'.replace('title','title'));
     // (id kesin: q-dash-ring-title)
@@ -2409,7 +2409,7 @@ function renderDashAgentScores(evals) {
         if(!byAgent[agent]) byAgent[agent] = { total:0, count:0, group: group };
         byAgent[agent].total += score;
         byAgent[agent].count += 1;
-        // group boÅsa son gÃ¶rÃ¼leni yaz
+        // group boÅsa son gÃ¶rÃ¼leni yaz
         if(!byAgent[agent].group && group) byAgent[agent].group = group;
     });
 
@@ -2418,15 +2418,15 @@ function renderDashAgentScores(evals) {
         return { name, group: o.group || (g !== 'all' ? g : ''), avg: o.count ? (o.total/o.count) : 0, count:o.count };
     });
 
-    // EÄer group seÃ§iliyse sadece o grubun kullanÄ±cÄ±larÄ± zaten geliyor; ama garanti olsun
+    // EÄer group seÃ§iliyse sadece o grubun kullanÄ±cÄ±larÄ± zaten geliyor; ama garanti olsun
     const filteredRows = (g && g !== 'all') ? rows.filter(r => (r.group || '') === g) : rows;
 
-    // SÄ±rala: en dÃ¼ÅÃ¼k ortalama Ã¼stte (iyileÅtirme alanÄ±)
+    // SÄ±rala: en dÃ¼ÅÃ¼k ortalama Ã¼stte (iyileÅtirme alanÄ±)
     filteredRows.sort((x,y)=> x.avg - y.avg);
 
     if(filteredRows.length === 0) { box.style.display='none'; return; }
 
-    // Ä°lk 8 kiÅiyi gÃ¶ster
+    // Ä°lk 8 kiÅiyi gÃ¶ster
     const top = filteredRows.slice(0, 8);
 
     box.innerHTML = top.map(r => `
@@ -2450,7 +2450,7 @@ function safeParseDetails(details) {
     if(typeof details === 'string') {
         const s = details.trim();
         if(!s) return null;
-        // BazÄ± eski kayÄ±tlar Ã§ift tÄ±rnak kaÃ§Ä±ÅlÄ± gelebilir
+        // BazÄ± eski kayÄ±tlar Ã§ift tÄ±rnak kaÃ§Ä±ÅlÄ± gelebilir
         const tryList = [s, s.replace(/\"/g,'"'), s.replace(/'/g,'"')];
         for(const cand of tryList){
             try{
@@ -2462,7 +2462,7 @@ function safeParseDetails(details) {
     return null;
 }
 
-// â YENÄ°: Feedback (Geri Bildirimler) Filtrelerini Doldurma
+// â YENÄ°: Feedback (Geri Bildirimler) Filtrelerini Doldurma
 function populateFeedbackFilters() {
     const groupSelect = document.getElementById('q-feedback-group');
     const agentSelect = document.getElementById('q-feedback-agent');
@@ -2556,7 +2556,7 @@ async function fetchEvaluationsForFeedback() {
 }
 
 async function refreshFeedbackData() {
-    // Feedback ekranÄ± iÃ§in (admin filtrelerine gÃ¶re) deÄerlendirmeleri + loglarÄ± Ã§ek, sonra listeyi bas
+    // Feedback ekranÄ± iÃ§in (admin filtrelerine gÃ¶re) deÄerlendirmeleri + loglarÄ± Ã§ek, sonra listeyi bas
     await fetchEvaluationsForFeedback();
     await fetchFeedbackLogs();
     loadFeedbackList();
@@ -2567,7 +2567,7 @@ function refreshQualityData() {
     loadQualityDashboard();
 }
 async function fetchEvaluationsForDashboard() {
-    // Dashboard filtrelerine gÃ¶re deÄerlendirmeleri Ã§ek (admin ise seÃ§ilen grup/temsilciye gÃ¶re)
+    // Dashboard filtrelerine gÃ¶re deÄerlendirmeleri Ã§ek (admin ise seÃ§ilen grup/temsilciye gÃ¶re)
     const groupSelect = document.getElementById('q-dash-group');
     const agentSelect = document.getElementById('q-dash-agent');
 
@@ -2617,9 +2617,9 @@ function loadQualityDashboard() {
             
             let matchGroup = true;
             let matchAgent = true;
-            // Admin filtreleme mantÄ±ÄÄ±
+            // Admin filtreleme mantÄ±ÄÄ±
             if (isAdminMode) {
-                // EÄer veri iÃ§inde grup bilgisi varsa onu kullan, yoksa adminUserList'ten bakmak gerekir.
+                // EÄer veri iÃ§inde grup bilgisi varsa onu kullan, yoksa adminUserList'ten bakmak gerekir.
                 if (selectedGroup !== 'all') {
                     if (e.group) {
                         matchGroup = (e.group === selectedGroup);
@@ -2631,7 +2631,7 @@ function loadQualityDashboard() {
                 
                 if (selectedAgent !== 'all' && e.agent !== selectedAgent) matchAgent = false;
             } else {
-                // Admin deÄilse sadece kendi verisi
+                // Admin deÄilse sadece kendi verisi
                 if(e.agent !== currentUser) matchAgent = false;
             }
             // MANUEL kayÄ±tlarÄ± dashboard'da gÃ¶sterme
@@ -2739,7 +2739,7 @@ function renderDashboardChart(data, ctxId = "q-breakdown-chart", key = "main") {
                 if(Array.isArray(details)) {
                     details.forEach(d => {
                         let qFullText = d.q; // Tam metin
-                        // Soruyu anahtar olarak kullan (kÄ±saltÄ±lmÄ±Å versiyonu)
+                        // Soruyu anahtar olarak kullan (kÄ±saltÄ±lmÄ±Å versiyonu)
                         let qShortText = qFullText.length > 25 ? qFullText.substring(0, 25) + '...' : qFullText;
                         
                         if (!questionStats[qShortText]) {
@@ -2753,21 +2753,21 @@ function renderDashboardChart(data, ctxId = "q-breakdown-chart", key = "main") {
                 }
             } catch (e) {
                 // JSON parse hatasÄ± veya eski veri formatÄ±
-                console.log("Detay verisi iÅlenemedi", e);
+                console.log("Detay verisi iÅlenemedi", e);
             }
         });
     }
-    // Ä°statistikleri diziye Ã§evirip baÅarÄ± oranÄ±na gÃ¶re sÄ±rala
+    // Ä°statistikleri diziye Ã§evirip baÅarÄ± oranÄ±na gÃ¶re sÄ±rala
     let statsArray = Object.keys(questionStats).map(key => {
         let s = questionStats[key];
-        // BaÅarÄ± oranÄ± %
+        // BaÅarÄ± oranÄ± %
         let percentage = s.max > 0 ? (s.earned / s.max) * 100 : 0;
         return { label: key, fullLabel: s.fullText, value: percentage };
     });
     
-    // BaÅarÄ± oranÄ±na gÃ¶re artan sÄ±ralama (En dÃ¼ÅÃ¼k baÅarÄ± en baÅta)
+    // BaÅarÄ± oranÄ±na gÃ¶re artan sÄ±ralama (En dÃ¼ÅÃ¼k baÅarÄ± en baÅta)
     statsArray.sort((a, b) => a.value - b.value);
-    // EÄer detay kÄ±rÄ±lÄ±mÄ± yoksa (eski/boÅ kayÄ±tlar), temsilci ortalamasÄ±na gÃ¶re kÄ±rÄ±lÄ±m gÃ¶ster
+    // EÄer detay kÄ±rÄ±lÄ±mÄ± yoksa (eski/boÅ kayÄ±tlar), temsilci ortalamasÄ±na gÃ¶re kÄ±rÄ±lÄ±m gÃ¶ster
     if (statsArray.length === 0) {
         const byAgent = {};
         data.forEach(it => {
@@ -2828,7 +2828,7 @@ function renderDashboardChart(data, ctxId = "q-breakdown-chart", key = "main") {
         return;
     }
 
-    // Sadece en dÃ¼ÅÃ¼k 6 kriteri gÃ¶ster
+    // Sadece en dÃ¼ÅÃ¼k 6 kriteri gÃ¶ster
     let topIssues = statsArray.slice(0, 6);
  
     let chartLabels = topIssues.map(i => i.label);
@@ -2838,7 +2838,7 @@ function renderDashboardChart(data, ctxId = "q-breakdown-chart", key = "main") {
         data: {
             labels: chartLabels,
             datasets: [{
-                label: 'BaÅarÄ± OranÄ± (%)',
+                label: 'BaÅarÄ± OranÄ± (%)',
                 data: chartData,
                 // Kriter BazlÄ± Renklendirme
                 backgroundColor: chartData.map(val => val < 70 ? 'rgba(211, 47, 47, 0.7)' : (val < 90 ? 'rgba(237, 108, 2, 0.7)' : 'rgba(46, 125, 50, 0.7)')),
@@ -2865,7 +2865,7 @@ function renderDashboardChart(data, ctxId = "q-breakdown-chart", key = "main") {
                 legend: { display: false },
                 tooltip: {
                     callbacks: {
-                        // Tooltip baÅlÄ±ÄÄ±nda tam metni gÃ¶sterilmesi
+                        // Tooltip baÅlÄ±ÄÄ±nda tam metni gÃ¶sterilmesi
                         title: function(context) {
                             if (context.length > 0) {
                                 const dataIndex = context[0].dataIndex;
@@ -2875,7 +2875,7 @@ function renderDashboardChart(data, ctxId = "q-breakdown-chart", key = "main") {
                             return '';
                         },
                         label: function(context) {
-                            return context.parsed.x + '% BaÅarÄ±';
+                            return context.parsed.x + '% BaÅarÄ±';
                         }
                     }
                 }
@@ -2883,7 +2883,7 @@ function renderDashboardChart(data, ctxId = "q-breakdown-chart", key = "main") {
         }
     });
 }
-// --- EÄÄ°TÄ°M MODÃLÃ (YENÄ°) ---
+// --- EÄÄ°TÄ°M MODÃLÃ (YENÄ°) ---
 function loadTrainingData() {
     const listEl = document.getElementById('training-list');
     listEl.innerHTML = '<div style="grid-column:1/-1; text-align:center;">YÃ¼kleniyor...</div>';
@@ -2898,17 +2898,17 @@ function loadTrainingData() {
             data.trainings.forEach(t => {
                 let statusHtml = t.isCompleted 
                     ? `<button class="t-btn t-btn-done"><i class="fas fa-check"></i> TamamlandÄ±</button>`
-                    : `<button class="t-btn t-btn-start" onclick="openTrainingLink('${t.id}', '${t.link}')">EÄitime Git</button>`;
+                    : `<button class="t-btn t-btn-start" onclick="openTrainingLink('${t.id}', '${t.link}')">EÄitime Git</button>`;
                 
                 let docHtml = t.docLink && t.docLink !== 'N/A' 
                     ? `<a href="${t.docLink}" target="_blank" class="t-doc-link"><i class="fas fa-file-download"></i> DÃ¶kÃ¼manÄ± Ä°ndir</a>` 
                     : '';
                 
-                // GÃNCELLENMÄ°Å KART YAPISI (Tarih ve SÃ¼re Eklendi)
+                // GÃNCELLENMÄ°Å KART YAPISI (Tarih ve SÃ¼re Eklendi)
                 listEl.innerHTML += `
                 <div class="t-card">
                     <div class="t-card-header">
-                        <span>${t.title}${isAdminMode ? ` <span style=\"font-weight:600; opacity:.8; font-size:.75rem\">(${t.target}${t.target==='Individual' && t.targetUser ? ' â¢ '+t.targetUser : ''})</span>` : ''}</span>
+                        <span>${t.title}${isAdminMode ? ` <span style=\"font-weight:600; opacity:.8; font-size:.75rem\">(${t.target}${t.target==='Individual' && t.targetUser ? ' â¢ '+t.targetUser : ''})</span>` : ''}</span>
                         <span class="t-status-badge">Atanma: ${t.date}</span>
                     </div>
                     <div class="t-card-body">
@@ -2916,7 +2916,7 @@ function loadTrainingData() {
                         ${docHtml}
                         <div style="margin-top:10px; display:flex; justify-content:space-between; font-size:0.8rem; color:#666; padding-top:10px; border-top:1px dashed #eee;">
                             <div><strong>SÃ¼re:</strong> ${t.duration || 'Belirtilmedi'}</div>
-                            <div><strong>BaÅlangÄ±Ã§:</strong> ${t.startDate || 'N/A'} - <strong>BitiÅ:</strong> ${t.endDate || 'N/A'}</div>
+                            <div><strong>BaÅlangÄ±Ã§:</strong> ${t.startDate || 'N/A'} - <strong>BitiÅ:</strong> ${t.endDate || 'N/A'}</div>
                         </div>
                         <div style="font-size:0.8rem; color:#999; margin-top:5px;">Atayan: ${t.creator}</div>
                     </div>
@@ -2926,7 +2926,7 @@ function loadTrainingData() {
                 </div>`;
             });
         } else {
-            listEl.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:20px; color:#888;">AtanmÄ±Å eÄitim bulunmuyor.</div>';
+            listEl.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:20px; color:#888;">AtanmÄ±Å eÄitim bulunmuyor.</div>';
         }
     });
 }
@@ -2943,13 +2943,13 @@ function openTrainingLink(id, link) {
     if(link && link !== 'N/A') {
         window.open(link, '_blank');
     } else {
-        Swal.fire('UyarÄ±', 'Bu eÄitim iÃ§in geÃ§erli bir link bulunmamaktadÄ±r.', 'warning');
+        Swal.fire('UyarÄ±', 'Bu eÄitim iÃ§in geÃ§erli bir link bulunmamaktadÄ±r.', 'warning');
     }
     
     // Linke tÄ±kladÄ±ktan sonra onay sor
     Swal.fire({
-        title: 'EÄitimi TamamladÄ±n mÄ±?',
-        text: "EÄitim iÃ§eriÄini inceleyip anladÄ±ysan onayla.",
+        title: 'EÄitimi TamamladÄ±n mÄ±?',
+        text: "EÄitim iÃ§eriÄini inceleyip anladÄ±ysan onayla.",
         icon: 'question',
         showCancelButton: true,
         confirmButtonText: 'Evet, TamamladÄ±m',
@@ -2967,7 +2967,7 @@ function completeTraining(id) {
         body: JSON.stringify({ action: "completeTraining", trainingId: id, username: currentUser, token: getToken() })
     }).then(r => r.json()).then(d => {
         if(d.result === 'success') {
-            Swal.fire('Harika!', 'EÄitim tamamlandÄ± olarak iÅaretlendi.', 'success');
+            Swal.fire('Harika!', 'EÄitim tamamlandÄ± olarak iÅaretlendi.', 'success');
             loadTrainingData();
         } else {
             Swal.fire('Hata', d.message, 'error');
@@ -2976,22 +2976,22 @@ function completeTraining(id) {
 }
 async function assignTrainingPopup() {
     const { value: formValues } = await Swal.fire({
-        title: 'Yeni EÄitim & DÃ¶kÃ¼man Ata',
+        title: 'Yeni EÄitim & DÃ¶kÃ¼man Ata',
         html: `
             <div class="t-modal-grid">
-                <input id="swal-t-title" class="swal2-input" placeholder="EÄitim BaÅlÄ±ÄÄ±" style="grid-column: 1 / 4;">
-                <textarea id="swal-t-desc" class="swal2-textarea" style="height:100px; grid-column: 1 / 4;" placeholder="EÄitim aÃ§Ä±klamasÄ± veya talimatlar..."></textarea>
-                <input id="swal-t-link" class="swal2-input" placeholder="Video/EÄitim Linki (URL)" style="grid-column: 1 / 4;">
-                <input id="swal-t-doc" class="swal2-input" placeholder="DÃ¶kÃ¼man Linki (Drive/PDF URL) (Ä°steÄe BaÄlÄ±)" style="grid-column: 1 / 4;">
+                <input id="swal-t-title" class="swal2-input" placeholder="EÄitim BaÅlÄ±ÄÄ±" style="grid-column: 1 / 4;">
+                <textarea id="swal-t-desc" class="swal2-textarea" style="height:100px; grid-column: 1 / 4;" placeholder="EÄitim aÃ§Ä±klamasÄ± veya talimatlar..."></textarea>
+                <input id="swal-t-link" class="swal2-input" placeholder="Video/EÄitim Linki (URL)" style="grid-column: 1 / 4;">
+                <input id="swal-t-doc" class="swal2-input" placeholder="DÃ¶kÃ¼man Linki (Drive/PDF URL) (Ä°steÄe BaÄlÄ±)" style="grid-column: 1 / 4;">
                 <input type="date" id="swal-t-start" class="swal2-input" value="${new Date().toISOString().substring(0, 10)}">
                 <input type="date" id="swal-t-end" class="swal2-input">
-                <input id="swal-t-duration" class="swal2-input" placeholder="SÃ¼re (Ãrn: 20dk)">
+                <input id="swal-t-duration" class="swal2-input" placeholder="SÃ¼re (Ãrn: 20dk)">
             </div>
             <select id="swal-t-target" class="swal2-input" onchange="updateTrainingTarget(this.value)" style="margin-top:10px;">
                 <option value="Genel">Herkese (TÃ¼m Ekip)</option>
-                <option value="TelesatÄ±Å">TelesatÄ±Å Ekibi</option>
+                <option value="TelesatÄ±Å">TelesatÄ±Å Ekibi</option>
                 <option value="Chat">Chat Ekibi</option>
-                <option value="Individual">KiÅiye Ãzel</option>
+                <option value="Individual">KiÅiye Ãzel</option>
             </select>
             <select id="swal-t-agent" class="swal2-input" style="display:none; width:100%;"></select>
         `,
@@ -3012,7 +3012,7 @@ async function assignTrainingPopup() {
             const target = document.getElementById('swal-t-target').value;
             const agent = target === 'Individual' ? document.getElementById('swal-t-agent').value : '';
             if (!document.getElementById('swal-t-title').value || (!target && !agent)) {
-                Swal.showValidationMessage('BaÅlÄ±k ve Atama AlanÄ± boÅ bÄ±rakÄ±lamaz');
+                Swal.showValidationMessage('BaÅlÄ±k ve Atama AlanÄ± boÅ bÄ±rakÄ±lamaz');
                 return false;
             }
             return {
@@ -3021,7 +3021,7 @@ async function assignTrainingPopup() {
                 link: document.getElementById('swal-t-link').value,
                 docLink: document.getElementById('swal-t-doc').value || 'N/A',
                 target: target,
-                targetAgent: agent, // KiÅiye Ã¶zel atama iÃ§in
+                targetAgent: agent, // KiÅiye Ã¶zel atama iÃ§in
                 creator: currentUser,
                 startDate: formatDateToDDMMYYYY(document.getElementById('swal-t-start').value), 
                 endDate: formatDateToDDMMYYYY(document.getElementById('swal-t-end').value), 
@@ -3036,12 +3036,12 @@ async function assignTrainingPopup() {
             headers: { "Content-Type": "text/plain;charset=utf-8" },
             body: JSON.stringify({ action: "assignTraining", username: currentUser, token: getToken(), ...formValues })
         }).then(r=>r.json()).then(d=>{
-            Swal.fire('BaÅarÄ±lÄ±', 'EÄitim atandÄ±.', 'success');
+            Swal.fire('BaÅarÄ±lÄ±', 'EÄitim atandÄ±.', 'success');
             loadTrainingData();
         });
     }
 }
-// --- FEEDBACK MODÃLÃ ---
+// --- FEEDBACK MODÃLÃ ---
 
 // YENÄ° FONKSÄ°YON: Feedback_Logs'u Ã§ekmek iÃ§in
 async function fetchFeedbackLogs() {
@@ -3058,7 +3058,7 @@ async function fetchFeedbackLogs() {
             feedbackLogsData = [];
         }
     } catch (error) {
-        console.error("Feedback Logs Ã§ekilirken hata oluÅtu:", error);
+        console.error("Feedback Logs Ã§ekilirken hata oluÅtu:", error);
         feedbackLogsData = [];
     }
 }
@@ -3072,7 +3072,7 @@ function formatPeriod(periodString) {
         return periodString;
     }
     
-    // EÄer uzun bir Date string'i ise (Ã¶r: Wed Oct 01 2025...) tarih nesnesine Ã§evir
+    // EÄer uzun bir Date string'i ise (Ã¶r: Wed Oct 01 2025...) tarih nesnesine Ã§evir
     try {
         const date = new Date(periodString);
         if (!isNaN(date.getTime())) {
@@ -3081,11 +3081,11 @@ function formatPeriod(periodString) {
             return `${month}.${year}`;
         }
     } catch (e) {
-        // Hata oluÅursa olduÄu gibi bÄ±rak veya N/A dÃ¶ndÃ¼r
+        // Hata oluÅursa olduÄu gibi bÄ±rak veya N/A dÃ¶ndÃ¼r
         console.error("DÃ¶nem formatlama hatasÄ±:", e);
     }
     
-    return periodString; // BaÅka formatta gelirse yine de olduÄu gibi dÃ¶ndÃ¼r
+    return periodString; // BaÅka formatta gelirse yine de olduÄu gibi dÃ¶ndÃ¼r
 }
 
 function loadFeedbackList() {
@@ -3096,9 +3096,9 @@ function loadFeedbackList() {
     const manualBtn = document.getElementById('manual-feedback-admin-btn');
     if(manualBtn) manualBtn.style.display = isAdminMode ? 'flex' : 'none';
     
-    // YENÄ° FÄ°LTRELEME MANTIÄI: Sadece feedbackType 'Mail' olanlar VEYA callId 'MANUEL' olanlar listelenir.
+    // YENÄ° FÄ°LTRELEME MANTIÄI: Sadece feedbackType 'Mail' olanlar VEYA callId 'MANUEL' olanlar listelenir.
     const feedbackItems = allEvaluationsData.filter(e => {
-        // feedbackType kontrolÃ¼ (BÃ¼yÃ¼k/kÃ¼Ã§Ã¼k harf duyarlÄ±lÄ±ÄÄ±nÄ± ortadan kaldÄ±rÄ±rÄ±z)
+        // feedbackType kontrolÃ¼ (BÃ¼yÃ¼k/kÃ¼Ã§Ã¼k harf duyarlÄ±lÄ±ÄÄ±nÄ± ortadan kaldÄ±rÄ±rÄ±z)
         const isMailFeedback = e.feedbackType && e.feedbackType.toLowerCase() === 'mail';
         // Manuel kontrolÃ¼
         const isManualFeedback = e.callId && String(e.callId).toUpperCase().startsWith('MANUEL-');
@@ -3106,35 +3106,35 @@ function loadFeedbackList() {
         return isMailFeedback || isManualFeedback;
     });
     if(feedbackItems.length === 0) {
-        listEl.innerHTML = '<div style="padding:20px; text-align:center; color:#888;">GÃ¶rÃ¼ntÃ¼lenecek filtrelenmiÅ geri bildirim yok (Sadece Mail veya Manuel).</div>';
+        listEl.innerHTML = '<div style="padding:20px; text-align:center; color:#888;">GÃ¶rÃ¼ntÃ¼lenecek filtrelenmiÅ geri bildirim yok (Sadece Mail veya Manuel).</div>';
         return;
     }
     
     feedbackItems.forEach(e => {
-        // GeliÅtirme: ÃaÄrÄ± Tarihi ve ID eklendi (GeliÅmiÅ Kart TasarÄ±mÄ±)
+        // GeliÅtirme: ÃaÄrÄ± Tarihi ve ID eklendi (GeliÅmiÅ Kart TasarÄ±mÄ±)
         const feedbackClass = e.feedbackType === 'SÃ¶zlÃ¼' ? '#2196f3' : (e.feedbackType === 'Mail' ? '#e65100' : (e.feedbackType === 'Bilgilendirme' ? '#0288d1' : (e.feedbackType === 'Feedback' ? '#2e7d32' : '#10b981')));
         
         // MANUEL CallID'den Ã¶n eki temizle
         const cleanCallId = String(e.callId).toUpperCase().startsWith('MANUEL-') ? String(e.callId).substring(7) : e.callId;
         
-        // Konu/BaÅlÄ±k bilgisi 'details' alanÄ±ndan gelir (Manuel geri bildirim iÃ§in)
-        // EÄer detay alanÄ± JSON ise (yani normal deÄerlendirme) veya boÅsa varsayÄ±lan metin kullan
+        // Konu/BaÅlÄ±k bilgisi 'details' alanÄ±ndan gelir (Manuel geri bildirim iÃ§in)
+        // EÄer detay alanÄ± JSON ise (yani normal deÄerlendirme) veya boÅsa varsayÄ±lan metin kullan
         const isEvaluationDetail = String(e.details).startsWith('[');
-        const feedbackTopic = isEvaluationDetail ? 'DeÄerlendirme Konusu' : (e.details || 'BelirtilmemiÅ');
+        const feedbackTopic = isEvaluationDetail ? 'DeÄerlendirme Konusu' : (e.details || 'BelirtilmemiÅ');
         
-        // DÃ¶nem, Kanal ve Tipi belirle (Manuel kayÄ±tlarda bu bilgileri Evaluations'tan deÄil, Feedback_Logs'tan Ã§ekiyoruz)
+        // DÃ¶nem, Kanal ve Tipi belirle (Manuel kayÄ±tlarda bu bilgileri Evaluations'tan deÄil, Feedback_Logs'tan Ã§ekiyoruz)
         const isManual = String(e.callId).toUpperCase().startsWith('MANUEL-');
         
         let period = e.period || e.date.substring(3);
         let channel = (e.channel && String(e.channel).trim()) ? String(e.channel).trim() : 'Yok';
         const infoType = e.feedbackType || 'Yok';
 
-        // DÃZELTME MANTIÄI: EÄer kayÄ±t Manuel ise, detaylÄ± bilgiyi feedbackLogsData'dan Ã§ek.
+        // DÃZELTME MANTIÄI: EÄer kayÄ±t Manuel ise, detaylÄ± bilgiyi feedbackLogsData'dan Ã§ek.
         if (isManual) {
-            // CallId'deki MANUEL- Ã¶n ekini atarak Feedback_Logs'taki Call_ID ile eÅleÅtirme
+            // CallId'deki MANUEL- Ã¶n ekini atarak Feedback_Logs'taki Call_ID ile eÅleÅtirme
             const logRow = feedbackLogsData.find(x => String(x.callId) === String(cleanCallId));
             if (logRow) {
-                // Apps Script'ten gelen period deÄerini formatla (Tarih Nesnesi/String olma ihtimaline karÅÄ±)
+                // Apps Script'ten gelen period deÄerini formatla (Tarih Nesnesi/String olma ihtimaline karÅÄ±)
                 period = formatPeriod(logRow.period) || period;
                 channel = logRow.channel && logRow.channel !== 'N/A' ? logRow.channel : 'Yok';
             }
@@ -3145,8 +3145,8 @@ function loadFeedbackList() {
                 <div class="feedback-header">
                     <div style="font-weight:bold; color:#0e1b42; font-size:1.1rem;">${e.agent}</div>
                     <div class="feedback-info-right">
-                        <span><i class="fas fa-user-check"></i> DeÄerleyen: ${e.evaluator}</span>
-                        <span><i class="fas fa-id-badge"></i> ÃaÄrÄ± ID: ${cleanCallId}</span>
+                        <span><i class="fas fa-user-check"></i> DeÄerleyen: ${e.evaluator}</span>
+                        <span><i class="fas fa-id-badge"></i> ÃaÄrÄ± ID: ${cleanCallId}</span>
                         <span><i class="fas fa-calendar-alt"></i> Tarih: ${e.callDate}</span>
                     </div>
                 </div>
@@ -3164,7 +3164,7 @@ function loadFeedbackList() {
             </div>`;
     });
 }
-// Adminler iÃ§in manuel geri bildirim ekleme (ÃaÄrÄ± dÄ±ÅÄ± konular iÃ§in)
+// Adminler iÃ§in manuel geri bildirim ekleme (ÃaÄrÄ± dÄ±ÅÄ± konular iÃ§in)
 async function addManualFeedbackPopup() {
     if (!isAdminMode) return;
     
@@ -3174,7 +3174,7 @@ async function addManualFeedbackPopup() {
         await fetchUserListForAdmin();
         Swal.close();
     }
-    // DÃ¶nem filtre seÃ§eneklerini oluÅtur
+    // DÃ¶nem filtre seÃ§eneklerini oluÅtur
     const now = new Date();
     const currentMonth = now.getMonth();
     const currentYear = now.getFullYear();
@@ -3183,7 +3183,7 @@ async function addManualFeedbackPopup() {
         let month = (currentMonth - i + 12) % 12;
         let year = currentYear - (currentMonth - i < 0 ? 1 : 0);
         const text = `${MONTH_NAMES[month]} ${year}`;
-        const value = `${String(month + 1).padStart(2, '0')}.${year}`; // Backend'in beklediÄi MM.YYYY formatÄ±
+        const value = `${String(month + 1).padStart(2, '0')}.${year}`; // Backend'in beklediÄi MM.YYYY formatÄ±
         const isCurrent = (i === 0);
         monthOptions += `<option value="${value}" ${isCurrent ? 'selected' : ''}>${text}</option>`;
     }
@@ -3196,14 +3196,14 @@ async function addManualFeedbackPopup() {
                 <select id="manual-q-agent" class="swal2-input"></select>
             </div>
             <div class="form-group">
-                <label for="manual-q-topic">Konu / BaÅlÄ±k <span class="required">*</span></label>
-                <input id="manual-q-topic" class="swal2-input" placeholder="Geri bildirim konusu (Ãrn: Yeni Kampanya Bilgilendirmesi)">
+                <label for="manual-q-topic">Konu / BaÅlÄ±k <span class="required">*</span></label>
+                <input id="manual-q-topic" class="swal2-input" placeholder="Geri bildirim konusu (Ãrn: Yeni Kampanya Bilgilendirmesi)">
             </div>
             
             <div class="grid-2-cols">
                 <div class="form-group">
-                    <label for="manual-q-callid">ÃaÄrÄ±/EtkileÅim ID <span class="required">*</span></label>
-                    <input id="manual-q-callid" class="swal2-input" placeholder="ID (Ãrn: 123456)">
+                    <label for="manual-q-callid">ÃaÄrÄ±/EtkileÅim ID <span class="required">*</span></label>
+                    <input id="manual-q-callid" class="swal2-input" placeholder="ID (Ãrn: 123456)">
                 </div>
                 <div class="form-group">
                     <label for="manual-q-date">Tarih <span class="required">*</span></label>
@@ -3218,7 +3218,7 @@ async function addManualFeedbackPopup() {
                         <option value="CanlÄ± Destek">CanlÄ± Destek</option>
                         <option value="E-posta">E-posta</option>
                         <option value="Sosyal Medya">Sosyal Medya</option>
-                        <option value="Yok">Yok/DiÄer</option>
+                        <option value="Yok">Yok/DiÄer</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -3232,7 +3232,7 @@ async function addManualFeedbackPopup() {
                         <option value="Bilgilendirme">Bilgilendirme</option>
                         <option value="SÃ¶zlÃ¼">SÃ¶zlÃ¼</option>
                         <option value="Mail">Mail</option>
-                        <option value="Ãzel">Ãzel Konu</option>
+                        <option value="Ãzel">Ãzel Konu</option>
                     </select>
                 </div>
             </div>
@@ -3243,7 +3243,7 @@ async function addManualFeedbackPopup() {
             </div>
         </div>
         <style>
-            /* Manuel Geri Bildirim Formu Stil Ä°yileÅtirmeleri */
+            /* Manuel Geri Bildirim Formu Stil Ä°yileÅtirmeleri */
             .manual-feedback-form {
                 text-align: left;
                 padding: 10px;
@@ -3301,7 +3301,7 @@ async function addManualFeedbackPopup() {
     const { value: formValues } = await Swal.fire({
         title: 'Manuel Geri Bildirim Yaz',
         html: newHtmlContent,
-        width: '600px', // Modal geniÅliÄini artÄ±rdÄ±k
+        width: '600px', // Modal geniÅliÄini artÄ±rdÄ±k
         showCancelButton: true,
         confirmButtonText: '<i class="fas fa-save"></i> Kaydet',
         didOpen: () => {
@@ -3322,30 +3322,30 @@ async function addManualFeedbackPopup() {
             const callId = document.getElementById('manual-q-callid').value.trim();
             const rawCallDate = document.getElementById('manual-q-date').value;
             const callDate = formatDateToDDMMYYYY(rawCallDate);
-            if (!agentName || !feedback || !callId || !rawCallDate || !topic) { // Konu/BaÅlÄ±k da zorunlu yapÄ±ldÄ±
-                 Swal.showValidationMessage('TÃ¼m (*) iÅaretli alanlar zorunludur!'); 
+            if (!agentName || !feedback || !callId || !rawCallDate || !topic) { // Konu/BaÅlÄ±k da zorunlu yapÄ±ldÄ±
+                 Swal.showValidationMessage('TÃ¼m (*) iÅaretli alanlar zorunludur!'); 
                  return false;
             }
             
-            // Konu sadece baÅlÄ±k olarak gÃ¶nderiliyor. DÃ¶nem ve Kanal ayrÄ± alanlar olarak gÃ¶nderilecek.
+            // Konu sadece baÅlÄ±k olarak gÃ¶nderiliyor. DÃ¶nem ve Kanal ayrÄ± alanlar olarak gÃ¶nderilecek.
             return {
                 agentName,
-                // Backend'de ayrÄ± loglama iÃ§in CallID'yi MANUEL ile baÅlatÄ±yoruz.
+                // Backend'de ayrÄ± loglama iÃ§in CallID'yi MANUEL ile baÅlatÄ±yoruz.
                 callId: "MANUEL-" + callId, 
                 callDate: callDate,
-                score: 100, // Manuel olduÄu iÃ§in tam puan
+                score: 100, // Manuel olduÄu iÃ§in tam puan
                 details: topic, // Sadece konuyu gÃ¶nderiyoruz
                 feedback,
                 feedbackType,
-                agentGroup: "Genel", // Manuel olduÄu iÃ§in Genel Grup olarak kaydedilir.
-                // ÃÃZÃM: Yeni alanlarÄ± ekliyoruz
+                agentGroup: "Genel", // Manuel olduÄu iÃ§in Genel Grup olarak kaydedilir.
+                // ÃÃZÃM: Yeni alanlarÄ± ekliyoruz
                 channel: channel,
                 period: period
             };
         }
     });
     if (formValues) {
-        // MÃKERRER KONTROL: AynÄ± temsilci + aynÄ± Call ID daha Ã¶nce kaydedildiyse uyar
+        // MÃKERRER KONTROL: AynÄ± temsilci + aynÄ± Call ID daha Ã¶nce kaydedildiyse uyar
         try {
             const normAgent = String(formValues.agentName || '').trim().toLowerCase();
             const normCallId = String(formValues.callId || '').trim();
@@ -3359,8 +3359,8 @@ async function addManualFeedbackPopup() {
                     icon: 'warning',
                     title: 'MÃ¼kerrer Dinleme',
                     html: `<div style="text-align:left; line-height:1.4;">
-                            <b>${formValues.agentName}</b> iÃ§in <b>Call ID: ${escapeHtml(formValues.callId)}</b> daha Ã¶nce kaydedilmiÅ gÃ¶rÃ¼nÃ¼yor.<br>
-                            <span style="color:#666; font-size:0.9rem;">Yine de yeni kayÄ±t oluÅturmak istiyor musun?</span>
+                            <b>${formValues.agentName}</b> iÃ§in <b>Call ID: ${escapeHtml(formValues.callId)}</b> daha Ã¶nce kaydedilmiÅ gÃ¶rÃ¼nÃ¼yor.<br>
+                            <span style="color:#666; font-size:0.9rem;">Yine de yeni kayÄ±t oluÅturmak istiyor musun?</span>
                            </div>`,
                     showCancelButton: true,
                     confirmButtonText: 'Evet, kaydet',
@@ -3382,7 +3382,7 @@ async function addManualFeedbackPopup() {
         .then(r => r.json()).then(async d => {
             if (d.result === "success") { 
                 Swal.fire({ icon: 'success', title: 'Kaydedildi', timer: 1500, showConfirmButton: false });
-                // DÃZELTME: Hem evaluations hem de feedback logs gÃ¼ncellenmeli
+                // DÃZELTME: Hem evaluations hem de feedback logs gÃ¼ncellenmeli
                 fetchEvaluationsForAgent(formValues.agentName);
                 fetchFeedbackLogs().then(() => { loadFeedbackList(); });
             } else if (d.result === "duplicate") {
@@ -3391,7 +3391,7 @@ async function addManualFeedbackPopup() {
                     title: 'MÃ¼kerrer Dinleme',
                     html: `<div style="text-align:left; line-height:1.4;">
                             <b>${formValues.agentName}</b> iÃ§in <b>Call ID: ${escapeHtml(formValues.callId)}</b> zaten var.<br>
-                            <span style="color:#666; font-size:0.9rem;">Yine de yeni kayÄ±t oluÅturulsun mu?</span>
+                            <span style="color:#666; font-size:0.9rem;">Yine de yeni kayÄ±t oluÅturulsun mu?</span>
                            </div>`,
                     showCancelButton: true,
                     confirmButtonText: 'Evet, zorla kaydet',
@@ -3446,7 +3446,7 @@ async function fetchEvaluationsForAgent(forcedName, silent=false) {
             if(silent) return; // Silent mode ise burada bitir (veri yÃ¼klendi)
             listEl.innerHTML = '';
             
-            // Sadece normal deÄerlendirmeleri filtrele ve gÃ¶ster
+            // Sadece normal deÄerlendirmeleri filtrele ve gÃ¶ster
             const normalEvaluations = allEvaluationsData.filter(e => !String(e.callId).toUpperCase().startsWith('MANUEL-'));
             if (normalEvaluations.length === 0) { listEl.innerHTML = `<p style="text-align:center; color:#666;">KayÄ±t yok.</p>`; return; }
             
@@ -3455,10 +3455,10 @@ async function fetchEvaluationsForAgent(forcedName, silent=false) {
                 let editBtn = isAdminMode ? `<i class="fas fa-pen" style="font-size:1rem; color:#fabb00; cursor:pointer; margin-right:5px;" onclick="event.stopPropagation(); editEvaluation('${evalItem.callId}')"></i>` : '';
                 let agentNameDisplay = (targetAgent === 'all' || targetAgent === targetGroup) ? `<span style="font-size:0.8rem; font-weight:bold; color:#555; background:#eee; padding:2px 6px; border-radius:4px; margin-left:10px;">${evalItem.agent}</span>` : '';
                 
-                // Detay HTML oluÅturma
+                // Detay HTML oluÅturma
                 let detailHtml = '';
                 try {
-                    // JSON'Ä± iÅlerken olasÄ± hatalara karÅÄ± try-catch
+                    // JSON'Ä± iÅlerken olasÄ± hatalara karÅÄ± try-catch
                     const detailObj = JSON.parse(evalItem.details);
                     detailHtml = '<table style="width:100%; font-size:0.85rem; border-collapse:collapse; margin-top:10px;">';
                     if (Array.isArray(detailObj)) {
@@ -3471,7 +3471,7 @@ async function fetchEvaluationsForAgent(forcedName, silent=false) {
                             </tr>`;
                         });
                     } else {
-                        // JSON olmasÄ±na raÄmen array deÄilse (manuel notlar)
+                        // JSON olmasÄ±na raÄmen array deÄilse (manuel notlar)
                         detailHtml = `<p style="white-space:pre-wrap; margin:0; font-size:0.9rem; background:#fff8e1; padding:10px; border-radius:4px;">${evalItem.details}</p>`;
                     }
                     detailHtml += '</table>';
@@ -3480,7 +3480,7 @@ async function fetchEvaluationsForAgent(forcedName, silent=false) {
                     detailHtml = `<p style="white-space:pre-wrap; margin:0; font-size:0.9rem; background:#fff8e1; padding:10px; border-radius:4px;">${evalItem.details}</p>`; 
                 }
                 
-                // GeliÅtirme: ÃaÄrÄ± Tarihi ve Dinlenme Tarihi
+                // GeliÅtirme: ÃaÄrÄ± Tarihi ve Dinlenme Tarihi
                 const callDateDisplay = evalItem.callDate && evalItem.callDate !== 'N/A' ? evalItem.callDate : 'N/A';
                 const listenDateDisplay = evalItem.date || 'N/A';
                 
@@ -3489,9 +3489,9 @@ async function fetchEvaluationsForAgent(forcedName, silent=false) {
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <div>
                             <div style="font-weight:700; color:#2c3e50;">${evalItem.agent} ${agentNameDisplay}</div>
-                            <!-- GeliÅtirme: ÃaÄrÄ± Tarihi ve Dinlenme Tarihi -->
+                            <!-- GeliÅtirme: ÃaÄrÄ± Tarihi ve Dinlenme Tarihi -->
                             <div class="eval-date-info">
-                                <span><i class="fas fa-phone"></i> ÃaÄrÄ±: ${callDateDisplay}</span>
+                                <span><i class="fas fa-phone"></i> ÃaÄrÄ±: ${callDateDisplay}</span>
                                 <span><i class="fas fa-headphones"></i> Dinlenme: ${listenDateDisplay}</span>
                             </div>
                             <div style="font-size:0.75rem; color:#999; margin-top:2px;">ID: ${evalItem.callId}</div>
@@ -3509,7 +3509,7 @@ async function fetchEvaluationsForAgent(forcedName, silent=false) {
                 </div>`;
             });
         }
-    } catch(err) { if(!silent) listEl.innerHTML = `<p style="color:red; text-align:center;">Hata oluÅtu.</p>`; }
+    } catch(err) { if(!silent) listEl.innerHTML = `<p style="color:red; text-align:center;">Hata oluÅtu.</p>`; }
 }
 function updateAgentListBasedOnGroup() {
     const groupSelect = document.getElementById('q-admin-group');
@@ -3578,7 +3578,7 @@ async function exportEvaluations() {
             const url = URL.createObjectURL(blob);
             link.setAttribute("href", url); link.setAttribute("download", data.fileName);
             document.body.appendChild(link); link.click(); document.body.removeChild(link);
-            Swal.fire('BaÅarÄ±lÄ±', 'Rapor indirildi.', 'success');
+            Swal.fire('BaÅarÄ±lÄ±', 'Rapor indirildi.', 'success');
         } else { Swal.fire('Hata', data.message || 'Veri alÄ±namadÄ±.', 'error'); }
     });
 }
@@ -3594,7 +3594,7 @@ async function logEvaluationPopup() {
     if (foundUser && foundUser.group) { agentGroup = foundUser.group; }
     
     const isChat = agentGroup.indexOf('Chat') > -1;
-    const isTelesatis = agentGroup.indexOf('TelesatÄ±Å') > -1;
+    const isTelesatis = agentGroup.indexOf('TelesatÄ±Å') > -1;
     if (isChat) agentGroup = 'Chat';
     
     Swal.fire({ title: 'HazÄ±rlanÄ±yor...', didOpen: () => Swal.showLoading() });
@@ -3610,7 +3610,7 @@ async function logEvaluationPopup() {
         criteriaList.forEach((c, i) => {
             let pts = parseInt(c.points) || 0;
             if (pts === 0) return;
-            // GeliÅtirme: Puan baÅlÄ±ÄÄ± Ã¼stÃ¼ne gelince tam metin gÃ¶sterilmesi iÃ§in title eklendi
+            // GeliÅtirme: Puan baÅlÄ±ÄÄ± Ã¼stÃ¼ne gelince tam metin gÃ¶sterilmesi iÃ§in title eklendi
             const fullText = escapeForJsString(c.text); 
             if (isChat) {
                 let mPts = parseInt(c.mediumScore) || 0; let bPts = parseInt(c.badScore) || 0;
@@ -3622,10 +3622,10 @@ async function logEvaluationPopup() {
         criteriaFieldsHtml += `</div>`;
     }
     
-    // GÃNCELLENMÄ°Å MODAL: Call ID zorunlu yapÄ±ldÄ±
+    // GÃNCELLENMÄ°Å MODAL: Call ID zorunlu yapÄ±ldÄ±
     const contentHtml = `
         <div class="eval-modal-wrapper">
-            <div class="score-dashboard"><div><div style="font-size:0.9rem;">DeÄerlendirilen</div><div style="font-size:1.2rem; font-weight:bold; color:#fabb00;">${agentName}</div></div><div class="score-circle-outer" id="score-ring"><div class="score-circle-inner" id="live-score">${isCriteriaBased ? '100' : '100'}</div></div></div>
+            <div class="score-dashboard"><div><div style="font-size:0.9rem;">DeÄerlendirilen</div><div style="font-size:1.2rem; font-weight:bold; color:#fabb00;">${agentName}</div></div><div class="score-circle-outer" id="score-ring"><div class="score-circle-inner" id="live-score">${isCriteriaBased ? '100' : '100'}</div></div></div>
             <div class="eval-header-card"><div><label>Call ID <span style="color:red;">*</span></label><input id="eval-callid" class="swal2-input" style="height:35px; margin:0; width:100%;" placeholder="Call ID"></div><div><label>Tarih</label><input type="date" id="eval-calldate" class="swal2-input" style="height:35px; margin:0; width:100%;" value="${new Date().toISOString().substring(0, 10)}"></div></div>
             ${isCriteriaBased ? criteriaFieldsHtml : `<div style="padding:15px; border:1px dashed #ccc; text-align:center;"><label>Manuel Puan</label><br><input id="eval-manual-score" type="number" class="swal2-input" value="100" min="0" max="100" style="width:100px; text-align:center;"></div><textarea id="eval-details" class="swal2-textarea" placeholder="Detaylar..."></textarea>`}
             <div style="margin-top:15px; padding:10px; background:#fafafa; border:1px solid #eee;"><label>Geri Bildirim Tipi</label><select id="feedback-type" class="swal2-input" style="width:100%; height:40px; margin:0;"><option value="Yok" selected>Yok</option><option value="SÃ¶zlÃ¼">SÃ¶zlÃ¼</option><option value="Mail">Mail</option></select></div>
@@ -3636,7 +3636,7 @@ async function logEvaluationPopup() {
         html: contentHtml,
         width: '600px',
         showCancelButton: true,
-        confirmButtonText: ' ð¾  Kaydet',
+        confirmButtonText: ' ð¾  Kaydet',
         allowOutsideClick: false,
         allowEscapeKey: false,
         didOpen: () => { 
@@ -3646,7 +3646,7 @@ async function logEvaluationPopup() {
         preConfirm: () => {
             const callId = document.getElementById('eval-callid').value.trim();
             if (!callId) {
-                Swal.showValidationMessage('Call ID alanÄ± boÅ bÄ±rakÄ±lamaz!');
+                Swal.showValidationMessage('Call ID alanÄ± boÅ bÄ±rakÄ±lamaz!');
                 return false;
             }
             
@@ -3679,7 +3679,7 @@ async function logEvaluationPopup() {
         .then(r => r.json()).then(d => {
             if (d.result === "success") { 
                 Swal.fire({ icon: 'success', title: 'Kaydedildi', timer: 1500, showConfirmButton: false });
-                // DÃZELTME: Hem evaluations hem de feedback logs gÃ¼ncellenmeli
+                // DÃZELTME: Hem evaluations hem de feedback logs gÃ¼ncellenmeli
                 fetchEvaluationsForAgent(formValues.agentName);
                 fetchFeedbackLogs().then(() => {
                     loadFeedbackList();
@@ -3697,8 +3697,8 @@ async function editEvaluation(targetCallId) {
     const agentName = evalData.agent;
     const agentGroupRaw = evalData.group || 'Genel';
     const isChat = agentGroupRaw.indexOf('Chat') > -1;
-    const isTelesatis = agentGroupRaw.indexOf('TelesatÄ±Å') > -1;
-    let agentGroup = isChat ? 'Chat' : (isTelesatis ? 'TelesatÄ±Å' : 'Genel');
+    const isTelesatis = agentGroupRaw.indexOf('TelesatÄ±Å') > -1;
+    let agentGroup = isChat ? 'Chat' : (isTelesatis ? 'TelesatÄ±Å' : 'Genel');
     
     Swal.fire({ title: 'Ä°nceleniyor...', didOpen: () => Swal.showLoading() });
     let criteriaList = [];
@@ -3708,8 +3708,8 @@ async function editEvaluation(targetCallId) {
     const isCriteriaBased = criteriaList.length > 0;
     let oldDetails = []; try { oldDetails = JSON.parse(evalData.details || "[]"); } catch(e) { oldDetails = []; }
     
-    // GÃNCELLENMÄ°Å MODAL: Call ID gÃ¶steriliyor
-    let contentHtml = `<div class="eval-modal-wrapper" style="border-top:5px solid #1976d2;"><div class="score-dashboard"><div><div style="font-size:0.9rem;">DÃZENLENEN</div><div style="font-size:1.2rem; font-weight:bold; color:#1976d2;">${agentName}</div></div><div class="score-circle-outer" id="score-ring"><div class="score-circle-inner" id="live-score">${evalData.score}</div></div></div><div class="eval-header-card"><div><label>Call ID</label><input id="eval-callid" class="swal2-input" value="${evalData.callId}" readonly style="background:#eee; height:35px; width:100%;"></div></div>`;
+    // GÃNCELLENMÄ°Å MODAL: Call ID gÃ¶steriliyor
+    let contentHtml = `<div class="eval-modal-wrapper" style="border-top:5px solid #1976d2;"><div class="score-dashboard"><div><div style="font-size:0.9rem;">DÃZENLENEN</div><div style="font-size:1.2rem; font-weight:bold; color:#1976d2;">${agentName}</div></div><div class="score-circle-outer" id="score-ring"><div class="score-circle-inner" id="live-score">${evalData.score}</div></div></div><div class="eval-header-card"><div><label>Call ID</label><input id="eval-callid" class="swal2-input" value="${evalData.callId}" readonly style="background:#eee; height:35px; width:100%;"></div></div>`;
     
     if (isCriteriaBased) {
         contentHtml += `<div class="criteria-container">`;
@@ -3719,7 +3719,7 @@ async function editEvaluation(targetCallId) {
             let oldItem = oldDetails.find(d => d.q === c.text) || (oldDetails[i] ? oldDetails[i] : {score:pts, note:''});
             let cVal = parseInt(oldItem.score); let cNote = oldItem.note || '';
             
-            // GeliÅtirme: Puan baÅlÄ±ÄÄ± Ã¼stÃ¼ne gelince tam metin gÃ¶sterilmesi iÃ§in title eklendi
+            // GeliÅtirme: Puan baÅlÄ±ÄÄ± Ã¼stÃ¼ne gelince tam metin gÃ¶sterilmesi iÃ§in title eklendi
             const fullText = escapeForJsString(c.text); 
             if (isChat) {
                 let gAct = cVal === pts ? 'active' : ''; let mAct = (cVal===mPts && mPts!==0) ? 'active' : ''; let bAct = (cVal===bPts && bPts!==0) ? 'active' : '';
@@ -3739,7 +3739,7 @@ async function editEvaluation(targetCallId) {
         html: contentHtml,
         width: '600px',
         showCancelButton: true,
-        confirmButtonText: ' ð¾  GÃ¼ncelle',
+        confirmButtonText: ' ð¾  GÃ¼ncelle',
         allowOutsideClick: false,
         allowEscapeKey: false,
         didOpen: () => { if (isTelesatis) window.recalcTotalSliderScore(); else if (isChat) window.recalcTotalScore(); },
@@ -3772,7 +3772,7 @@ async function editEvaluation(targetCallId) {
         .then(r => r.json()).then(d => {
             if (d.result === "success") { 
                 Swal.fire({ icon: 'success', title: 'GÃ¼ncellendi', timer: 1500, showConfirmButton: false }); 
-                // DÃZELTME: GÃ¼ncelleme sonrasÄ± hem evaluations hem de feedback logs gÃ¼ncellenmeli
+                // DÃZELTME: GÃ¼ncelleme sonrasÄ± hem evaluations hem de feedback logs gÃ¼ncellenmeli
                 fetchEvaluationsForAgent(agentName);
                 fetchFeedbackLogs().then(() => {
                     loadFeedbackList();
@@ -3784,11 +3784,11 @@ async function editEvaluation(targetCallId) {
 }
 
 /* =========================================================
-   ANA SAYFA + TEKNÄ°K + TELESATIÅ (FULLSCREEN) GÃNCELLEMESÄ°
+   ANA SAYFA + TEKNÄ°K + TELESATIÅ (FULLSCREEN) GÃNCELLEMESÄ°
    ========================================================= */
 
-const TELESales_OFFERS_FALLBACK = [{"offer": "YILLIK - 1299 TL", "segment": "WÄ°NBACK", "description": "KullanÄ±cÄ± daha Ã¶nce aylÄ±k ya da yÄ±llÄ±k herhangi bir paket kullanmÄ±Å, ardÄ±ndan paket sonlanmÄ±Å ve Åu anda aktif paketi olmayan kullanÄ±cÄ±larÄ± aradÄ±ÄÄ±mÄ±z bir data", "note": "KullanÄ±cÄ±nÄ±n izleme geÃ§miÅi olabilir."}, {"offer": "AYLIK  - 6 AY 109 TL", "segment": "WÄ°NBACK", "description": "KullanÄ±cÄ± daha Ã¶nce aylÄ±k ya da yÄ±llÄ±k herhangi bir paket kullanmÄ±Å, ardÄ±ndan paket sonlanmÄ±Å ve Åu anda aktif paketi olmayan kullanÄ±cÄ±larÄ± aradÄ±ÄÄ±mÄ±z bir data", "note": "KullanÄ±cÄ±nÄ±n izleme geÃ§miÅi olabilir."}, {"offer": "YILLIK - 1399 TL", "segment": "CANCELLÄ°NG", "description": "AboneliÄinde iptal talebinde bulunmuÅ, paket sÃ¼resi bitimine kadar eriÅime devam eden, geri kazanÄ±m iÃ§in aradÄ±ÄÄ±mÄ±z bir data", "note": "KullanÄ±cÄ±nÄ±n izleme geÃ§miÅi olabilir. Ä°ndirim oranÄ± yÃ¼ksek + KullanÄ±cÄ±nÄ±n bir iptal nedeni olabilir"}, {"offer": "AYLIK  - 6 AY 119 TL", "segment": "CANCELLÄ°NG", "description": "AboneliÄinde iptal talebinde bulunmuÅ, paket sÃ¼resi bitimine kadar eriÅime devam eden, geri kazanÄ±m iÃ§in aradÄ±ÄÄ±mÄ±z bir data", "note": "KullanÄ±cÄ±nÄ±n izleme geÃ§miÅi olabilir. Ä°ndirim oranÄ± yÃ¼ksek + KullanÄ±cÄ±nÄ±n bir iptal nedeni olabilir"}, {"offer": "YILLIK - 1499 TL", "segment": "ACTÄ°VE GRACE", "description": "Paket yenileme sÃ¼recine giren fakat Ã¼cret alÄ±namadÄ±ÄÄ± iÃ§in paketi yenilenemeyen kullanÄ±cÄ±larÄ± aradÄ±ÄÄ±mÄ±z bir data", "note": "Paket yenileme sÃ¼recinden bir Ã¶deme sorunu oluÅtuÄunu bu nedenle aboneliÄinin yenilenmediÄini, kullanÄ±cÄ±ya hem bu sorunu Ã§Ã¶zmek hem de indirimli fiyatlar Ã¼zerinden yardÄ±mcÄ± olmak +Ä°Ã§erik"}, {"offer": "AYLIK  - 6 AY 109 TL", "segment": "ACTÄ°VE GRACE", "description": "Paket yenileme sÃ¼recine giren fakat Ã¼cret alÄ±namadÄ±ÄÄ± iÃ§in paketi yenilenemeyen kullanÄ±cÄ±larÄ± aradÄ±ÄÄ±mÄ±z bir data", "note": "Paket yenileme sÃ¼recinden bir Ã¶deme sorunu oluÅtuÄunu bu nedenle aboneliÄinin yenilenmediÄini, kullanÄ±cÄ±ya hem bu sorunu Ã§Ã¶zmek hem de indirimli fiyatlar Ã¼zerinden yardÄ±mcÄ± olmak +Ä°Ã§erik"}, {"offer": "YILLIK - 1499 TL", "segment": "INBOUND", "description": "Inbound Ã¼zerinden gelen satÄ±n alma talepleri ya da satÄ±Åa ikna edilen kullanÄ±cÄ±lar iÃ§in sunulan teklif", "note": ""}, {"offer": "AYLIK - 6 AY 139,5 TL", "segment": "INBOUND", "description": "Inbound Ã¼zerinden gelen satÄ±n alma talepleri ya da satÄ±Åa ikna edilen kullanÄ±cÄ±lar iÃ§in sunulan teklif", "note": ""}];
-const SPORTS_RIGHTS_FALLBACK = [{"item": "Euroleague maÃ§larÄ± ve stÃ¼dyo programlarÄ±", "period": "2025-2026 / 2026- 2027 / 2027-2028 / 2028-2029", "note": ""}, {"item": "Bundesliga", "period": "2025-2026 / 2026- 2027 / 2027-2028 / 2028-2029", "note": ""}, {"item": "Bundesliga 2", "period": "2025-2026 / 2026- 2027 / 2027-2028 / 2028-2029", "note": ""}, {"item": "Ä°spanya LaLiga Ã¶nemli maÃ§larÄ±", "period": "2025 - 2026 / 2026 - 2027", "note": ""}, {"item": "LaLiga 2 Ã¶nemli maÃ§larÄ±", "period": "2025 - 2026 / 2026 - 2027", "note": ""}, {"item": "Ä°talya Serie A Ã¶nemli maÃ§larÄ±", "period": "2025 - 2026 / 2026 - 2027", "note": ""}, {"item": "Portekiz Liga Portugal Ã¶nemli maÃ§larÄ±", "period": "2025 - 2026", "note": ""}, {"item": "Suudi Arabistan Pro Lig Ã¶nemli maÃ§larÄ±", "period": "2025-2026 / 2026- 2027 / 2027-2028 / 2028-2029", "note": ""}, {"item": "Hollanda Ligi", "period": "2025-2026 / 2026- 2027 / 2027-2028 / 2028-2029", "note": ""}, {"item": "Ä°skoÃ§ya Premiership Ã¶nemli maÃ§larÄ±", "period": "2025 - 2026 / 2026 - 2027", "note": ""}, {"item": "NCAA Amerikan Futbol", "period": "2025 - 2026 / 2026 - 2027", "note": ""}, {"item": "NCAA Basketbol", "period": "2025 - 2026 / 2026 - 2027", "note": ""}, {"item": "NFL", "period": "2025 - 2026", "note": ""}, {"item": "NBA", "period": "2025-2026 / 2026- 2027 / 2027-2028 / 2028-2029", "note": ""}, {"item": "EuroCup", "period": "2025-2026 / 2026- 2027 / 2027-2028 / 2028-2029", "note": ""}, {"item": "Yunanistan Basketbol Ligi Ã¶nemli maÃ§larÄ±", "period": "2025 - 2026 Sezon belirsiz", "note": ""}, {"item": "NCAA", "period": "2025 - 2026 / 2026 - 2027", "note": ""}, {"item": "Libertadores KupasÄ±", "period": "2027, 2028, 2029, 2030 (4 seasons)", "note": ""}, {"item": "Copa Sudamericana", "period": "2027, 2028, 2029, 2030 (4 seasons)", "note": ""}, {"item": "WRC", "period": "2025", "note": "2026 da alÄ±nabilir net deÄil"}, {"item": "Nascar", "period": "2025 - 2026 - 2027 - 2028 ve 2029", "note": ""}, {"item": "IndyCar", "period": "2025 - 2026 - 2027", "note": ""}, {"item": "MotoGP - Moto2 - Moto3", "period": "2025 - 2026 - 2027", "note": ""}, {"item": "ATP Tenis TurnuvalarÄ± Ã¶nemli maÃ§lar", "period": "2025 - 2026 - 2027 and 2028", "note": ""}, {"item": "Wimbledon Tenis Ã¶nemli maÃ§lar", "period": "2025 - 2026 - 2027", "note": ""}, {"item": "UFC DÃ¶vÃ¼Å Gecesi yayÄ±nlarÄ±", "period": "2027 sonuna kadar bizde", "note": ""}, {"item": "Oktagon", "period": "2025", "note": ""}, {"item": "PFL MMA", "period": "2025", "note": ""}, {"item": "Cage Warriors Boks MaÃ§larÄ±", "period": "2025", "note": ""}, {"item": "BKFC", "period": "KaldÄ±rÄ±ldÄ±", "note": ""}];
+const TELESales_OFFERS_FALLBACK = [{"offer": "YILLIK - 1299 TL", "segment": "WÄ°NBACK", "description": "KullanÄ±cÄ± daha Ã¶nce aylÄ±k ya da yÄ±llÄ±k herhangi bir paket kullanmÄ±Å, ardÄ±ndan paket sonlanmÄ±Å ve Åu anda aktif paketi olmayan kullanÄ±cÄ±larÄ± aradÄ±ÄÄ±mÄ±z bir data", "note": "KullanÄ±cÄ±nÄ±n izleme geÃ§miÅi olabilir."}, {"offer": "AYLIK  - 6 AY 109 TL", "segment": "WÄ°NBACK", "description": "KullanÄ±cÄ± daha Ã¶nce aylÄ±k ya da yÄ±llÄ±k herhangi bir paket kullanmÄ±Å, ardÄ±ndan paket sonlanmÄ±Å ve Åu anda aktif paketi olmayan kullanÄ±cÄ±larÄ± aradÄ±ÄÄ±mÄ±z bir data", "note": "KullanÄ±cÄ±nÄ±n izleme geÃ§miÅi olabilir."}, {"offer": "YILLIK - 1399 TL", "segment": "CANCELLÄ°NG", "description": "AboneliÄinde iptal talebinde bulunmuÅ, paket sÃ¼resi bitimine kadar eriÅime devam eden, geri kazanÄ±m iÃ§in aradÄ±ÄÄ±mÄ±z bir data", "note": "KullanÄ±cÄ±nÄ±n izleme geÃ§miÅi olabilir. Ä°ndirim oranÄ± yÃ¼ksek + KullanÄ±cÄ±nÄ±n bir iptal nedeni olabilir"}, {"offer": "AYLIK  - 6 AY 119 TL", "segment": "CANCELLÄ°NG", "description": "AboneliÄinde iptal talebinde bulunmuÅ, paket sÃ¼resi bitimine kadar eriÅime devam eden, geri kazanÄ±m iÃ§in aradÄ±ÄÄ±mÄ±z bir data", "note": "KullanÄ±cÄ±nÄ±n izleme geÃ§miÅi olabilir. Ä°ndirim oranÄ± yÃ¼ksek + KullanÄ±cÄ±nÄ±n bir iptal nedeni olabilir"}, {"offer": "YILLIK - 1499 TL", "segment": "ACTÄ°VE GRACE", "description": "Paket yenileme sÃ¼recine giren fakat Ã¼cret alÄ±namadÄ±ÄÄ± iÃ§in paketi yenilenemeyen kullanÄ±cÄ±larÄ± aradÄ±ÄÄ±mÄ±z bir data", "note": "Paket yenileme sÃ¼recinden bir Ã¶deme sorunu oluÅtuÄunu bu nedenle aboneliÄinin yenilenmediÄini, kullanÄ±cÄ±ya hem bu sorunu Ã§Ã¶zmek hem de indirimli fiyatlar Ã¼zerinden yardÄ±mcÄ± olmak +Ä°Ã§erik"}, {"offer": "AYLIK  - 6 AY 109 TL", "segment": "ACTÄ°VE GRACE", "description": "Paket yenileme sÃ¼recine giren fakat Ã¼cret alÄ±namadÄ±ÄÄ± iÃ§in paketi yenilenemeyen kullanÄ±cÄ±larÄ± aradÄ±ÄÄ±mÄ±z bir data", "note": "Paket yenileme sÃ¼recinden bir Ã¶deme sorunu oluÅtuÄunu bu nedenle aboneliÄinin yenilenmediÄini, kullanÄ±cÄ±ya hem bu sorunu Ã§Ã¶zmek hem de indirimli fiyatlar Ã¼zerinden yardÄ±mcÄ± olmak +Ä°Ã§erik"}, {"offer": "YILLIK - 1499 TL", "segment": "INBOUND", "description": "Inbound Ã¼zerinden gelen satÄ±n alma talepleri ya da satÄ±Åa ikna edilen kullanÄ±cÄ±lar iÃ§in sunulan teklif", "note": ""}, {"offer": "AYLIK - 6 AY 139,5 TL", "segment": "INBOUND", "description": "Inbound Ã¼zerinden gelen satÄ±n alma talepleri ya da satÄ±Åa ikna edilen kullanÄ±cÄ±lar iÃ§in sunulan teklif", "note": ""}];
+const SPORTS_RIGHTS_FALLBACK = [{"item": "Euroleague maÃ§larÄ± ve stÃ¼dyo programlarÄ±", "period": "2025-2026 / 2026- 2027 / 2027-2028 / 2028-2029", "note": ""}, {"item": "Bundesliga", "period": "2025-2026 / 2026- 2027 / 2027-2028 / 2028-2029", "note": ""}, {"item": "Bundesliga 2", "period": "2025-2026 / 2026- 2027 / 2027-2028 / 2028-2029", "note": ""}, {"item": "Ä°spanya LaLiga Ã¶nemli maÃ§larÄ±", "period": "2025 - 2026 / 2026 - 2027", "note": ""}, {"item": "LaLiga 2 Ã¶nemli maÃ§larÄ±", "period": "2025 - 2026 / 2026 - 2027", "note": ""}, {"item": "Ä°talya Serie A Ã¶nemli maÃ§larÄ±", "period": "2025 - 2026 / 2026 - 2027", "note": ""}, {"item": "Portekiz Liga Portugal Ã¶nemli maÃ§larÄ±", "period": "2025 - 2026", "note": ""}, {"item": "Suudi Arabistan Pro Lig Ã¶nemli maÃ§larÄ±", "period": "2025-2026 / 2026- 2027 / 2027-2028 / 2028-2029", "note": ""}, {"item": "Hollanda Ligi", "period": "2025-2026 / 2026- 2027 / 2027-2028 / 2028-2029", "note": ""}, {"item": "Ä°skoÃ§ya Premiership Ã¶nemli maÃ§larÄ±", "period": "2025 - 2026 / 2026 - 2027", "note": ""}, {"item": "NCAA Amerikan Futbol", "period": "2025 - 2026 / 2026 - 2027", "note": ""}, {"item": "NCAA Basketbol", "period": "2025 - 2026 / 2026 - 2027", "note": ""}, {"item": "NFL", "period": "2025 - 2026", "note": ""}, {"item": "NBA", "period": "2025-2026 / 2026- 2027 / 2027-2028 / 2028-2029", "note": ""}, {"item": "EuroCup", "period": "2025-2026 / 2026- 2027 / 2027-2028 / 2028-2029", "note": ""}, {"item": "Yunanistan Basketbol Ligi Ã¶nemli maÃ§larÄ±", "period": "2025 - 2026 Sezon belirsiz", "note": ""}, {"item": "NCAA", "period": "2025 - 2026 / 2026 - 2027", "note": ""}, {"item": "Libertadores KupasÄ±", "period": "2027, 2028, 2029, 2030 (4 seasons)", "note": ""}, {"item": "Copa Sudamericana", "period": "2027, 2028, 2029, 2030 (4 seasons)", "note": ""}, {"item": "WRC", "period": "2025", "note": "2026 da alÄ±nabilir net deÄil"}, {"item": "Nascar", "period": "2025 - 2026 - 2027 - 2028 ve 2029", "note": ""}, {"item": "IndyCar", "period": "2025 - 2026 - 2027", "note": ""}, {"item": "MotoGP - Moto2 - Moto3", "period": "2025 - 2026 - 2027", "note": ""}, {"item": "ATP Tenis TurnuvalarÄ± Ã¶nemli maÃ§lar", "period": "2025 - 2026 - 2027 and 2028", "note": ""}, {"item": "Wimbledon Tenis Ã¶nemli maÃ§lar", "period": "2025 - 2026 - 2027", "note": ""}, {"item": "UFC DÃ¶vÃ¼Å Gecesi yayÄ±nlarÄ±", "period": "2027 sonuna kadar bizde", "note": ""}, {"item": "Oktagon", "period": "2025", "note": ""}, {"item": "PFL MMA", "period": "2025", "note": ""}, {"item": "Cage Warriors Boks MaÃ§larÄ±", "period": "2025", "note": ""}, {"item": "BKFC", "period": "KaldÄ±rÄ±ldÄ±", "note": ""}];
 
 function setActiveFilterButton(btn){
     try{
@@ -3815,10 +3815,10 @@ function hideHomeScreen(){
 }
 
 function renderHomePanels(){
-    // --- BUGÃN NELER VAR? (YayÄ±n AkÄ±ÅÄ± / bugÃ¼nÃ¼n maÃ§larÄ±) ---
+    // --- BUGÃN NELER VAR? (YayÄ±n AkÄ±ÅÄ± / bugÃ¼nÃ¼n maÃ§larÄ±) ---
     const todayEl = document.getElementById('home-today');
     if(todayEl){
-        todayEl.innerHTML = '<div class="home-mini-item">YayÄ±n akÄ±ÅÄ± yÃ¼kleniyor...</div>';
+        todayEl.innerHTML = '<div class="home-mini-item">YayÄ±n akÄ±ÅÄ± yÃ¼kleniyor...</div>';
         (async()=>{
             try{
                 const items = await fetchBroadcastFlow();
@@ -3840,7 +3840,7 @@ const todayISO = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-$
                     const iso = toISO(it.dateISO || it.date);
                     if(iso !== todayISO) return false;
 
-                    // Saati geÃ§en karÅÄ±laÅmalar gÃ¶rÃ¼nmesin
+                    // Saati geÃ§en karÅÄ±laÅmalar gÃ¶rÃ¼nmesin
                     const now = Date.now();
                     const se = Number(it.startEpoch || 0);
                     if(se) return se > now;
@@ -3854,7 +3854,7 @@ const todayISO = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-$
                 });
 
                 if(!todays.length){
-                    todayEl.innerHTML = '<div class="home-mini-item">BugÃ¼n iÃ§in yayÄ±n akÄ±ÅÄ± kaydÄ± bulunamadÄ±.</div>';
+                    todayEl.innerHTML = '<div class="home-mini-item">BugÃ¼n iÃ§in yayÄ±n akÄ±ÅÄ± kaydÄ± bulunamadÄ±.</div>';
                 }else{
                     const shown = todays.slice(0,4);
                     todayEl.innerHTML = shown.map(it=>{
@@ -3865,23 +3865,23 @@ const todayISO = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-$
                         const spk = escapeHtml(it.spiker || it.spikers || it.commentator || it.commentators || '');
                         return `
                           <div class="home-mini-item">
-                            <div class="home-mini-date">${time}${league?` â¢ ${league}`:''}${ch?` â¢ ${ch}`:''}</div>
+                            <div class="home-mini-date">${time}${league?` â¢ ${league}`:''}${ch?` â¢ ${ch}`:''}</div>
                             <div class="home-mini-title">${title || 'MaÃ§'}</div>
-                            ${spk ? `<div class="home-mini-desc" style="margin-top:4px;color:#555">ð ${spk}</div>` : ''}
+                            ${spk ? `<div class="home-mini-desc" style="margin-top:4px;color:#555">ð ${spk}</div>` : ''}
                           </div>
                         `;
-                    }).join('') + (todays.length>shown.length ? `<div style="color:#666;font-size:.9rem;margin-top:6px">+${todays.length-shown.length} maÃ§ dahaâ¦</div>` : '');
+                    }).join('') + (todays.length>shown.length ? `<div style="color:#666;font-size:.9rem;margin-top:6px">+${todays.length-shown.length} maÃ§ dahaâ¦</div>` : '');
                 }
 
 
-                // kartÄ± tÄ±klayÄ±nca yayÄ±n akÄ±ÅÄ±na git
+                // kartÄ± tÄ±klayÄ±nca yayÄ±n akÄ±ÅÄ±na git
                 const card = todayEl.closest('.home-card');
                 if(card){
                     card.classList.add('clickable');
                     card.onclick = ()=>openBroadcastFlow();
                 }
             }catch(e){
-                todayEl.innerHTML = '<div class="home-mini-item">YayÄ±n akÄ±ÅÄ± alÄ±namadÄ±.</div>';
+                todayEl.innerHTML = '<div class="home-mini-item">YayÄ±n akÄ±ÅÄ± alÄ±namadÄ±.</div>';
             }
         })();
     }
@@ -3908,11 +3908,11 @@ const todayISO = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-$
         }
     }
 
-    // --- GÃNÃN SÃZÃ (HomeBlocks -> e-tabla) ---
+    // --- GÃNÃN SÃZÃ (HomeBlocks -> e-tabla) ---
     const quoteEl = document.getElementById('home-quote');
     if(quoteEl){
         const q = String((homeBlocks && homeBlocks.quote && homeBlocks.quote.content) ? homeBlocks.quote.content : (localStorage.getItem('homeQuote')||'')).trim();
-        quoteEl.innerHTML = q ? escapeHtml(q) : '<span style="color:#999">BugÃ¼n iÃ§in bir sÃ¶z eklenmemiÅ.</span>';
+        quoteEl.innerHTML = q ? escapeHtml(q) : '<span style="color:#999">BugÃ¼n iÃ§in bir sÃ¶z eklenmemiÅ.</span>';
     }
 
     // Admin: edit butonlarÄ±nÄ± aÃ§
@@ -3931,11 +3931,11 @@ const todayISO = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-$
 // Ana Sayfa - GÃ¼nÃ¼n SÃ¶zÃ¼ dÃ¼zenleme (sadece admin mod + dÃ¼zenleme aÃ§Ä±kken)
 function editHomeBlock(kind){
     if(!isAdminMode){
-        Swal.fire("Yetkisiz", "Bu iÅlem iÃ§in admin yetkisi gerekli.", "warning");
+        Swal.fire("Yetkisiz", "Bu iÅlem iÃ§in admin yetkisi gerekli.", "warning");
         return;
     }
     if(!isEditingActive){
-        Swal.fire("KapalÄ±", "DÃ¼zenleme modu kapalÄ±. Ãnce 'DÃ¼zenlemeyi AÃ§' demelisin.", "info");
+        Swal.fire("KapalÄ±", "DÃ¼zenleme modu kapalÄ±. Ãnce 'DÃ¼zenlemeyi AÃ§' demelisin.", "info");
         return;
     }
     if(kind !== 'quote'){
@@ -3947,7 +3947,7 @@ function editHomeBlock(kind){
         title: "GÃ¼nÃ¼n SÃ¶zÃ¼",
         input: "textarea",
         inputValue: cur,
-        inputPlaceholder: "BugÃ¼nÃ¼n sÃ¶zÃ¼nÃ¼ yazâ¦",
+        inputPlaceholder: "BugÃ¼nÃ¼n sÃ¶zÃ¼nÃ¼ yazâ¦",
         showCancelButton: true,
         confirmButtonText: "Kaydet",
         cancelButtonText: "VazgeÃ§",
@@ -3973,7 +3973,7 @@ function editHomeBlock(kind){
     });
 }
 
-// Kart detayÄ±nÄ± doÄrudan aÃ§mak iÃ§in kÃ¼Ã§Ã¼k bir yardÄ±mcÄ±
+// Kart detayÄ±nÄ± doÄrudan aÃ§mak iÃ§in kÃ¼Ã§Ã¼k bir yardÄ±mcÄ±
 function openCardDetail(cardId){
     const card = (cardsData||[]).find(x=>String(x.id)===String(cardId));
     if(!card){Swal.fire('Hata','Kart bulunamadÄ±.','error');return;}
@@ -3981,7 +3981,7 @@ function openCardDetail(cardId){
 }
 
 /* -------------------------
-   TELE SATIÅ FULLSCREEN
+   TELE SATIÅ FULLSCREEN
 --------------------------*/
 let telesalesOffers = [];
 function safeGetToken(){
@@ -4001,11 +4001,11 @@ async function fetchSheetObjects(actionName){
 }
 
 async function openTelesalesArea(){
-    // MenÃ¼ yetkisi: telesales (TeleSatÄ±Å) - yetkisiz kullanÄ±cÄ± fullscreen'e giremesin
+    // MenÃ¼ yetkisi: telesales (TeleSatÄ±Å) - yetkisiz kullanÄ±cÄ± fullscreen'e giremesin
     try{
         const perm = (typeof menuPermissions!=="undefined" && menuPermissions) ? menuPermissions["telesales"] : null;
         if(perm && !isAllowedByPerm(perm)){
-            Swal.fire("Yetkisiz", "TeleSatÄ±Å ekranÄ±na eriÅimin yok.", "warning");
+            Swal.fire("Yetkisiz", "TeleSatÄ±Å ekranÄ±na eriÅimin yok.", "warning");
             return;
         }
     }catch(e){}
@@ -4035,9 +4035,9 @@ async function openTelesalesArea(){
         telesalesOffers = (Array.isArray(loaded) && loaded.length)
             ? loaded.map(o=>({
                 segment: o.segment || o.Segment || o.SEGMENT || '',
-                title: o.title || o.BaÅlÄ±k || o.Baslik || o.Teklif || o['Teklif AdÄ±'] || o['Teklif Adi'] || '',
+                title: o.title || o.BaÅlÄ±k || o.Baslik || o.Teklif || o['Teklif AdÄ±'] || o['Teklif Adi'] || '',
                 desc: o.desc || o.AÃ§Ä±klama || o.Aciklama || o.Detay || o['Detay/Not'] || o.Not || '',
-                example: o.example || o.Ãrnek || o.Ornek || '',
+                example: o.example || o.Ãrnek || o.Ornek || '',
                 tips: o.tips || o.Ä°pucu || o.Ipucu || '',
                 objection: o.objection || o.Itiraz || '',
                 reply: o.reply || o.Cevap || ''
@@ -4128,9 +4128,9 @@ function renderTelesalesDataOffers(){
 
 function addTelesalesOffer(){
     Swal.fire({
-        title:"TeleSatÄ±Å Teklifi Ekle",
+        title:"TeleSatÄ±Å Teklifi Ekle",
         html: `
-          <input id="to-title" class="swal2-input" placeholder="BaÅlÄ±k">
+          <input id="to-title" class="swal2-input" placeholder="BaÅlÄ±k">
           <input id="to-seg" class="swal2-input" placeholder="Segment / Etiket (opsiyonel)">
           <textarea id="to-desc" class="swal2-textarea" placeholder="AÃ§Ä±klama"></textarea>
           <textarea id="to-detail" class="swal2-textarea" placeholder="Detay (opsiyonel)"></textarea>
@@ -4140,7 +4140,7 @@ function addTelesalesOffer(){
         cancelButtonText:"VazgeÃ§",
         preConfirm: ()=>{
             const title=(document.getElementById('to-title').value||'').trim();
-            if(!title) return Swal.showValidationMessage("BaÅlÄ±k zorunlu");
+            if(!title) return Swal.showValidationMessage("BaÅlÄ±k zorunlu");
             return {
                 id:'local_'+Date.now(),
                 title,
@@ -4179,7 +4179,7 @@ async function editTelesalesOffer(idx){
     const { value: v } = await Swal.fire({
         title:"Teklifi DÃ¼zenle",
         html: `
-          <input id="to-title" class="swal2-input" placeholder="BaÅlÄ±k" value="${escapeHtml(o.title||'')}">
+          <input id="to-title" class="swal2-input" placeholder="BaÅlÄ±k" value="${escapeHtml(o.title||'')}">
           <input id="to-seg" class="swal2-input" placeholder="Segment / Etiket" value="${escapeHtml(o.segment||'')}">
           <textarea id="to-desc" class="swal2-textarea" placeholder="AÃ§Ä±klama">${escapeHtml(o.desc||'')}</textarea>
           <textarea id="to-detail" class="swal2-textarea" placeholder="Detay">${escapeHtml(o.detail||'')}</textarea>
@@ -4189,7 +4189,7 @@ async function editTelesalesOffer(idx){
         cancelButtonText:"VazgeÃ§",
         preConfirm: ()=>{
             const title=(document.getElementById('to-title').value||'').trim();
-            if(!title) return Swal.showValidationMessage("BaÅlÄ±k zorunlu");
+            if(!title) return Swal.showValidationMessage("BaÅlÄ±k zorunlu");
             return {
                 title,
                 segment:(document.getElementById('to-seg').value||'').trim(),
@@ -4278,7 +4278,7 @@ function renderTelesalesScripts(){
         if(Array.isArray(ov) && ov.length) list = ov;
     }catch(e){}
 
-    // Ä°stek: TeleSatÄ±Å Scriptler'deki ayrÄ± "DÃ¼zenlemeyi AÃ§" kalksÄ±n.
+    // Ä°stek: TeleSatÄ±Å Scriptler'deki ayrÄ± "DÃ¼zenlemeyi AÃ§" kalksÄ±n.
     // DÃ¼zenleme sadece Ã¼st kullanÄ±cÄ± menÃ¼sÃ¼ndeki global "DÃ¼zenlemeyi AÃ§" aktifken yapÄ±labilsin.
     const bar = (isAdminMode && isEditingActive) ? `
         <div style="display:flex;gap:10px;align-items:center;margin:6px 0 12px;">
@@ -4323,7 +4323,7 @@ function addTelesalesScript(){
     Swal.fire({
         title:"Script Ekle",
         html: `
-          <input id="ts-title" class="swal2-input" placeholder="BaÅlÄ±k">
+          <input id="ts-title" class="swal2-input" placeholder="BaÅlÄ±k">
           <textarea id="ts-text" class="swal2-textarea" placeholder="Script metni"></textarea>
         `,
         showCancelButton:true,
@@ -4351,7 +4351,7 @@ function editTelesalesScript(idx){
     Swal.fire({
         title:"Script DÃ¼zenle",
         html: `
-          <input id="ts-title" class="swal2-input" placeholder="BaÅlÄ±k" value="${escapeHtml(s.title||'')}">
+          <input id="ts-title" class="swal2-input" placeholder="BaÅlÄ±k" value="${escapeHtml(s.title||'')}">
           <textarea id="ts-text" class="swal2-textarea" placeholder="Script metni">${escapeHtml(s.text||'')}</textarea>
         `,
         showCancelButton:true,
@@ -4382,14 +4382,14 @@ function deleteTelesalesScript(idx){
 function renderTelesalesDocs(){
     const box = document.getElementById('t-docs');
     if(!box) return;
-    const docs = (trainingData||[]).filter(t=>(t.target||'')==='TelesatÄ±Å' || (t.title||'').toLowerCase().includes('telesatÄ±Å'));
+    const docs = (trainingData||[]).filter(t=>(t.target||'')==='TelesatÄ±Å' || (t.title||'').toLowerCase().includes('telesatÄ±Å'));
     if(docs.length===0){
-        box.innerHTML = '<div style="opacity:.7;padding:10px">Bu ekibe atanmÄ±Å dÃ¶kÃ¼man/eÄitim gÃ¶rÃ¼nmÃ¼yor.</div>';
+        box.innerHTML = '<div style="opacity:.7;padding:10px">Bu ekibe atanmÄ±Å dÃ¶kÃ¼man/eÄitim gÃ¶rÃ¼nmÃ¼yor.</div>';
         return;
     }
     box.innerHTML = docs.map(d=>`
       <div class="news-item" style="border-left-color:var(--secondary)">
-        <span class="news-date">${escapeHtml((d.startDate||'') + (d.endDate?(' â '+d.endDate):''))}</span>
+        <span class="news-date">${escapeHtml((d.startDate||'') + (d.endDate?(' â '+d.endDate):''))}</span>
         <span class="news-title">${escapeHtml(d.title||'')}</span>
         <div class="news-desc">${escapeHtml(d.desc||'')}</div>
         ${d.link && d.link!=='N/A' ? `<a class="btn btn-link" href="${escapeHtml(d.link)}" target="_blank">Link</a>`:''}
@@ -4416,7 +4416,7 @@ async function openTechArea(tab){
     if(nm) nm.innerText = currentUser || 'KullanÄ±cÄ±';
     if(rl) rl.innerText = isAdminMode ? 'Admin' : 'Temsilci';
 
-    // Ä°lk aÃ§Ä±lÄ±Åta "bozuk gÃ¶rÃ¼nÃ¼m" (flicker) olmasÄ±n: veri gelene kadar bekle
+    // Ä°lk aÃ§Ä±lÄ±Åta "bozuk gÃ¶rÃ¼nÃ¼m" (flicker) olmasÄ±n: veri gelene kadar bekle
     try{
         if((!database || database.length===0) && window.__dataLoadedPromise){
             const lists = ['x-broadcast-list','x-access-list','x-app-list','x-activation-list','x-cards'];
@@ -4447,7 +4447,7 @@ function switchTechTab(tab){
     if(el) el.classList.add('active');
 }
 
-const TECH_DOC_CONTENT = {"broadcast": [{"title": "Smart TV â CanlÄ± YayÄ±nda Donma Problemi YaÅÄ±yorum", "body": "MÃ¼Återinin sorun yaÅadÄ±ÄÄ± yayÄ±n ya da yayÄ±nlarda genel bir sorun var mÄ± kontrol edilir? Genel bir sorun var ise teknik ekibin incelediÄi yÃ¶nÃ¼nde bilgi verilir.\nMÃ¼Återinin kullandÄ±ÄÄ± cihaz TVmanager âda loglardan kontrol edilir. ArÃ§elik/Beko/Grundig/Altus marka Android TV olmayan Smart TVâlerden ise genel sorun hakkÄ±nda bilgi verilir.\nYukarÄ±daki durumlar dÄ±ÅÄ±nda yaÅanan bir sorun ise TV ve modemin elektrik baÄlantÄ±sÄ±nÄ± kesilip tekrar verilmesi istenir. Â« YaÅadÄ±ÄÄ±nÄ±z sorunu kontrol ederken TV ve modeminizin elektrik baÄlantÄ±sÄ±nÄ± kesip 10 sn sonra yeniden aÃ§abilir misiniz? ArdÄ±ndan yeniden yayÄ±nÄ± aÃ§Ä±p kontrol edebilir misiniz? (AyrÄ±ca Ã¶neri olarak modemi kapatÄ±p tekrar aÃ§tÄ±ktan sonra, sadece izleme yaptÄ±ÄÄ± cihaz modeme baÄlÄ± olursa daha iyi bir baÄlantÄ± olacaÄÄ± bilgisi verilebilir)\nSorun devam eder ise Smart TV tarayÄ±cÄ±sÄ±ndan https://www.hiztesti.com.tr/ bir hÄ±z testi yapmasÄ± sonucu bizimle paylaÅmasÄ± istenir.\nHÄ±z testi sonucu 8 Mbps altÄ±nda ise internet baÄlantÄ± hÄ±zÄ±nÄ±n dÃ¼ÅÃ¼k olduÄunu internet servis saÄlayÄ±cÄ±sÄ± iletiÅime geÃ§mesi istenir.\n8 Mbps Ã¼zerinde ise mÃ¼Återiden sorunu gÃ¶steren kÄ±sa bir video talep edilir.\nVideo kaydÄ± ve hÄ±z testinin sonuÃ§larÄ± gÃ¶steren bilgiler alÄ±ndÄ±ktan sonra mÃ¼Återiye incelenmesi iÃ§in teknik ekibimize iletildiÄi inceleme tamamlandÄ±ÄÄ±nda eposta ile bilgi verileceÄi yÃ¶nÃ¼nde bilgi verilir.\nSorun aynÄ± gÃ¼n iÃ§inde benzer cihazlarda farklÄ± mÃ¼Återilerde yaÅÄ±yor ise tÃ¼m bilgilerle Erlabâa arÄ±za kaydÄ± aÃ§Ä±lÄ±r. Sorun birkaÃ§ mÃ¼Återi ile sÄ±nÄ±rlÄ± ise 17:00 â 01:00 vardiyasÄ±ndaki ekip arkadaÅÄ±nda sistemsel bir sorun olmadÄ±ÄÄ±na dair eposta gÃ¶nderilmesi iÃ§in bilgileri paylaÅÄ±lÄ±r."}, {"title": "Mobil Uygulama â CanlÄ± YayÄ±nda Donma Sorunu YaÅÄ±yorum", "body": "MÃ¼Återinin sorun yaÅadÄ±ÄÄ± yayÄ±n ya da yayÄ±nlarda genel bir sorun var mÄ± kontrol edilir? Genel bir sorun var ise teknik ekibin incelediÄi yÃ¶nÃ¼nde bilgi verilir.(MÃ¼Återi Ä°OS veya Android iÅletim sistemli hangi cihazdan izliyorsa, mÃ¼mkÃ¼nse aynÄ± iÅletim sistemli mobil cihazdan kontrol edilebilir, gerekirse ekip arkadaÅlarÄ±ndan kontrol etmeleri istenebilir)\nGenel bir sorun yok ise, www.hiztesti.com.tr link Ã¼zerinden hÄ±z testi yapmasÄ± sonucu bizimle paylaÅmasÄ± istenir.\nHÄ±z testi sonucu 8 mbps altÄ±nda ise internet baÄlantÄ± hÄ±zÄ±nÄ±n dÃ¼ÅÃ¼k olduÄu internet servisi saÄlayÄ±cÄ±sÄ± ile iletiÅime geÃ§mesi istenir. (Ãneri olarak modemi kapatÄ±p tekrar aÃ§tÄ±ktan sonra sadece izleme yaptÄ±ÄÄ± cihaz modeme baÄlÄ± olursa daha iyi bir baÄlantÄ± olacaÄÄ± bilgisi verilebilir)\n8 mbps Ã¼zerinde ise, uygulama verilerin temizlenmesi veya uygulamanÄ±n silip tekrar yÃ¼klenmesi istenilir, sorun devam etmesi durumunda sorunu gÃ¶steren video kaydÄ± istenir.\n 4. HÄ±z testi, cihaz marka model ve sÃ¼rÃ¼m bilgileri alÄ±ndÄ±ktan sonra, incelenmesi iÃ§in teknik ekibe iletildiÄi, inceleme tamamlandÄ±ÄÄ±nda e-posta  ile bilgi verileceÄi yÃ¶nÃ¼nde bilgi verilir.\n 5. Sorun aynÄ± gÃ¼n iÃ§erinde benzer cihazlarda farklÄ± mÃ¼Återilerde yaÅÄ±yor ise tÃ¼m bilgilerle Erlabâa arÄ±za kaydÄ± aÃ§Ä±lÄ±r. Sorun birkaÃ§ mÃ¼Återi ile sÄ±nÄ±rlÄ±  ise 17:00 â 01:00 vardiyasÄ±ndaki ekip arkadaÅÄ±nda sistemsel bir sorun olmadÄ±ÄÄ±na dair eposta gÃ¶nderilmesi iÃ§in bilgileri paylaÅÄ±lÄ±r."}, {"title": "Bilgisayar â CanlÄ± YayÄ±nda Donma Sorunu YaÅÄ±yorum", "body": "MÃ¼Återinin sorun yaÅadÄ±ÄÄ± yayÄ±n ya da yayÄ±nlarda genel bir sorun var mÄ± kontrol edilir? Genel bir sorun var ise teknik ekibin incelediÄi yÃ¶nÃ¼nde bilgi verilir.\nGenel bir sorun deÄilse, Ã¶ncelikle https://www.hiztesti.com.tr/ bir hÄ±z testi yapmasÄ± sonucu bizimle paylaÅmasÄ± istenir.\nHÄ±z testi sonucu 8 mbps altÄ±nda ise internet baÄlantÄ± hÄ±zÄ±nÄ±n dÃ¼ÅÃ¼k olduÄunu internet servis saÄlayÄ±cÄ±sÄ± iletiÅime geÃ§mesi istenir.\n8 mbps Ã¼zerinde ise mÃ¼Återiden aÅaÄÄ±daki adÄ±mlarÄ± uygulamasÄ± istenir.\n3. BilgisayarÄ±n iÅletim sitemi Ã¶Ärenilip, gÃ¶rÃ¼Åme Ã¼zerinden ââpingWindows7ââ veya ââpingwindows10ââ kÄ±sayollarÄ±ndan mÃ¼Återi sunucularÄ± kontrol edilir.\n(Windows 10 Ã¼zeri iÅletim sistemi cihazlara pingwindows10 kÄ±sayolu gÃ¶nderilebilir.)\n4. Sunucu kontrol ekranÄ±nda kontrol edilmesi gereken, ok ile gÃ¶sterilen yerden, sunucu ile kayÄ±p olup olmadÄ±ÄÄ± ve kÄ±rmÄ±zÄ± alan iÃ§erisinde sunucu ile web sitemize kaÃ§ saniyede iÅlem saÄladÄ±ÄÄ± kontrol edilir.\n5. 1 â 35 arasÄ± normal sayÄ±labilir, bu saniye aralÄ±ÄÄ±nda sorun yaÅanÄ±yorsa, web sitemize daha hÄ±zlÄ± tepsi sÃ¼resi veren ve genellikle sorunsuz bir Åekilde izleme saÄlanabilen 193.192.103.249, 185.11.14.27 veya 195.175.178.8 sunucularÄ± kontrol edilmelidir.\n6. Uygun sunucuyu tespit ettikten sonra canlÄ± destek ekranÄ±nda ââHostââ ââhost2ââ kÄ±sa yollarÄ± kullanarak, kÄ±sa yoldaki adÄ±mlar ile mÃ¼Återinin sadece bizim sitemize baÄlandÄ±ÄÄ± sunucusunu, en uygun sunucu ile deÄiÅtirip tarayÄ±cÄ± aÃ§Ä±p kapattÄ±rdÄ±ktan sonra tekrar yayÄ±nÄ± kontrol etmesini iletebiliriz. (AyrÄ±ca mÃ¼Återi yayÄ±nlarÄ± auto deÄil, manuel olarak 720 veya 1080p seÃ§ip kontrol edilmesi Ã¶nerilir)\n7. Sorun aynÄ± gÃ¼n iÃ§erinde benzer iÅletim sistemi veya sunucuda farklÄ± mÃ¼Återilerde yaÅÄ±yor ise tÃ¼m bilgilerle Erlabâa arÄ±za kaydÄ± aÃ§Ä±lÄ±r. Sorun birkaÃ§ mÃ¼Återi ile sÄ±nÄ±rlÄ± ise 17:00 â 01:00 vardiyasÄ±ndaki ekip arkadaÅÄ±nda sistemsel bir sorun olmadÄ±ÄÄ±na dair eposta gÃ¶nderilmesi iÃ§in bilgileri paylaÅÄ±lÄ±r"}, {"title": "YAYIN SORUNLARI", "body": "35 sn arasÄ± normal sayÄ±labilir, bu saniye aralÄ±ÄÄ±nda sorun yaÅanÄ±yorsa, web sitemize daha hÄ±zlÄ± tepsi sÃ¼resi veren ve genellikle sorunsuz bir Åekilde izleme saÄlanabilen 193.192.103.249, 185.11.14.27 veya 195.175.178.8 sunucularÄ± kontrol edilmelidir."}, {"title": "MacOS â CanlÄ± YayÄ±nda Donma Sorunu YaÅÄ±yorum", "body": "MÃ¼Återinin sorun yaÅadÄ±ÄÄ± yayÄ±n ya da yayÄ±nlarda genel bir sorun var mÄ± kontrol edilir? Genel bir sorun var ise teknik ekibin incelediÄi yÃ¶nÃ¼nde bilgi verilir.\nGenel bir sorun deÄilse, Ã¶ncelikle https://www.hiztesti.com.tr/ bir hÄ±z testi yapmasÄ± sonucu bizimle paylaÅmasÄ± istenir.\nHÄ±z testi sonucu 8 mbps altÄ±nda ise internet baÄlantÄ± hÄ±zÄ±nÄ±n dÃ¼ÅÃ¼k olduÄunu internet servis saÄlayÄ±cÄ±sÄ± iletiÅime geÃ§mesi istenir.\n8 mbps Ã¼zerinde ise mÃ¼Återiden aÅaÄÄ±daki adÄ±mlarÄ± uygulamasÄ± istenir.\nMindbehind Ã¼zerinden ââpingmacOSââ kÄ±sayolundan mÃ¼Återi sunucularÄ± kontrol edilir.\nSunucu kontrol ekranÄ±nda kontrol edilmesi gereken, ââpacket lossââ kÄ±smÄ±nda kayÄ±p olup olmadÄ±ÄÄ±,  alan iÃ§erisinde sunucu ile web sitemize kaÃ§ saniyede iÅlem saÄladÄ±ÄÄ± kontrol edilir.\n1 â 35 arasÄ± normal sayÄ±labilir, bu saniye aralÄ±ÄÄ±nda sorun yaÅanÄ±yorsa, web sitemize daha hÄ±zlÄ± tepsi sÃ¼resi veren ve genellikle sorunsuz bir Åekilde izleme saÄlanabilen 193.192.103.249, 185.11.14.27 veya 195.175.178.8 sunucularÄ± kontrol edilmelidir.\nUygun sunucuyu tespit ettikten sonra canlÄ± destek ekranÄ±nda ââmacOShostââ kÄ±sa yolunu kullanarak, kÄ±sa yoldaki adÄ±mlar ile mÃ¼Återinin sadece bizim sitemize baÄlandÄ±ÄÄ± sunucuyu, en uygun sunucu ile deÄiÅtirip tarayÄ±cÄ± aÃ§Ä±p kapattÄ±rdÄ±ktan sonra tekrar yayÄ±nÄ± kontrol etmesini iletebiliriz. (AyrÄ±ca mÃ¼Återi yayÄ±nlarÄ± auto deÄil, manuel olarak 720 veya 1080p seÃ§ip kontrol edilmesi Ã¶nerilir)\nSorun aynÄ± gÃ¼n iÃ§erinde benzer iÅletim sistemi veya sunucuda farklÄ± mÃ¼Återilerde yaÅÄ±yor ise tÃ¼m bilgilerle Erlabâa arÄ±za kaydÄ± aÃ§Ä±lÄ±r. Sorun birkaÃ§ mÃ¼Återi ile sÄ±nÄ±rlÄ± ise 17:00 â 01:00 vardiyasÄ±ndaki ekip arkadaÅÄ±nda sistemsel bir sorun olmadÄ±ÄÄ±na dair eposta gÃ¶nderilmesi iÃ§in bilgileri paylaÅÄ±lÄ±r."}, {"title": "ââYayÄ±nda beklenmedik bir kesinti oluÅtuââ UyarÄ±sÄ±", "body": "Bu uyarÄ± genel bir yayÄ±n sorunu olduÄunda ya da kullanÄ±cÄ± TÃ¼rkiye sÄ±nÄ±rlarÄ± dÄ±ÅÄ±nda bir yerden eriÅim saÄladÄ±ÄÄ±nda karÅÄ±mÄ±za Ã§Ä±kmaktadÄ±r.\nKullanÄ±cÄ±nÄ±n sorun yaÅadÄ±ÄÄ± yayÄ±n kontrol edilir ve genel bir yayÄ±n sorunu olup olmadÄ±ÄÄ± teyit edilir.\nTvmanagerâda SubscriberLog ekranÄ±ndan ip adresi alÄ±nÄ±r ve yurtdÄ±ÅÄ± bir konum olup olmadÄ±ÄÄ± teyit edilir.\nKullanÄ±cÄ± yurtdÄ±ÅÄ±nda ise eriÅim saÄlayamayacaÄÄ± bilgisi verilir, VPN kullanÄ±yor ise kapatmasÄ± istenir.\nTVmanager Devices kÄ±smÄ±nda oturumlar sonlandÄ±rÄ±lÄ±r ve kullanÄ±cÄ±dan tekrar giriÅ yaparak kontrol etmesi rica edilir.\nMobil veri veya farklÄ± bir aÄda bu hata mesajÄ±nÄ±n alÄ±nÄ±p alÄ±nmadÄ±ÄÄ± teyit edilir.\nCihaz ve modem kapama ve aÃ§ma iÅlemi uygulanÄ±r.\nSorun devam eder ise inceleme iÃ§in cihaz ve diÄer bilgilerle teknik ekibimize bilgi verileceÄi iletilir. Excel de kullanÄ±cÄ±dan alÄ±nan bilgiler not edilir."}], "access": [{"title": "ERÄ°ÅÄ°M SORUNLARI", "body": "ââLisans haklarÄ± sebebiyle TÃ¼rkiye sÄ±nÄ±rlarÄ± dÄ±ÅÄ±nda hizmet verilememektedir.ââ UyarÄ±sÄ±\nAlÄ±nan hata mÃ¼Återinin yurt dÄ±ÅÄ±nda olmasÄ± ve yurt iÃ§inde ise VPN ya da benzeri bir uygulamanÄ±n cihazÄ±nda aktif olmasÄ±ndan kaynaklanmaktadÄ±r.\n\nMÃ¼Återiye yurt dÄ±ÅÄ±nda olup olmadÄ±ÄÄ± sorulur, yurt dÄ±ÅÄ±nda ise ââlisans haklarÄ± sebebiyle yayÄ±nlarÄ±n yurt dÄ±ÅÄ±ndan izlenemediÄiââ yÃ¶nÃ¼nde bilgi verilir.\nYurt iÃ§inde ise VPN ya da benzeri bir uygulamanÄ±n cihazÄ±nda aktif olup ya da olmadÄ±ÄÄ± sorulur. Aktif ise devre dÄ±ÅÄ± bÄ±rakÄ±lÄ±p tekrar denemesi Ã¶nerilir.\nVPN ya da benzeri bir uygulama kullanmÄ±yor ise mÃ¼Återinin ip adresi Ã¶Ärenilir ve https://tr.wizcase.com/tools/whats-my-ip/ ip adresi kontrol edilir.  AynÄ± zamanda adresin vpn Ã¼zerinden alÄ±nÄ±p alÄ±nmadÄ±ÄÄ±nÄ±n kontrolÃ¼ iÃ§in https://vpnapi.io adresine girilip kontrol edilir.\nIp adresi yurt dÄ±ÅÄ± ya da ISP bilgisi bilinen bir servis saÄlayÄ±cÄ±sÄ± deÄilse mÃ¼Återiye bulunduÄu lokasyonun otel, yurt vb. bir yer olup olmadÄ±ÄÄ± ya da cihazÄ±nÄ±n Åirket cihazÄ± olup olmadÄ±ÄÄ± sorulur."}, {"title": "ââIP Karantinaââ UyarÄ±sÄ±", "body": "Ä°p Karantina sorunu genel bir sorun yok ise, eposta veya Åifre bir Ã§ok defa hatalÄ± girilmesinden dolayÄ± alÄ±nÄ±r.\nKullanÄ±cÄ±nÄ±n ip adresi karantina da olup ya da olmadÄ±ÄÄ±, TVmanager â CMS â Admission Gate menÃ¼sÃ¼ Ã¼zerinden kontrol edilerek Ã§Ä±karÄ±labilir. Ä°kinci bir seÃ§enek olarak modem kapama ve aÃ§ma iÅlemi yaptÄ±rÄ±labilir."}], "app": [{"title": "Teknik Sorun Analizi NasÄ±l YapÄ±lÄ±r?", "body": "App KaynaklÄ± Nedenler\nCihaz KaynaklÄ± Nedenler\nApp hatalarÄ± baÅlÄ±ÄÄ±nda uygulamanÄ±n aÃ§Ä±lmamasÄ± ya da kendi kendine kapanmasÄ± Åeklinde teknik sorunlar ile karÅÄ±laÅabiliriz. Bu tip sorunlar, kullanÄ±cÄ± deneyimini doÄrudan etkileyerek uygulamaya eriÅilememesine neden olur.\nUygulamanÄ±n eski sÃ¼rÃ¼mÃ¼\nÃnbellek sorunlarÄ±\nUyumsuz cihazlar\nDolu RAM/Arka planda Ã§alÄ±Åan fazla uygulama\nCihazÄ±n gÃ¼ncel olmamasÄ± (Eski sistemi sÃ¼rÃ¼mleri)\nKullanÄ±cÄ±ya Sorulabilecek Sorular:\nUygulama aÃ§Ä±lÄ±yor mu, yoksa aÃ§Ä±lmadan kapanÄ±yor mu?\nUygulama sÃ¼rÃ¼mÃ¼, cihaz iÅletim sistemi sÃ¼rÃ¼mÃ¼ nedir? (TVmanager kontrolÃ¼)\nCihazda yeterli depolama alanÄ± var mÄ±?"}], "activation": [{"title": "ââPromosyon Kodu BulunamadÄ±ââ UyarÄ±sÄ±", "body": "GÃ¶rselde ki Ã¶rnekte doÄrusu ââYILLIKLOCAââ olan kampanya kodu, kÃ¼Ã§Ã¼k harf ile yazÄ±ldÄ±ÄÄ±nda ââPromosyon Kodu BulunamadÄ±ââ hatasÄ± alÄ±nmÄ±ÅtÄ±r. Bu hata ile karÅÄ±laÅÄ±ldÄ±ÄÄ±nda kampanya kodunun yanlÄ±Å, eksik, kÃ¼Ã§Ã¼k harf ya da boÅluk bÄ±rakÄ±larak yazÄ±ldÄ±ÄÄ±nÄ± tespitle, kullanÄ±cÄ±yÄ± bu doÄrultuda doÄru yazÄ±m iÃ§in yÃ¶nlendirmemiz gerekir."}, {"title": "ââKampanya Kodu Aktif Edilemediââ UyarÄ±sÄ±", "body": "GÃ¶rseldeki Ã¶rnekteki gibi eski bir promosyon kodu yazÄ±ldÄ±ÄÄ±nda ââKampanya Kodu Aktif Edilemediââ uyarÄ±sÄ± alÄ±nÄ±r."}, {"title": "ââGeÃ§ersiz Kampanya Koduââ UyarÄ±sÄ±", "body": "GÃ¶rseldeki Ã¶rnekteki gibi daha Ã¶nce kullanÄ±lmÄ±Å bir promosyon kodu yazÄ±ldÄ±ÄÄ±nda ââGeÃ§ersiz Kampanya Koduââ hatasÄ± alÄ±nÄ±r.\nPromosyon kodunun hangi hesapta kullanÄ±ldÄ±ÄÄ±nÄ± aÅaÄÄ±daki gÃ¶rseldeki gibi Campaign alanÄ±nda arama yaparak gÃ¶rÃ¼ntÃ¼leyebiliriz."}, {"title": "Playstore Uygulama Aktivasyon Sorunu", "body": "BazÄ± durumlarda, kullanÄ±cÄ±lar Google Play Store Ã¼zerinden S Sport Plus uygulamasÄ±nda abonelik satÄ±n aldÄ±klarÄ±nda veya yenileme gerÃ§ekleÅtiÄinde, Ã¼yelikleri otomatik olarak aktifleÅmeyebiliyor.  Bu durumda, kullanÄ±cÄ±nÄ±n uygulama Ã¼zerinden manuel olarak paket aktivasyonu yapmasÄ± gerekmektedir.\n\nAktivasyon iÅleminin baÅarÄ±lÄ± olabilmesi iÃ§in:\n Google Play Store Ã¼zerinden satÄ±n alma iÅlemi yapÄ±lÄ±rken kullanÄ±lan Gmail hesabÄ±, aktivasyon anÄ±nda cihazda aÃ§Ä±k olmalÄ±dÄ±r.\n Aktivasyon iÅlemi uygulama iÃ§erisinden yapÄ±lmalÄ±dÄ±r.\nDestek ekibi tarafÄ±ndan Mindbehind Ã¼zerinden âpaketgoogleâ kÄ±sayolu kullanÄ±larak yÃ¶nlendirme saÄlanabilir.  KullanÄ±cÄ± baÅarÄ±lÄ± bir Åekilde paket aktivasyonu yaptÄ±ktan sonra, paket atamasÄ± sistemde gerÃ§ekleÅir ve log kayÄ±tlarÄ±nda ilgili iÅlem aÅaÄÄ±daki gibi gÃ¶rÃ¼nÃ¼r (ekli gÃ¶rsellerdeki gibi).  Bu iÅlem, paketin doÄru Åekilde tanÄ±mlanmasÄ± iÃ§in Ã¶nemlidir."}, {"title": "App Store Uygulama Aktivasyon Sorunu", "body": "MÃ¼Återiler App Store Ã¼zerinden uygulamamÄ±zdan abonelik satÄ±n aldÄ±ÄÄ± veya yenileme olduÄu zaman bazen Ã¼yelik aktif olmuyor.\nÃyelikleri aktif olabilmeleri iÃ§in, uygulama Ã¼zerinden paket aktivasyon yapmalarÄ± gerekiyor. Paket aktivasyon yaparken, satÄ±n alma yaparken hangi Apple kimliÄi hesabÄ± aÃ§Ä±k ise, o hesap aÃ§Ä±kken aktivasyon denemesi gerekiyor.\nMindbehind Ã¼zerinden ââpaketappleââ kÄ±sayolu kullanÄ±lÄ±r.\nMÃ¼Återi paket aktivasyonu yaptÄ±ktan sonra Ã¼yelik atamasÄ± ve loglarda nasÄ±l gÃ¶zÃ¼ktÃ¼ÄÃ¼ gÃ¶rsellerdeki gibidir.\nPaket aktivasyon butonu Ã¶rnek gÃ¶rÃ¼ntÃ¼sÃ¼ yandaki gibidir."}, {"title": "AKTÄ°VASYON SORUNLARI", "body": "Ä°OS Uygulama Paket Aktivasyon ââAbonelik BaÅkasÄ±na Aittirââ Sorunu\n\nÄ°os uygulamamÄ±zda mÃ¼Återi paket aktivasyon iÅlemi yaptÄ±ÄÄ±nda ââAbonelik BaÅkasÄ±na Aittirââ hatasÄ± geliyor ise, cihazda aÃ§Ä±k olan Apple kimliÄi ile satÄ±n alÄ±nmÄ±Å, ancak aktivasyon yaptÄ±ÄÄ± eposta adresi farklÄ± bir eposta adresidir.\n\nFarklÄ± eposta adresi ile paket aktivasyon yaptÄ±ÄÄ±nda ââSubscriberlogââ kÄ±smÄ±nda Ã¶rnek ekran gÃ¶rÃ¼ntÃ¼sÃ¼nde kÄ±rmÄ±zÄ± alana alÄ±nan ââpackageValidationââ  kÄ±smÄ± Ã§Ä±kar, ok ile gÃ¶sterilen ID kÄ±smÄ±ndan doÄru Ã¼yeliÄi ID aramasÄ± ile bulabiliriz."}, {"title": "AKTÄ°VASYON SORUNLARI", "body": "Android ââPaket BaÅka Bir KullanÄ±cÄ±ya Ait OlduÄu Ä°Ã§in Paket Atama Ä°Ålemi BaÅarÄ±sÄ±z Olduââ Sorunu\n\nAndroid uygulamamÄ±zda mÃ¼Återi paket aktivasyon iÅlemi yaptÄ±ÄÄ±nda ââPaket BaÅka Bir KullanÄ±cÄ±ya Ait OlduÄu Ä°Ã§in Paket Atama Ä°Ålemi BaÅarÄ±sÄ±z Olduââ hatasÄ± geliyor ise, cihazda aÃ§Ä±k olan Play Store gmail hesabÄ± ile satÄ±n alÄ±nmÄ±Å, ancak aktivasyon yaptÄ±ÄÄ± eposta adresi farklÄ± bir eposta adresidir.\n\nFarklÄ± eposta adresi ile paket aktivasyon yaptÄ±ÄÄ±nda ââSubscriberlogââ kÄ±smÄ±nda Ã¶rnek ekran gÃ¶rÃ¼ntÃ¼sÃ¼nde kÄ±rmÄ±zÄ± alana alÄ±nan ââValidate Google Packageââ  kÄ±smÄ± Ã§Ä±kar, ok ile gÃ¶sterilen ID kÄ±smÄ±ndan doÄru Ã¼yeliÄi ID aramasÄ± ile bulabiliriz."}, {"title": "AKTÄ°VASYON SORUNLARI", "body": "Android Uygulama Paket Aktivasyon Ä°Ålem TamamlanamadÄ± veya Ãyelik Bulunamama Sorunu\nAndroid uygulamamÄ±zda mÃ¼Återi Ã¶deme yapmÄ±Å olmasÄ±na raÄmen paket aktivasyonu yaptÄ±ÄÄ±nda ââÄ°Ålem tamamlandÄ±, Ä°Ålem TamamlanamadÄ± veya Abone bulunamadÄ±ââ hatasÄ± geliyor ve Ã¼yelik aktif olmuyor ise, mÃ¼Återiden GPA kodunu paylaÅÄ±lmasÄ± istenir.\nGPA kodu, Google tarafÄ±ndan Ã¶deme yapÄ±ldÄ±ÄÄ±na dair mÃ¼Återiye gÃ¶nderilen Ã¶deme faturasÄ± (makbuz) iÃ§erisinde yer almaktadÄ±r.\nBu GPA kodu ile Ã¼yeliÄi Tvmanager Ã¼zerinden aÅaÄÄ±daki gÃ¶rseldeki gibi Reporting > General > Payments kÄ±smÄ±nda tarihi aralÄ±ÄÄ± ayarlanÄ±p ââTransaction Identiferââ kÄ±smÄ±ndan arama yapÄ±lÄ±p, Ã¼yelik IDâsine ââSubscriber IDââ Ã¼zerinden ulaÅÄ±labilir."}, {"title": "AKTÄ°VASYON SORUNLARI", "body": "TÃ¼rksat Abone BulunamadÄ± veya Abone Active DeÄil Sorunu\nBu hata, Hizmet ID veya GeÃ§ici Kod hatalÄ± yazÄ±lmasÄ±ndan dolayÄ± alÄ±nÄ±r.  MÃ¼Återiler genellikle bazÄ± bÃ¼yÃ¼k kÃ¼Ã§Ã¼k harfleri karÄ±ÅtÄ±rabiliyor veya sistemden dolayÄ± bazen bu sorun alÄ±nabiliyor.\nÃÃ¶zÃ¼m olarak harf hatasÄ± olmamasÄ± iÃ§in Tvmanager>Reporting>General>Thirtdparty Provisions kÄ±smÄ±ndan tarih aralÄ±ÄÄ± belirleyip, Hizmet ID numarasÄ±nÄ± ââExtrenal IDââ kÄ±smÄ±ndan aratÄ±p, kullanÄ±cÄ± TÃ¼rksat bilgilerini bulup ââUniqueIDââ kÄ±smÄ±ndan geÃ§ici kodu bulup, kullanÄ±cÄ±ya paylaÅtÄ±ÄÄ±mÄ±zda, ID ve GeÃ§ici kodu kopyala yapÄ±ÅtÄ±rÄ±r Åeklinde ilerlemesini iletebiliriz.\nAynÄ± sorun devam eder ise, kullanÄ±cÄ±dan onay alÄ±p, ID ve geÃ§ici kod ile kullanÄ±cÄ±nÄ±n Ã¼yeliÄini kendimiz yapabiliriz. MÃ¼Återinin Ã¼yeliÄini biz tarafÄ±ndan yapÄ±ldÄ± ise, mÃ¼Återiye Åifresini nasÄ±l gÃ¼ncelleyebileceÄi ile ilgili bilgi verilir."}]};
+const TECH_DOC_CONTENT = {"broadcast": [{"title": "Smart TV â CanlÄ± YayÄ±nda Donma Problemi YaÅÄ±yorum", "body": "MÃ¼Återinin sorun yaÅadÄ±ÄÄ± yayÄ±n ya da yayÄ±nlarda genel bir sorun var mÄ± kontrol edilir? Genel bir sorun var ise teknik ekibin incelediÄi yÃ¶nÃ¼nde bilgi verilir.\nMÃ¼Återinin kullandÄ±ÄÄ± cihaz TVmanager âda loglardan kontrol edilir. ArÃ§elik/Beko/Grundig/Altus marka Android TV olmayan Smart TVâlerden ise genel sorun hakkÄ±nda bilgi verilir.\nYukarÄ±daki durumlar dÄ±ÅÄ±nda yaÅanan bir sorun ise TV ve modemin elektrik baÄlantÄ±sÄ±nÄ± kesilip tekrar verilmesi istenir. Â« YaÅadÄ±ÄÄ±nÄ±z sorunu kontrol ederken TV ve modeminizin elektrik baÄlantÄ±sÄ±nÄ± kesip 10 sn sonra yeniden aÃ§abilir misiniz? ArdÄ±ndan yeniden yayÄ±nÄ± aÃ§Ä±p kontrol edebilir misiniz? (AyrÄ±ca Ã¶neri olarak modemi kapatÄ±p tekrar aÃ§tÄ±ktan sonra, sadece izleme yaptÄ±ÄÄ± cihaz modeme baÄlÄ± olursa daha iyi bir baÄlantÄ± olacaÄÄ± bilgisi verilebilir)\nSorun devam eder ise Smart TV tarayÄ±cÄ±sÄ±ndan https://www.hiztesti.com.tr/ bir hÄ±z testi yapmasÄ± sonucu bizimle paylaÅmasÄ± istenir.\nHÄ±z testi sonucu 8 Mbps altÄ±nda ise internet baÄlantÄ± hÄ±zÄ±nÄ±n dÃ¼ÅÃ¼k olduÄunu internet servis saÄlayÄ±cÄ±sÄ± iletiÅime geÃ§mesi istenir.\n8 Mbps Ã¼zerinde ise mÃ¼Återiden sorunu gÃ¶steren kÄ±sa bir video talep edilir.\nVideo kaydÄ± ve hÄ±z testinin sonuÃ§larÄ± gÃ¶steren bilgiler alÄ±ndÄ±ktan sonra mÃ¼Återiye incelenmesi iÃ§in teknik ekibimize iletildiÄi inceleme tamamlandÄ±ÄÄ±nda eposta ile bilgi verileceÄi yÃ¶nÃ¼nde bilgi verilir.\nSorun aynÄ± gÃ¼n iÃ§inde benzer cihazlarda farklÄ± mÃ¼Återilerde yaÅÄ±yor ise tÃ¼m bilgilerle Erlabâa arÄ±za kaydÄ± aÃ§Ä±lÄ±r. Sorun birkaÃ§ mÃ¼Återi ile sÄ±nÄ±rlÄ± ise 17:00 â 01:00 vardiyasÄ±ndaki ekip arkadaÅÄ±nda sistemsel bir sorun olmadÄ±ÄÄ±na dair eposta gÃ¶nderilmesi iÃ§in bilgileri paylaÅÄ±lÄ±r."}, {"title": "Mobil Uygulama â CanlÄ± YayÄ±nda Donma Sorunu YaÅÄ±yorum", "body": "MÃ¼Återinin sorun yaÅadÄ±ÄÄ± yayÄ±n ya da yayÄ±nlarda genel bir sorun var mÄ± kontrol edilir? Genel bir sorun var ise teknik ekibin incelediÄi yÃ¶nÃ¼nde bilgi verilir.(MÃ¼Återi Ä°OS veya Android iÅletim sistemli hangi cihazdan izliyorsa, mÃ¼mkÃ¼nse aynÄ± iÅletim sistemli mobil cihazdan kontrol edilebilir, gerekirse ekip arkadaÅlarÄ±ndan kontrol etmeleri istenebilir)\nGenel bir sorun yok ise, www.hiztesti.com.tr link Ã¼zerinden hÄ±z testi yapmasÄ± sonucu bizimle paylaÅmasÄ± istenir.\nHÄ±z testi sonucu 8 mbps altÄ±nda ise internet baÄlantÄ± hÄ±zÄ±nÄ±n dÃ¼ÅÃ¼k olduÄu internet servisi saÄlayÄ±cÄ±sÄ± ile iletiÅime geÃ§mesi istenir. (Ãneri olarak modemi kapatÄ±p tekrar aÃ§tÄ±ktan sonra sadece izleme yaptÄ±ÄÄ± cihaz modeme baÄlÄ± olursa daha iyi bir baÄlantÄ± olacaÄÄ± bilgisi verilebilir)\n8 mbps Ã¼zerinde ise, uygulama verilerin temizlenmesi veya uygulamanÄ±n silip tekrar yÃ¼klenmesi istenilir, sorun devam etmesi durumunda sorunu gÃ¶steren video kaydÄ± istenir.\n 4. HÄ±z testi, cihaz marka model ve sÃ¼rÃ¼m bilgileri alÄ±ndÄ±ktan sonra, incelenmesi iÃ§in teknik ekibe iletildiÄi, inceleme tamamlandÄ±ÄÄ±nda e-posta  ile bilgi verileceÄi yÃ¶nÃ¼nde bilgi verilir.\n 5. Sorun aynÄ± gÃ¼n iÃ§erinde benzer cihazlarda farklÄ± mÃ¼Återilerde yaÅÄ±yor ise tÃ¼m bilgilerle Erlabâa arÄ±za kaydÄ± aÃ§Ä±lÄ±r. Sorun birkaÃ§ mÃ¼Återi ile sÄ±nÄ±rlÄ±  ise 17:00 â 01:00 vardiyasÄ±ndaki ekip arkadaÅÄ±nda sistemsel bir sorun olmadÄ±ÄÄ±na dair eposta gÃ¶nderilmesi iÃ§in bilgileri paylaÅÄ±lÄ±r."}, {"title": "Bilgisayar â CanlÄ± YayÄ±nda Donma Sorunu YaÅÄ±yorum", "body": "MÃ¼Återinin sorun yaÅadÄ±ÄÄ± yayÄ±n ya da yayÄ±nlarda genel bir sorun var mÄ± kontrol edilir? Genel bir sorun var ise teknik ekibin incelediÄi yÃ¶nÃ¼nde bilgi verilir.\nGenel bir sorun deÄilse, Ã¶ncelikle https://www.hiztesti.com.tr/ bir hÄ±z testi yapmasÄ± sonucu bizimle paylaÅmasÄ± istenir.\nHÄ±z testi sonucu 8 mbps altÄ±nda ise internet baÄlantÄ± hÄ±zÄ±nÄ±n dÃ¼ÅÃ¼k olduÄunu internet servis saÄlayÄ±cÄ±sÄ± iletiÅime geÃ§mesi istenir.\n8 mbps Ã¼zerinde ise mÃ¼Återiden aÅaÄÄ±daki adÄ±mlarÄ± uygulamasÄ± istenir.\n3. BilgisayarÄ±n iÅletim sitemi Ã¶Ärenilip, gÃ¶rÃ¼Åme Ã¼zerinden ââpingWindows7ââ veya ââpingwindows10ââ kÄ±sayollarÄ±ndan mÃ¼Återi sunucularÄ± kontrol edilir.\n(Windows 10 Ã¼zeri iÅletim sistemi cihazlara pingwindows10 kÄ±sayolu gÃ¶nderilebilir.)\n4. Sunucu kontrol ekranÄ±nda kontrol edilmesi gereken, ok ile gÃ¶sterilen yerden, sunucu ile kayÄ±p olup olmadÄ±ÄÄ± ve kÄ±rmÄ±zÄ± alan iÃ§erisinde sunucu ile web sitemize kaÃ§ saniyede iÅlem saÄladÄ±ÄÄ± kontrol edilir.\n5. 1 â 35 arasÄ± normal sayÄ±labilir, bu saniye aralÄ±ÄÄ±nda sorun yaÅanÄ±yorsa, web sitemize daha hÄ±zlÄ± tepsi sÃ¼resi veren ve genellikle sorunsuz bir Åekilde izleme saÄlanabilen 193.192.103.249, 185.11.14.27 veya 195.175.178.8 sunucularÄ± kontrol edilmelidir.\n6. Uygun sunucuyu tespit ettikten sonra canlÄ± destek ekranÄ±nda ââHostââ ââhost2ââ kÄ±sa yollarÄ± kullanarak, kÄ±sa yoldaki adÄ±mlar ile mÃ¼Återinin sadece bizim sitemize baÄlandÄ±ÄÄ± sunucusunu, en uygun sunucu ile deÄiÅtirip tarayÄ±cÄ± aÃ§Ä±p kapattÄ±rdÄ±ktan sonra tekrar yayÄ±nÄ± kontrol etmesini iletebiliriz. (AyrÄ±ca mÃ¼Återi yayÄ±nlarÄ± auto deÄil, manuel olarak 720 veya 1080p seÃ§ip kontrol edilmesi Ã¶nerilir)\n7. Sorun aynÄ± gÃ¼n iÃ§erinde benzer iÅletim sistemi veya sunucuda farklÄ± mÃ¼Återilerde yaÅÄ±yor ise tÃ¼m bilgilerle Erlabâa arÄ±za kaydÄ± aÃ§Ä±lÄ±r. Sorun birkaÃ§ mÃ¼Återi ile sÄ±nÄ±rlÄ± ise 17:00 â 01:00 vardiyasÄ±ndaki ekip arkadaÅÄ±nda sistemsel bir sorun olmadÄ±ÄÄ±na dair eposta gÃ¶nderilmesi iÃ§in bilgileri paylaÅÄ±lÄ±r"}, {"title": "YAYIN SORUNLARI", "body": "35 sn arasÄ± normal sayÄ±labilir, bu saniye aralÄ±ÄÄ±nda sorun yaÅanÄ±yorsa, web sitemize daha hÄ±zlÄ± tepsi sÃ¼resi veren ve genellikle sorunsuz bir Åekilde izleme saÄlanabilen 193.192.103.249, 185.11.14.27 veya 195.175.178.8 sunucularÄ± kontrol edilmelidir."}, {"title": "MacOS â CanlÄ± YayÄ±nda Donma Sorunu YaÅÄ±yorum", "body": "MÃ¼Återinin sorun yaÅadÄ±ÄÄ± yayÄ±n ya da yayÄ±nlarda genel bir sorun var mÄ± kontrol edilir? Genel bir sorun var ise teknik ekibin incelediÄi yÃ¶nÃ¼nde bilgi verilir.\nGenel bir sorun deÄilse, Ã¶ncelikle https://www.hiztesti.com.tr/ bir hÄ±z testi yapmasÄ± sonucu bizimle paylaÅmasÄ± istenir.\nHÄ±z testi sonucu 8 mbps altÄ±nda ise internet baÄlantÄ± hÄ±zÄ±nÄ±n dÃ¼ÅÃ¼k olduÄunu internet servis saÄlayÄ±cÄ±sÄ± iletiÅime geÃ§mesi istenir.\n8 mbps Ã¼zerinde ise mÃ¼Återiden aÅaÄÄ±daki adÄ±mlarÄ± uygulamasÄ± istenir.\nMindbehind Ã¼zerinden ââpingmacOSââ kÄ±sayolundan mÃ¼Återi sunucularÄ± kontrol edilir.\nSunucu kontrol ekranÄ±nda kontrol edilmesi gereken, ââpacket lossââ kÄ±smÄ±nda kayÄ±p olup olmadÄ±ÄÄ±,  alan iÃ§erisinde sunucu ile web sitemize kaÃ§ saniyede iÅlem saÄladÄ±ÄÄ± kontrol edilir.\n1 â 35 arasÄ± normal sayÄ±labilir, bu saniye aralÄ±ÄÄ±nda sorun yaÅanÄ±yorsa, web sitemize daha hÄ±zlÄ± tepsi sÃ¼resi veren ve genellikle sorunsuz bir Åekilde izleme saÄlanabilen 193.192.103.249, 185.11.14.27 veya 195.175.178.8 sunucularÄ± kontrol edilmelidir.\nUygun sunucuyu tespit ettikten sonra canlÄ± destek ekranÄ±nda ââmacOShostââ kÄ±sa yolunu kullanarak, kÄ±sa yoldaki adÄ±mlar ile mÃ¼Återinin sadece bizim sitemize baÄlandÄ±ÄÄ± sunucuyu, en uygun sunucu ile deÄiÅtirip tarayÄ±cÄ± aÃ§Ä±p kapattÄ±rdÄ±ktan sonra tekrar yayÄ±nÄ± kontrol etmesini iletebiliriz. (AyrÄ±ca mÃ¼Återi yayÄ±nlarÄ± auto deÄil, manuel olarak 720 veya 1080p seÃ§ip kontrol edilmesi Ã¶nerilir)\nSorun aynÄ± gÃ¼n iÃ§erinde benzer iÅletim sistemi veya sunucuda farklÄ± mÃ¼Återilerde yaÅÄ±yor ise tÃ¼m bilgilerle Erlabâa arÄ±za kaydÄ± aÃ§Ä±lÄ±r. Sorun birkaÃ§ mÃ¼Återi ile sÄ±nÄ±rlÄ± ise 17:00 â 01:00 vardiyasÄ±ndaki ekip arkadaÅÄ±nda sistemsel bir sorun olmadÄ±ÄÄ±na dair eposta gÃ¶nderilmesi iÃ§in bilgileri paylaÅÄ±lÄ±r."}, {"title": "ââYayÄ±nda beklenmedik bir kesinti oluÅtuââ UyarÄ±sÄ±", "body": "Bu uyarÄ± genel bir yayÄ±n sorunu olduÄunda ya da kullanÄ±cÄ± TÃ¼rkiye sÄ±nÄ±rlarÄ± dÄ±ÅÄ±nda bir yerden eriÅim saÄladÄ±ÄÄ±nda karÅÄ±mÄ±za Ã§Ä±kmaktadÄ±r.\nKullanÄ±cÄ±nÄ±n sorun yaÅadÄ±ÄÄ± yayÄ±n kontrol edilir ve genel bir yayÄ±n sorunu olup olmadÄ±ÄÄ± teyit edilir.\nTvmanagerâda SubscriberLog ekranÄ±ndan ip adresi alÄ±nÄ±r ve yurtdÄ±ÅÄ± bir konum olup olmadÄ±ÄÄ± teyit edilir.\nKullanÄ±cÄ± yurtdÄ±ÅÄ±nda ise eriÅim saÄlayamayacaÄÄ± bilgisi verilir, VPN kullanÄ±yor ise kapatmasÄ± istenir.\nTVmanager Devices kÄ±smÄ±nda oturumlar sonlandÄ±rÄ±lÄ±r ve kullanÄ±cÄ±dan tekrar giriÅ yaparak kontrol etmesi rica edilir.\nMobil veri veya farklÄ± bir aÄda bu hata mesajÄ±nÄ±n alÄ±nÄ±p alÄ±nmadÄ±ÄÄ± teyit edilir.\nCihaz ve modem kapama ve aÃ§ma iÅlemi uygulanÄ±r.\nSorun devam eder ise inceleme iÃ§in cihaz ve diÄer bilgilerle teknik ekibimize bilgi verileceÄi iletilir. Excel de kullanÄ±cÄ±dan alÄ±nan bilgiler not edilir."}], "access": [{"title": "ERÄ°ÅÄ°M SORUNLARI", "body": "ââLisans haklarÄ± sebebiyle TÃ¼rkiye sÄ±nÄ±rlarÄ± dÄ±ÅÄ±nda hizmet verilememektedir.ââ UyarÄ±sÄ±\nAlÄ±nan hata mÃ¼Återinin yurt dÄ±ÅÄ±nda olmasÄ± ve yurt iÃ§inde ise VPN ya da benzeri bir uygulamanÄ±n cihazÄ±nda aktif olmasÄ±ndan kaynaklanmaktadÄ±r.\n\nMÃ¼Återiye yurt dÄ±ÅÄ±nda olup olmadÄ±ÄÄ± sorulur, yurt dÄ±ÅÄ±nda ise ââlisans haklarÄ± sebebiyle yayÄ±nlarÄ±n yurt dÄ±ÅÄ±ndan izlenemediÄiââ yÃ¶nÃ¼nde bilgi verilir.\nYurt iÃ§inde ise VPN ya da benzeri bir uygulamanÄ±n cihazÄ±nda aktif olup ya da olmadÄ±ÄÄ± sorulur. Aktif ise devre dÄ±ÅÄ± bÄ±rakÄ±lÄ±p tekrar denemesi Ã¶nerilir.\nVPN ya da benzeri bir uygulama kullanmÄ±yor ise mÃ¼Återinin ip adresi Ã¶Ärenilir ve https://tr.wizcase.com/tools/whats-my-ip/ ip adresi kontrol edilir.  AynÄ± zamanda adresin vpn Ã¼zerinden alÄ±nÄ±p alÄ±nmadÄ±ÄÄ±nÄ±n kontrolÃ¼ iÃ§in https://vpnapi.io adresine girilip kontrol edilir.\nIp adresi yurt dÄ±ÅÄ± ya da ISP bilgisi bilinen bir servis saÄlayÄ±cÄ±sÄ± deÄilse mÃ¼Återiye bulunduÄu lokasyonun otel, yurt vb. bir yer olup olmadÄ±ÄÄ± ya da cihazÄ±nÄ±n Åirket cihazÄ± olup olmadÄ±ÄÄ± sorulur."}, {"title": "ââIP Karantinaââ UyarÄ±sÄ±", "body": "Ä°p Karantina sorunu genel bir sorun yok ise, eposta veya Åifre bir Ã§ok defa hatalÄ± girilmesinden dolayÄ± alÄ±nÄ±r.\nKullanÄ±cÄ±nÄ±n ip adresi karantina da olup ya da olmadÄ±ÄÄ±, TVmanager â CMS â Admission Gate menÃ¼sÃ¼ Ã¼zerinden kontrol edilerek Ã§Ä±karÄ±labilir. Ä°kinci bir seÃ§enek olarak modem kapama ve aÃ§ma iÅlemi yaptÄ±rÄ±labilir."}], "app": [{"title": "Teknik Sorun Analizi NasÄ±l YapÄ±lÄ±r?", "body": "App KaynaklÄ± Nedenler\nCihaz KaynaklÄ± Nedenler\nApp hatalarÄ± baÅlÄ±ÄÄ±nda uygulamanÄ±n aÃ§Ä±lmamasÄ± ya da kendi kendine kapanmasÄ± Åeklinde teknik sorunlar ile karÅÄ±laÅabiliriz. Bu tip sorunlar, kullanÄ±cÄ± deneyimini doÄrudan etkileyerek uygulamaya eriÅilememesine neden olur.\nUygulamanÄ±n eski sÃ¼rÃ¼mÃ¼\nÃnbellek sorunlarÄ±\nUyumsuz cihazlar\nDolu RAM/Arka planda Ã§alÄ±Åan fazla uygulama\nCihazÄ±n gÃ¼ncel olmamasÄ± (Eski sistemi sÃ¼rÃ¼mleri)\nKullanÄ±cÄ±ya Sorulabilecek Sorular:\nUygulama aÃ§Ä±lÄ±yor mu, yoksa aÃ§Ä±lmadan kapanÄ±yor mu?\nUygulama sÃ¼rÃ¼mÃ¼, cihaz iÅletim sistemi sÃ¼rÃ¼mÃ¼ nedir? (TVmanager kontrolÃ¼)\nCihazda yeterli depolama alanÄ± var mÄ±?"}], "activation": [{"title": "ââPromosyon Kodu BulunamadÄ±ââ UyarÄ±sÄ±", "body": "GÃ¶rselde ki Ã¶rnekte doÄrusu ââYILLIKLOCAââ olan kampanya kodu, kÃ¼Ã§Ã¼k harf ile yazÄ±ldÄ±ÄÄ±nda ââPromosyon Kodu BulunamadÄ±ââ hatasÄ± alÄ±nmÄ±ÅtÄ±r. Bu hata ile karÅÄ±laÅÄ±ldÄ±ÄÄ±nda kampanya kodunun yanlÄ±Å, eksik, kÃ¼Ã§Ã¼k harf ya da boÅluk bÄ±rakÄ±larak yazÄ±ldÄ±ÄÄ±nÄ± tespitle, kullanÄ±cÄ±yÄ± bu doÄrultuda doÄru yazÄ±m iÃ§in yÃ¶nlendirmemiz gerekir."}, {"title": "ââKampanya Kodu Aktif Edilemediââ UyarÄ±sÄ±", "body": "GÃ¶rseldeki Ã¶rnekteki gibi eski bir promosyon kodu yazÄ±ldÄ±ÄÄ±nda ââKampanya Kodu Aktif Edilemediââ uyarÄ±sÄ± alÄ±nÄ±r."}, {"title": "ââGeÃ§ersiz Kampanya Koduââ UyarÄ±sÄ±", "body": "GÃ¶rseldeki Ã¶rnekteki gibi daha Ã¶nce kullanÄ±lmÄ±Å bir promosyon kodu yazÄ±ldÄ±ÄÄ±nda ââGeÃ§ersiz Kampanya Koduââ hatasÄ± alÄ±nÄ±r.\nPromosyon kodunun hangi hesapta kullanÄ±ldÄ±ÄÄ±nÄ± aÅaÄÄ±daki gÃ¶rseldeki gibi Campaign alanÄ±nda arama yaparak gÃ¶rÃ¼ntÃ¼leyebiliriz."}, {"title": "Playstore Uygulama Aktivasyon Sorunu", "body": "BazÄ± durumlarda, kullanÄ±cÄ±lar Google Play Store Ã¼zerinden S Sport Plus uygulamasÄ±nda abonelik satÄ±n aldÄ±klarÄ±nda veya yenileme gerÃ§ekleÅtiÄinde, Ã¼yelikleri otomatik olarak aktifleÅmeyebiliyor.  Bu durumda, kullanÄ±cÄ±nÄ±n uygulama Ã¼zerinden manuel olarak paket aktivasyonu yapmasÄ± gerekmektedir.\n\nAktivasyon iÅleminin baÅarÄ±lÄ± olabilmesi iÃ§in:\n Google Play Store Ã¼zerinden satÄ±n alma iÅlemi yapÄ±lÄ±rken kullanÄ±lan Gmail hesabÄ±, aktivasyon anÄ±nda cihazda aÃ§Ä±k olmalÄ±dÄ±r.\n Aktivasyon iÅlemi uygulama iÃ§erisinden yapÄ±lmalÄ±dÄ±r.\nDestek ekibi tarafÄ±ndan Mindbehind Ã¼zerinden âpaketgoogleâ kÄ±sayolu kullanÄ±larak yÃ¶nlendirme saÄlanabilir.  KullanÄ±cÄ± baÅarÄ±lÄ± bir Åekilde paket aktivasyonu yaptÄ±ktan sonra, paket atamasÄ± sistemde gerÃ§ekleÅir ve log kayÄ±tlarÄ±nda ilgili iÅlem aÅaÄÄ±daki gibi gÃ¶rÃ¼nÃ¼r (ekli gÃ¶rsellerdeki gibi).  Bu iÅlem, paketin doÄru Åekilde tanÄ±mlanmasÄ± iÃ§in Ã¶nemlidir."}, {"title": "App Store Uygulama Aktivasyon Sorunu", "body": "MÃ¼Återiler App Store Ã¼zerinden uygulamamÄ±zdan abonelik satÄ±n aldÄ±ÄÄ± veya yenileme olduÄu zaman bazen Ã¼yelik aktif olmuyor.\nÃyelikleri aktif olabilmeleri iÃ§in, uygulama Ã¼zerinden paket aktivasyon yapmalarÄ± gerekiyor. Paket aktivasyon yaparken, satÄ±n alma yaparken hangi Apple kimliÄi hesabÄ± aÃ§Ä±k ise, o hesap aÃ§Ä±kken aktivasyon denemesi gerekiyor.\nMindbehind Ã¼zerinden ââpaketappleââ kÄ±sayolu kullanÄ±lÄ±r.\nMÃ¼Återi paket aktivasyonu yaptÄ±ktan sonra Ã¼yelik atamasÄ± ve loglarda nasÄ±l gÃ¶zÃ¼ktÃ¼ÄÃ¼ gÃ¶rsellerdeki gibidir.\nPaket aktivasyon butonu Ã¶rnek gÃ¶rÃ¼ntÃ¼sÃ¼ yandaki gibidir."}, {"title": "AKTÄ°VASYON SORUNLARI", "body": "Ä°OS Uygulama Paket Aktivasyon ââAbonelik BaÅkasÄ±na Aittirââ Sorunu\n\nÄ°os uygulamamÄ±zda mÃ¼Återi paket aktivasyon iÅlemi yaptÄ±ÄÄ±nda ââAbonelik BaÅkasÄ±na Aittirââ hatasÄ± geliyor ise, cihazda aÃ§Ä±k olan Apple kimliÄi ile satÄ±n alÄ±nmÄ±Å, ancak aktivasyon yaptÄ±ÄÄ± eposta adresi farklÄ± bir eposta adresidir.\n\nFarklÄ± eposta adresi ile paket aktivasyon yaptÄ±ÄÄ±nda ââSubscriberlogââ kÄ±smÄ±nda Ã¶rnek ekran gÃ¶rÃ¼ntÃ¼sÃ¼nde kÄ±rmÄ±zÄ± alana alÄ±nan ââpackageValidationââ  kÄ±smÄ± Ã§Ä±kar, ok ile gÃ¶sterilen ID kÄ±smÄ±ndan doÄru Ã¼yeliÄi ID aramasÄ± ile bulabiliriz."}, {"title": "AKTÄ°VASYON SORUNLARI", "body": "Android ââPaket BaÅka Bir KullanÄ±cÄ±ya Ait OlduÄu Ä°Ã§in Paket Atama Ä°Ålemi BaÅarÄ±sÄ±z Olduââ Sorunu\n\nAndroid uygulamamÄ±zda mÃ¼Återi paket aktivasyon iÅlemi yaptÄ±ÄÄ±nda ââPaket BaÅka Bir KullanÄ±cÄ±ya Ait OlduÄu Ä°Ã§in Paket Atama Ä°Ålemi BaÅarÄ±sÄ±z Olduââ hatasÄ± geliyor ise, cihazda aÃ§Ä±k olan Play Store gmail hesabÄ± ile satÄ±n alÄ±nmÄ±Å, ancak aktivasyon yaptÄ±ÄÄ± eposta adresi farklÄ± bir eposta adresidir.\n\nFarklÄ± eposta adresi ile paket aktivasyon yaptÄ±ÄÄ±nda ââSubscriberlogââ kÄ±smÄ±nda Ã¶rnek ekran gÃ¶rÃ¼ntÃ¼sÃ¼nde kÄ±rmÄ±zÄ± alana alÄ±nan ââValidate Google Packageââ  kÄ±smÄ± Ã§Ä±kar, ok ile gÃ¶sterilen ID kÄ±smÄ±ndan doÄru Ã¼yeliÄi ID aramasÄ± ile bulabiliriz."}, {"title": "AKTÄ°VASYON SORUNLARI", "body": "Android Uygulama Paket Aktivasyon Ä°Ålem TamamlanamadÄ± veya Ãyelik Bulunamama Sorunu\nAndroid uygulamamÄ±zda mÃ¼Återi Ã¶deme yapmÄ±Å olmasÄ±na raÄmen paket aktivasyonu yaptÄ±ÄÄ±nda ââÄ°Ålem tamamlandÄ±, Ä°Ålem TamamlanamadÄ± veya Abone bulunamadÄ±ââ hatasÄ± geliyor ve Ã¼yelik aktif olmuyor ise, mÃ¼Återiden GPA kodunu paylaÅÄ±lmasÄ± istenir.\nGPA kodu, Google tarafÄ±ndan Ã¶deme yapÄ±ldÄ±ÄÄ±na dair mÃ¼Återiye gÃ¶nderilen Ã¶deme faturasÄ± (makbuz) iÃ§erisinde yer almaktadÄ±r.\nBu GPA kodu ile Ã¼yeliÄi Tvmanager Ã¼zerinden aÅaÄÄ±daki gÃ¶rseldeki gibi Reporting > General > Payments kÄ±smÄ±nda tarihi aralÄ±ÄÄ± ayarlanÄ±p ââTransaction Identiferââ kÄ±smÄ±ndan arama yapÄ±lÄ±p, Ã¼yelik IDâsine ââSubscriber IDââ Ã¼zerinden ulaÅÄ±labilir."}, {"title": "AKTÄ°VASYON SORUNLARI", "body": "TÃ¼rksat Abone BulunamadÄ± veya Abone Active DeÄil Sorunu\nBu hata, Hizmet ID veya GeÃ§ici Kod hatalÄ± yazÄ±lmasÄ±ndan dolayÄ± alÄ±nÄ±r.  MÃ¼Återiler genellikle bazÄ± bÃ¼yÃ¼k kÃ¼Ã§Ã¼k harfleri karÄ±ÅtÄ±rabiliyor veya sistemden dolayÄ± bazen bu sorun alÄ±nabiliyor.\nÃÃ¶zÃ¼m olarak harf hatasÄ± olmamasÄ± iÃ§in Tvmanager>Reporting>General>Thirtdparty Provisions kÄ±smÄ±ndan tarih aralÄ±ÄÄ± belirleyip, Hizmet ID numarasÄ±nÄ± ââExtrenal IDââ kÄ±smÄ±ndan aratÄ±p, kullanÄ±cÄ± TÃ¼rksat bilgilerini bulup ââUniqueIDââ kÄ±smÄ±ndan geÃ§ici kodu bulup, kullanÄ±cÄ±ya paylaÅtÄ±ÄÄ±mÄ±zda, ID ve GeÃ§ici kodu kopyala yapÄ±ÅtÄ±rÄ±r Åeklinde ilerlemesini iletebiliriz.\nAynÄ± sorun devam eder ise, kullanÄ±cÄ±dan onay alÄ±p, ID ve geÃ§ici kod ile kullanÄ±cÄ±nÄ±n Ã¼yeliÄini kendimiz yapabiliriz. MÃ¼Återinin Ã¼yeliÄini biz tarafÄ±ndan yapÄ±ldÄ± ise, mÃ¼Återiye Åifresini nasÄ±l gÃ¼ncelleyebileceÄi ile ilgili bilgi verilir."}]};
 
 function renderTechSections(){
     // Kaynak: Sheet'ten gelen teknik kartlar + admin override (localStorage)
@@ -4460,9 +4460,9 @@ function renderTechSections(){
     const buckets = {broadcast:[], access:[], app:[], activation:[], cards:[]};
     techCards.forEach(c=>{
         const hay = `${c.title||''} ${c.text||''} ${c.script||''}`.toLowerCase();
-        if(hay.includes('yayÄ±n') || hay.includes('don') || hay.includes('buffer') || hay.includes('akÄ±Å') || hay.includes('tv')){
+        if(hay.includes('yayÄ±n') || hay.includes('don') || hay.includes('buffer') || hay.includes('akÄ±Å') || hay.includes('tv')){
             buckets.broadcast.push(c);
-        }else if(hay.includes('eriÅim') || hay.includes('vpn') || hay.includes('proxy') || hay.includes('login') || hay.includes('giriÅ') || hay.includes('yurtdÄ±ÅÄ±')){
+        }else if(hay.includes('eriÅim') || hay.includes('vpn') || hay.includes('proxy') || hay.includes('login') || hay.includes('giriÅ') || hay.includes('yurtdÄ±ÅÄ±')){
             buckets.access.push(c);
         }else if(hay.includes('app') || hay.includes('uygulama') || hay.includes('hata') || hay.includes('crash') || hay.includes('versiyon')){
             buckets.app.push(c);
@@ -4476,7 +4476,7 @@ function renderTechSections(){
 
     window.__techBuckets = buckets;
 
-    // Search input baÄlama
+    // Search input baÄlama
     const bindSearch = (inputId, key, listId)=>{
         const inp = document.getElementById(inputId);
         if(!inp) return;
@@ -4620,7 +4620,7 @@ function addTechCard(bucketKey){
     Swal.fire({
         title: "Teknik Kart Ekle",
         html: `
-          <input id="tc-title" class="swal2-input" placeholder="BaÅlÄ±k">
+          <input id="tc-title" class="swal2-input" placeholder="BaÅlÄ±k">
           <input id="tc-badge" class="swal2-input" placeholder="Etiket (Ã¶r: TEKNÄ°K)">
           <input id="tc-link" class="swal2-input" placeholder="Link (opsiyonel)">
           <textarea id="tc-text" class="swal2-textarea" placeholder="AÃ§Ä±klama"></textarea>
@@ -4631,7 +4631,7 @@ function addTechCard(bucketKey){
         cancelButtonText: "VazgeÃ§",
         preConfirm: ()=>{
             const title = (document.getElementById('tc-title').value||'').trim();
-            if(!title) return Swal.showValidationMessage("BaÅlÄ±k zorunlu");
+            if(!title) return Swal.showValidationMessage("BaÅlÄ±k zorunlu");
             return {
                 id: 'local_' + Date.now(),
                 title,
@@ -4664,7 +4664,7 @@ function editTechCard(key){
     Swal.fire({
         title: "KartÄ± DÃ¼zenle",
         html: `
-          <input id="tc-title" class="swal2-input" placeholder="BaÅlÄ±k" value="${escapeHtml(c.title||'')}">
+          <input id="tc-title" class="swal2-input" placeholder="BaÅlÄ±k" value="${escapeHtml(c.title||'')}">
           <input id="tc-badge" class="swal2-input" placeholder="Etiket" value="${escapeHtml(c.code||c.category||'TEKNÄ°K')}">
           <input id="tc-link" class="swal2-input" placeholder="Link" value="${escapeHtml(c.link||'')}">
           <textarea id="tc-text" class="swal2-textarea" placeholder="AÃ§Ä±klama">${escapeHtml(c.text||'')}</textarea>
@@ -4675,7 +4675,7 @@ function editTechCard(key){
         cancelButtonText: "VazgeÃ§",
         preConfirm: ()=>{
             const title = (document.getElementById('tc-title').value||'').trim();
-            if(!title) return Swal.showValidationMessage("BaÅlÄ±k zorunlu");
+            if(!title) return Swal.showValidationMessage("BaÅlÄ±k zorunlu");
             return {
                 ...c,
                 title,
@@ -4717,7 +4717,7 @@ function renderTechList(targetId, list, showCategory=false){
     const el = document.getElementById(targetId);
     if(!el) return;
     if(!list || list.length===0){
-        el.innerHTML = '<div style="padding:16px;opacity:.7">Bu baÅlÄ±k altÄ±nda iÃ§erik yok.</div>';
+        el.innerHTML = '<div style="padding:16px;opacity:.7">Bu baÅlÄ±k altÄ±nda iÃ§erik yok.</div>';
         return;
     }
     el.innerHTML = list.map((c)=>`
@@ -4745,7 +4745,7 @@ function renderTechDocs(){
         try{
             const items = (TECH_DOC_CONTENT && TECH_DOC_CONTENT[key]) ? TECH_DOC_CONTENT[key] : [];
             if(!Array.isArray(items) || items.length===0){
-                el.innerHTML = '<div style="padding:12px 2px;opacity:.7">Bu baÅlÄ±k altÄ±nda teknik dÃ¶kÃ¼man bulunamadÄ±.</div>';
+                el.innerHTML = '<div style="padding:12px 2px;opacity:.7">Bu baÅlÄ±k altÄ±nda teknik dÃ¶kÃ¼man bulunamadÄ±.</div>';
                 return;
             }
 
@@ -4812,8 +4812,8 @@ function embeddedTwRender(targetId){
     let html = `
       <div style="display:flex; gap:8px; align-items:center; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap">
         <div style="display:flex; gap:8px; align-items:center">
-          ${backVisible ? `<button type="button" class="tech-btn tech-btn-option" onclick="embeddedTwBack('${targetId}')">â¬ Geri</button>` : ''}
-          <button type="button" class="tech-btn tech-btn-option" onclick="embeddedTwReset('${targetId}')">â» SÄ±fÄ±rla</button>
+          ${backVisible ? `<button type="button" class="tech-btn tech-btn-option" onclick="embeddedTwBack('${targetId}')">â¬ Geri</button>` : ''}
+          <button type="button" class="tech-btn tech-btn-option" onclick="embeddedTwReset('${targetId}')">â» SÄ±fÄ±rla</button>
         </div>
         <div style="opacity:.7; font-size:.9rem">AdÄ±m: ${escapeHtml(stepData.title || '')}</div>
       </div>
@@ -4825,7 +4825,7 @@ function embeddedTwRender(targetId){
         html += `<div style="font-size:1rem; margin:10px 0; white-space:pre-line">${escapeHtml(stepData.text)}</div>`;
     }
     if(stepData.script){
-        html += `<div class="tech-script-box"><span class="tech-script-label">MÃ¼Återiye iletilecek:</span>${escapeHtml(stepData.script)}</div>`;
+        html += `<div class="tech-script-box"><span class="tech-script-label">MÃ¼Återiye iletilecek:</span>${escapeHtml(stepData.script)}</div>`;
     }
     if(stepData.alert){
         html += `<div class="tech-alert">${escapeHtml(stepData.alert)}</div>`;
@@ -4878,7 +4878,7 @@ async function addTechCardSheet(){
     const { value: v } = await Swal.fire({
       title: 'Teknik Kart Ekle',
       html: `
-        <input id="tc-title" class="swal2-input" placeholder="BaÅlÄ±k">
+        <input id="tc-title" class="swal2-input" placeholder="BaÅlÄ±k">
         <textarea id="tc-text" class="swal2-textarea" placeholder="AÃ§Ä±klama"></textarea>
         <textarea id="tc-script" class="swal2-textarea" placeholder="Script (opsiyonel)"></textarea>
         <input id="tc-link" class="swal2-input" placeholder="Link (opsiyonel)">
@@ -4888,7 +4888,7 @@ async function addTechCardSheet(){
       cancelButtonText: 'VazgeÃ§',
       preConfirm: ()=>{
         const title = (document.getElementById('tc-title').value||'').trim();
-        if(!title) return Swal.showValidationMessage('BaÅlÄ±k zorunlu');
+        if(!title) return Swal.showValidationMessage('BaÅlÄ±k zorunlu');
         const today = new Date();
         const dateStr = today.getDate() + "." + (today.getMonth()+1) + "." + today.getFullYear();
         return {
@@ -4933,7 +4933,7 @@ async function editTechCardSheet(dbIndex){
     const { value: v } = await Swal.fire({
       title: 'Teknik KartÄ± DÃ¼zenle',
       html: `
-        <input id="tc-title" class="swal2-input" placeholder="BaÅlÄ±k" value="${escapeHtml(it.title||'')}">
+        <input id="tc-title" class="swal2-input" placeholder="BaÅlÄ±k" value="${escapeHtml(it.title||'')}">
         <textarea id="tc-text" class="swal2-textarea" placeholder="AÃ§Ä±klama">${escapeHtml(it.text||'')}</textarea>
         <textarea id="tc-script" class="swal2-textarea" placeholder="Script">${escapeHtml(it.script||'')}</textarea>
         <input id="tc-link" class="swal2-input" placeholder="Link" value="${escapeHtml(it.link||'')}">
@@ -4943,7 +4943,7 @@ async function editTechCardSheet(dbIndex){
       cancelButtonText: 'VazgeÃ§',
       preConfirm: ()=>{
         const title = (document.getElementById('tc-title').value||'').trim();
-        if(!title) return Swal.showValidationMessage('BaÅlÄ±k zorunlu');
+        if(!title) return Swal.showValidationMessage('BaÅlÄ±k zorunlu');
         return {
           title,
           text: (document.getElementById('tc-text').value||'').trim(),
@@ -5031,8 +5031,8 @@ function applySportsRights(){
         const hay = `${s.title||''} ${s.desc||''} ${s.detail||''}`.toLowerCase();
         const hit = rights.find(r=>hay.includes(String(r.name||'').toLowerCase().replaceAll('*','').trim().split(' ')[0]));
         if(hit){
-            const extra = `YayÄ±n hakkÄ± bitiÅ: ${hit.end || hit.duration}`;
-            if(s.tip && !s.tip.includes('YayÄ±n hakkÄ±')) s.tip = `${s.tip} â¢ ${extra}`;
+            const extra = `YayÄ±n hakkÄ± bitiÅ: ${hit.end || hit.duration}`;
+            if(s.tip && !s.tip.includes('YayÄ±n hakkÄ±')) s.tip = `${s.tip} â¢ ${extra}`;
             else if(!s.tip) s.tip = extra;
             if(s.detail && !s.detail.includes('YayÄ±n hakkÄ±')) s.detail = `${s.detail}\n\n${extra}`;
             else if(!s.detail) s.detail = extra;
@@ -5058,11 +5058,11 @@ let __techCatsLoadedAt = 0;
 
 const TECH_TAB_LABELS = {
   broadcast: 'YayÄ±n',
-  access: 'EriÅim SorunlarÄ±',
+  access: 'EriÅim SorunlarÄ±',
   app: 'App HatalarÄ±',
   activation: 'Aktivasyon',
   info: 'Bilgi',
-  payment: 'Ãdeme SorunlarÄ±'
+  payment: 'Ãdeme SorunlarÄ±'
 };
 
 function __normalizeTechTab(tab){
@@ -5082,7 +5082,7 @@ function __normalizeTechCategory(cat){
 
 async function __fetchTechDocs(){
   if(!SCRIPT_URL){
-    if(typeof showGlobalError === "function") showGlobalError("SCRIPT_URL ayarlÄ± deÄil. SaÄ alttan ayarlayabilirsin.");
+    if(typeof showGlobalError === "function") showGlobalError("SCRIPT_URL ayarlÄ± deÄil. SaÄ alttan ayarlayabilirsin.");
     throw new Error("SCRIPT_URL missing");
   }
   const res = await fetch(SCRIPT_URL, {
@@ -5098,7 +5098,7 @@ async function __fetchTechDocs(){
     .map(r => ({
       categoryKey: __normalizeTechCategory(r.Kategori),
       kategori: (r.Kategori||"").trim(),
-      baslik: (r.BaÅlÄ±k || r.Baslik || r.Title || r["BaÅlÄ±k"] || "").toString().trim(),
+      baslik: (r.BaÅlÄ±k || r.Baslik || r.Title || r["BaÅlÄ±k"] || "").toString().trim(),
       icerik: (r.Ä°Ã§erik || r.Icerik || r.Content || r["Ä°Ã§erik"] || "").toString(),
       adim: (r.AdÄ±m || r.Adim || r.Step || r["AdÄ±m"] || "").toString(),
       not: (r.Not || "").toString(),
@@ -5109,7 +5109,7 @@ async function __fetchTechDocs(){
 }
 
 async function __fetchTechDocCategories(){
-  // K sÃ¼tunundan okunan kategori listesi (boÅsa A sÃ¼tunundan tÃ¼retilir)
+  // K sÃ¼tunundan okunan kategori listesi (boÅsa A sÃ¼tunundan tÃ¼retilir)
   if(!SCRIPT_URL) return [];
   try{
     const r = await fetch(SCRIPT_URL, {
@@ -5152,7 +5152,7 @@ function __renderTechList(tabKey, items){
   if(!listEl) return;
 
   if(!items || items.length===0){
-    listEl.innerHTML = `<div style="padding:16px;opacity:.75">Bu baÅlÄ±k altÄ±nda henÃ¼z iÃ§erik yok. (Sheet: Teknik_Dokumanlar)</div>`;
+    listEl.innerHTML = `<div style="padding:16px;opacity:.75">Bu baÅlÄ±k altÄ±nda henÃ¼z iÃ§erik yok. (Sheet: Teknik_Dokumanlar)</div>`;
     return;
   }
 
@@ -5243,7 +5243,7 @@ async function loadTechCategoryOptions(){
 }
 
 function techTabLabel(tabKey){
-  const m = { broadcast:'YayÄ±n', access:'EriÅim SorunlarÄ±', app:'App HatalarÄ±', activation:'Aktivasyon', info:'Bilgi', payment:'Ãdeme SorunlarÄ±' };
+  const m = { broadcast:'YayÄ±n', access:'EriÅim SorunlarÄ±', app:'App HatalarÄ±', activation:'Aktivasyon', info:'Bilgi', payment:'Ãdeme SorunlarÄ±' };
   return m[tabKey] || 'YayÄ±n';
 }
 
@@ -5264,7 +5264,7 @@ async function addTechDoc(tabKey){
       <select id="td-cat" class="swal2-select" style="width:100%;max-width:420px">
         ${optionsHtml}
       </select>
-      <input id="td-title" class="swal2-input" placeholder="BaÅlÄ±k">
+      <input id="td-title" class="swal2-input" placeholder="BaÅlÄ±k">
       <textarea id="td-content" class="swal2-textarea" placeholder="Ä°Ã§erik"></textarea>
       <input id="td-step" class="swal2-input" placeholder="AdÄ±m (opsiyonel)">
       <input id="td-note" class="swal2-input" placeholder="Not (opsiyonel)">
@@ -5277,7 +5277,7 @@ async function addTechDoc(tabKey){
       const cat = (document.getElementById('td-cat')?.value || defaultLabel || '').trim();
       if(!cat) return Swal.showValidationMessage('Kategori zorunlu');
       const title = (document.getElementById('td-title').value||'').trim();
-      if(!title) return Swal.showValidationMessage('BaÅlÄ±k zorunlu');
+      if(!title) return Swal.showValidationMessage('BaÅlÄ±k zorunlu');
       return {
         kategori: cat,
         baslik: title,
@@ -5327,7 +5327,7 @@ async function editTechDoc(tabKey, baslik){
       <select id="td-cat" class="swal2-select" style="width:100%;max-width:420px">
         ${optionsHtml}
       </select>
-      <input id="td-title" class="swal2-input" placeholder="BaÅlÄ±k" value="${__escapeHtml(it.baslik||'')}">
+      <input id="td-title" class="swal2-input" placeholder="BaÅlÄ±k" value="${__escapeHtml(it.baslik||'')}">
       <textarea id="td-content" class="swal2-textarea" placeholder="Ä°Ã§erik">${__escapeHtml(it.icerik||'')}</textarea>
       <input id="td-step" class="swal2-input" placeholder="AdÄ±m" value="${__escapeHtml(it.adim||'')}">
       <input id="td-note" class="swal2-input" placeholder="Not" value="${__escapeHtml(it.not||'')}">
@@ -5340,7 +5340,7 @@ async function editTechDoc(tabKey, baslik){
       const cat = (document.getElementById('td-cat')?.value || it.kategori || '').trim();
       if(!cat) return Swal.showValidationMessage('Kategori zorunlu');
       const title = (document.getElementById('td-title').value||'').trim();
-      if(!title) return Swal.showValidationMessage('BaÅlÄ±k zorunlu');
+      if(!title) return Swal.showValidationMessage('BaÅlÄ±k zorunlu');
       return {
         kategori: cat,
         baslik: title,
