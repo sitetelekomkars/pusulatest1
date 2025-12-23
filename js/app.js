@@ -5401,3 +5401,11 @@ window.switchTechTab = async function(tab){
 
 // expose for onclick
 try{ window.openMenuPermissions = openMenuPermissions; }catch(e){}
+// Değerlendirme geçmişi: ID üzerine çift tıkla kopyala
+document.addEventListener('dblclick', function(e){
+  const el = e.target.closest('[data-copy-id]');
+  if(!el) return;
+  const val = el.getAttribute('data-copy-id');
+  if(!val) return;
+  copyText(val);
+});
