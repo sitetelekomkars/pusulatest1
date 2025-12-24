@@ -37,12 +37,26 @@ body {
 #login-screen { 
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 5000; 
     display: flex; justify-content: center; align-items: center;
-    background: var(--primary);
+    /* Kurumsal geçiş (286C tonları) */
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 55%, var(--primary-light) 100%);
 }
 .login-card {
-    background: #1c2438; padding: 25px 40px; border-radius: 12px; text-align: center;
+    /* Kurumsal koyu panel */
+    background: #0e1b42;
+    padding: 25px 40px;
+    border-radius: 14px;
+    text-align: center;
     width: 300px; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-    border: 1px solid rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    position: relative;
+    overflow: hidden;
+}
+.login-card::before{
+    content:"";
+    position:absolute;
+    top:0;left:0;right:0;
+    height:4px;
+    background: linear-gradient(90deg, var(--secondary), var(--primary-light));
 }
 .login-logo-img {
     width: 90px;
@@ -1014,7 +1028,7 @@ body.editing .edit-icon { display: block !important; }
   box-shadow: 0 12px 28px rgba(0,0,0,0.10);
 }
 .home-hero-title{ font-size: 1.35rem; font-weight: 900; letter-spacing:.2px; }
-.home-hero-title #home-welcome-user{ color: var(--secondary); font-weight:900; }
+.home-hero-title #home-welcome-user{ color: #fff; font-weight:900; }
 .home-hero-sub{ opacity:.8; margin-top:4px; font-size:.95rem; }
 .home-hero-actions{ display:flex; flex-wrap:wrap; gap:10px; justify-content:flex-end; }
 .home-pill{
@@ -1266,4 +1280,4 @@ body.editing .edit-icon { display: block !important; }
 .news-ticker-box{background:rgba(0,51,160,.92)}
 /* Hoş geldin bar: kurumsal laciverte yakın ton */
 .home-hero{background:linear-gradient(135deg,#002766,#0033A0)}
-.home-hero-title #home-welcome-user{color:#CF0A2C}
+.home-hero-title #home-welcome-user{color:#fff}
