@@ -5372,18 +5372,16 @@ window.switchTechTab = async function(tab){
   try{
     // existing visual tab switch
     document.querySelectorAll('#tech-fullscreen .q-nav-item').forEach(li => li.classList.remove('active'));
-    const tabMap = {broadcast:'x-view-broadcast',access:'x-view-access',app:'x-view-app',activation:'x-view-activation',info:'x-view-info',payment:'x-view-payment',wizard:'x-view-wizard',cards:'x-view-cards'};
-    const viewId = tabMap[tab];
+    const tabMap = {wizard:'x-view-wizard',access:'x-view-access',app:'x-view-app',activation:'x-view-activation',payment:'x-view-payment',cards:'x-view-cards',info:'x-view-info'};
+    const viewId = tabMap[tab] || tabMap['wizard'];
     // activate clicked item
-    const items = Array.from(document.querySelectorAll('#tech-fullscreen .q-nav-menu .q-nav-item'));
-    const idx = ['broadcast','access','app','activation','payment','info','wizard','cards'].indexOf(tab);
-    if(idx>=0 && items[idx]) items[idx].classList.add('active');
-
-    document.querySelectorAll('#tech-fullscreen .q-view-section').forEach(v => v.classList.remove('active'));
+    const byData = document.querySelector(`#tech-fullscreen .q-nav-item[data-tech-tab="${tab}"]`);
+    if(byData) byData.classList.add('active');
+document.querySelectorAll('#tech-fullscreen .q-view-section').forEach(v => v.classList.remove('active'));
     const viewEl = document.getElementById(viewId);
     if(viewEl) viewEl.classList.add('active');
 
-    if(['broadcast','access','app','activation','payment','info'].includes(tab)){
+    if(['access','app','activation','payment','info'].includes(tab)){
       const all = await loadTechDocsIfNeeded(false);
       const filtered = all.filter(x => x.categoryKey === tab);
       __renderTechList(tab, filtered);
