@@ -1257,3 +1257,13 @@ body.editing .edit-icon { display: block !important; }
 
 /* Hide TeleSatış segment filter row (in case html remains) */
 #t-segment-filter{ display:none !important; }
+
+
+/* --- Kurumsal düzenleme hotfix (2025-12-25) --- */
+.tech-side-top .q-name{color:#fff}
+.tech-side-top .q-role{color:rgba(255,255,255,.75)}
+/* Duyuru bar: üst panelden bir tık açık */
+.news-ticker-box{background:rgba(0,51,160,.92)}
+/* Hoş geldin bar: kurumsal laciverte yakın ton */
+.home-hero{background:linear-gradient(135deg,#002766,#0033A0)}
+.home-hero-title #home-welcome-user{color:#CF0A2C}
