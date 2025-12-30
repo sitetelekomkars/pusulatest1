@@ -275,6 +275,62 @@ let trainingData = [];
 let dashboardChart = null;
 // YENİ: Feedback Log Verisi (Manuel kayıt detayları için)
 let feedbackLogsData = [];
+
+// ==========================================================
+// --- KALİTE DASHBOARD MODU (Chat / TeleSatış) ---
+// ==========================================================
+/**
+ * Dashboard'ı iki ayrı kurumsal görünüme bölmek için kullanılan mod.
+ * - chat: sadece Chat değerlendirmeleri
+ * - telesales: sadece TeleSatış değerlendirmeleri
+ */
+let qualityDashboardMode = 'chat';
+
+function normalizeEvalGroup(v){
+  const s = String(v||'').toLowerCase();
+  // Türkçe karakter/çeşitli yazımlar
+  return s
+    .replaceAll('ş','s').replaceAll('ı','i').replaceAll('ğ','g')
+    .replaceAll('ü','u').replaceAll('ö','o').replaceAll('ç','c');
+}
+
+function resolveDashboardGroupForMode(mode){
+  if(mode === 'telesales') return 'Telesatış';
+  return 'Chat';
+}
+
+function setQualityDashboardMode(mode){
+  qualityDashboardMode = (mode === 'telesales') ? 'telesales' : 'chat';
+  // Başlık güncelle
+  try{
+    const t = document.getElementById('q-dashboard-title');
+    if(t) t.textContent = `${qualityDashboardMode === 'telesales' ? 'TeleSatış' : 'Chat'} - Genel Bakış`;
+  }catch(e){}
+
+  // Admin filtrelerinde grup dropdown'u: mod'a göre kilitle
+  try{
+    const groupSelect = document.getElementById('q-dash-group');
+    if(groupSelect && isAdminMode){
+      const wanted = resolveDashboardGroupForMode(qualityDashboardMode);
+      // option yoksa ekle (edge-case)
+      if(!Array.from(groupSelect.options||[]).some(o => o.value === wanted)){
+        const opt = document.createElement('option');
+        opt.value = wanted; opt.textContent = wanted;
+        groupSelect.appendChild(opt);
+      }
+      groupSelect.value = wanted;
+      groupSelect.style.display = 'none'; // ayrık dashboard = grup seçimi yok
+    }
+  }catch(e){}
+}
+
+function isEvaluationInDashboardMode(e){
+  const g = normalizeEvalGroup(e && e.group);
+  if(qualityDashboardMode === 'telesales'){
+    return g.includes('telesatis');
+  }
+  return g.includes('chat');
+}
 // ==========================================================
 // --- KALİTE PUANLAMA LOGİĞİ: CHAT (BUTON TABANLI) ---
 // ==========================================================
@@ -2336,21 +2392,40 @@ function closeFullQuality() {
     }
 }
 // Sekme Değiştirme
-function switchQualityTab(tabName, element) {
+function switchQualityTab(tabName, modeOrElement) {
     // Menu active class
     document.querySelectorAll('.q-nav-item').forEach(item => item.classList.remove('active'));
-    // Element varsa onu aktif yap, yoksa varsayılanı (dashboard) bulup aktif yap
-    if (element) {
-        element.classList.add('active');
-    } else {
-        document.querySelector(`.q-nav-item[onclick*="${tabName}"]`).classList.add('active');
+
+    /** @type {HTMLElement|null} */
+    let activeItem = null;
+    let requestedMode = null;
+
+    if (modeOrElement && typeof modeOrElement === 'object' && modeOrElement.classList) {
+        activeItem = /** @type {HTMLElement} */ (modeOrElement);
+        requestedMode = activeItem.getAttribute('data-qmode');
+    } else if (typeof modeOrElement === 'string') {
+        requestedMode = modeOrElement;
     }
+
+    if (!activeItem) {
+        if (tabName === 'dashboard') {
+            const mode = (requestedMode === 'telesales') ? 'telesales' : 'chat';
+            activeItem = document.querySelector(`.q-nav-item[data-qtab="dashboard"][data-qmode="${mode}"]`);
+        } else {
+            activeItem = document.querySelector(`.q-nav-item[data-qtab="${tabName}"]`);
+        }
+    }
+    if (activeItem) activeItem.classList.add('active');
     
     // View active class
     document.querySelectorAll('.q-view-section').forEach(section => section.classList.remove('active'));
     document.getElementById(`view-${tabName}`).classList.add('active');
     // Veri Yükleme
-    if (tabName === 'dashboard') loadQualityDashboard();
+    if (tabName === 'dashboard') {
+        const mode = (requestedMode === 'telesales') ? 'telesales' : (requestedMode === 'chat' ? 'chat' : (activeItem && activeItem.getAttribute('data-qmode')));
+        setQualityDashboardMode(mode || 'chat');
+        loadQualityDashboard();
+    }
     else if (tabName === 'evaluations') fetchEvaluationsForAgent();
     // DÜZELTME: Feedback sekmesi açılırken önce Feedback_Logs çekilmeli
     else if (tabName === 'feedback') {
@@ -2404,7 +2479,10 @@ function populateDashboardFilters() {
         opt.value = g; opt.innerText = g;
         groupSelect.appendChild(opt);
     });
-    // İlk yüklemede tüm agentları listele
+    // Ayrık dashboard modunu tekrar uygula (populateDashboardFilters display ayarlarını ezebilir)
+    try { setQualityDashboardMode(qualityDashboardMode); } catch (e) {}
+
+    // İlk yüklemede agent listesini listele
     updateDashAgentList();
 }
 // YENİ: Dashboard Agent Listesini Güncelleme
@@ -2685,6 +2763,9 @@ function loadQualityDashboard() {
         let filtered = allEvaluationsData.filter(e => {
             const eDate = e.date.substring(3); // dd.MM.yyyy -> MM.yyyy
             const matchMonth = (eDate === selectedMonth);
+
+            // Ayrık dashboard modu: Chat / TeleSatış
+            const matchMode = isEvaluationInDashboardMode(e);
             
             let matchGroup = true;
             let matchAgent = true;
@@ -2707,7 +2788,7 @@ function loadQualityDashboard() {
             }
             // MANUEL kayıtları dashboard'da gösterme
             const isManual = e.callId && String(e.callId).toUpperCase().startsWith('MANUEL-');
-            return matchMonth && matchGroup && matchAgent && !isManual;
+            return matchMonth && matchMode && matchGroup && matchAgent && !isManual;
         });
         const total = filtered.reduce((acc, curr) => acc + (parseInt(curr.score)||0), 0);
         const count = filtered.length;
