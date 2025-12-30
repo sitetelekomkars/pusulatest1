@@ -1371,3 +1371,17 @@ body.editing .edit-icon { display: block !important; }
 
 /* Filters: keep compact on smaller screens */
 .q-dash-filters .minimal-select{ min-width: 120px; }
+
+/* --- Kalite Dashboard İyileştirmeleri --- */
+#q-dash-worst{
+  font-size: 1.35rem; /* daha küçük punto */
+  line-height: 1.15;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Chart.js veri etiketleri küçük ve okunur kalsın */
+.chartjs-render-monitor{ }
