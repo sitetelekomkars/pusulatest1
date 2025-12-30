@@ -65,7 +65,98 @@
   </div>
 </div><div id="loading" style="text-align:center;padding:40px;color:#999"><i class="fas fa-circle-notch fa-spin fa-2x" aria-hidden="true"></i><br><span style="font-size:.9rem;margin-top:10px;display:block">Veriler güncelleniyor...</span></div><div class="grid" id="cardGrid"></div></div></div><div id="news-modal" class="modal-overlay"><div class="modal-content"><span class="close-modal" onclick='closeModal("news-modal")'>&times;</span><h2 style="color:var(--primary)">📢 Duyurular</h2><div id="news-container"></div></div></div><div id="wizard-modal" class="modal-overlay"><div class="modal-content"><span class="close-modal" onclick='closeModal("wizard-modal")'>&times;</span><div id="wizard-body"></div></div></div><div id="tech-wizard-modal" class="modal-overlay"><div class="modal-content" style="max-width:900px;padding:0;overflow:hidden;display:flex;flex-direction:column"><div style="background-color:#0e1b42;color:#fabb00;padding:20px;text-align:center;font-size:1.4rem;font-weight:800;border-bottom:5px solid #fabb00;position:relative">📺 S Sport Plus - Teknik Çözüm Sihirbazı<span class="close-modal" onclick='closeModal("tech-wizard-modal")' style="color:#fff;top:15px;right:20px">&times;</span></div><div style="background-color:#eaeaea;padding:10px 25px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #ccc"><button id="tw-btn-back" class="btn btn-copy" style="background:#6c757d;color:#fff;display:none" onclick="twGoBack()">⬅ Önceki Adım</button><button class="btn btn-copy" style="background:#d32f2f;color:#fff" onclick="twResetWizard()">↻ Ba ş a D ö n</button></div><div id="tech-wizard-content" style="padding:30px;overflow-y:auto;max-height:60vh"></div></div></div><div id="guide-modal" class="modal-overlay"><div class="modal-content"><span class="close-modal" onclick='closeModal("guide-modal")'>&times;</span><h2 style="text-align:center;color:var(--primary)">📖 Spor Terimleri & İçerik Rehberi</h2><div class="guide-grid" id="guide-grid"></div></div></div><div id="sales-modal" class="modal-overlay"><div class="modal-content"><span class="close-modal" onclick='closeModal("sales-modal")'>&times;</span><h2 style="text-align:center;color:var(--sales)">📞 Satış Scriptleri</h2><div class="sales-grid" id="sales-grid"></div></div></div><div id="penalty-modal" class="modal-overlay"><div class="modal-content" style="max-width:650px;background:#1a1a1a;border:1px solid #333;min-height:600px;display:flex;flex-direction:column"><span class="close-modal" onclick='closeModal("penalty-modal")'>&times;</span><h2 style="text-align:center;color:#fabb00;margin-top:0">⚽ S Sport Arena</h2><div id="penalty-lobby" style="text-align:center;padding:20px;flex-grow:1;display:flex;flex-direction:column;align-items:center;justify-content:center"><h3 style="color:#fff;margin-bottom:15px">🏆 Liderlik Tablosu (Top 5)</h3><div id="leaderboard-loader" style="color:#aaa">Yükleniyor...</div><table id="leaderboard-table" style="width:100%;color:#eee;border-collapse:collapse;margin-bottom:30px;display:none"><thead><tr style="border-bottom:1px solid #555;color:#fabb00"><th style="padding:10px">#</th><th style="padding:10px">Temsilci</th><th style="padding:10px">Maç</th><th style="padding:10px">Ort.</th></tr></thead><tbody id="leaderboard-body"></tbody></table><button class="penalty-btn" style="width:200px;background:#2e7d32;color:#fff;border-color:#1b5e20" onclick="startGameFromLobby()">MAÇA BAŞLA 🏃 ‍ ♂️⚽</button></div><div id="penalty-game-area" style="display:none"><div class="penalty-stats"><span>SKOR:<span id="p-score">0</span></span><span>TOP:<span id="p-balls">10</span></span></div><div id="double-indicator" class="double-indicator" style="display:none">2. ŞANS AKTİF</div><div class="penalty-field"><div class="stadium-stands"></div><div class="grass-stripes"></div><div class="goal-container"><div class="goal-net"></div><div class="goal-top-bar"></div><div class="goal-post-left"></div><div class="goal-post-right"></div><div id="keeper-wrap" class="keeper-wrapper"><div class="player-figure"><div class="head"></div><div class="torso"></div><div class="arms"><div class="arm left"><div class="gloves"></div></div><div class="arm right"><div class="gloves"></div></div></div><div class="shorts"></div><div class="legs"><div class="leg left"></div><div class="leg right"></div></div></div><div class="keeper-shadow"></div></div></div><div class="goal-message" id="goal-msg">GOL!</div><div class="penalty-area"></div><div class="penalty-spot-mark"></div><div id="ball-wrap" class="ball-wrapper"><div class="football"></div><div class="ball-shadow"></div></div><div id="shooter-wrap" class="shooter-wrapper"><div class="player-figure"><div class="head"></div><div class="torso"></div><div class="arms"><div class="arm left"></div><div class="arm right"></div></div><div class="shorts"></div><div class="legs"><div class="leg left"><div class="sock"></div><div class="shoe"></div></div><div class="leg right"><div class="sock"></div><div class="shoe"></div></div></div></div></div></div><div style="margin-top:15px;color:#ddd;min-height:50px;font-weight:500;text-align:center;padding:10px;background:rgba(255,255,255,.05);border-radius:8px" id="p-question-text">Soru yükleniyor...</div><div id="joker-container" style="display:flex;justify-content:space-around;margin:15px 0"><button id="joker-call" class="joker-btn" onclick='useJoker("call")' title="Telefon Jokeri">📞 Telefon</button><button id="joker-half" class="joker-btn" onclick='useJoker("half")' title="Yarı Yarıya Joker">✂️ 50:50</button><button id="joker-double" class="joker-btn" onclick='useJoker("double")' title="Çift Cevap Hakkı">2️ ⃣ Ç ift Cevap</button></div><div class="penalty-options" id="p-options"></div><button id="p-restart-btn" class="restart-btn" style="display:none;width:100%;background:#fabb00;color:#000;font-weight:700" onclick="showLobby()">LOBİYE DÖN 🏠</button></div></div></div>
 
-<div id="quality-fullscreen" class="quality-fullscreen-wrapper" style="display:none"><div class="q-sidebar"><div class="q-sidebar-header"><i class="fas fa-chart-line fa-lg" aria-hidden="true"></i><span>S Sport Pusula</span></div><div class="q-user-profile"><div class="q-avatar-circle" id="q-side-avatar">U</div><div class="q-user-info"><div class="q-user-name" id="q-side-name">Kullanıcı Adı</div><div class="q-user-role" id="q-side-role">Temsilci</div></div></div><ul class="q-nav-menu"><li class="q-nav-item active" onclick='switchQualityTab("dashboard")'><i class="fas fa-home" aria-hidden="true"></i>Dashboard</li><li class="q-nav-item" onclick='switchQualityTab("evaluations")'><i class="fas fa-list-alt" aria-hidden="true"></i>Değerlendirmeler</li><li class="q-nav-item" onclick='switchQualityTab("feedback")'><i class="fas fa-comment-dots" aria-hidden="true"></i>Geri Bildirimler</li><li class="q-nav-item" onclick='switchQualityTab("training")'><i class="fas fa-graduation-cap" aria-hidden="true"></i>Eğitimlerim</li></ul><div class="q-sidebar-footer"><button onclick="closeFullQuality()" class="q-exit-btn"><i class="fas fa-sign-out-alt" aria-hidden="true"></i>Geri</button></div></div><div class="q-content"><div id="view-dashboard" class="q-view-section active"><div class="q-view-header" style="flex-wrap:wrap;gap:10px"><h2>Genel Bakış</h2><div style="display:flex;gap:10px;margin-left:auto;align-items:center;flex-wrap:wrap"><select id="q-dash-group" onchange="updateDashAgentList()" class="minimal-select" style="max-width:120px"><option value="all">Tüm Gruplar</option></select><select id="q-dash-agent" onchange="refreshQualityData()" class="minimal-select" style="max-width:130px"><option value="all">Tüm Temsilciler</option></select><div class="q-period-selector" style="margin-left:10px"><span>Dönem:</span><select id="q-dash-month" onchange="refreshQualityData()"></select></div></div></div><div class="q-stats-row"><div class="q-stat-box box-blue"><div class="stat-icon"><i class="fas fa-star" aria-hidden="true"></i></div><div class="stat-info"><span class="stat-val" id="q-dash-score">-</span><span class="stat-label">Ortalama Puan</span></div></div><div class="q-stat-box box-green"><div class="stat-icon"><i class="fas fa-phone-volume" aria-hidden="true"></i></div><div class="stat-info"><span class="stat-val" id="q-dash-count">-</span><span class="stat-label">Değerlendirilen</span></div></div><div class="q-stat-box box-orange"><div class="stat-icon"><i class="fas fa-bullseye" aria-hidden="true"></i></div><div class="stat-info"><span class="stat-val" id="q-dash-target">-%</span><span class="stat-label">Hedef Başarısı</span></div></div></div><div class="q-dashboard-grid"><div class="q-chart-card"><h3 id="q-dash-ring-title">Puan Durumu</h3><div class="score-circle-outer large-ring" id="q-dash-ring"><div class="score-circle-inner" id="q-dash-ring-text">-</div></div><div id="q-dash-agent-scores" class="q-dash-agent-scores" style="display:none"></div></div><div class="q-chart-card" style="flex:2"><h3>Puan Kırılımları</h3><div style="position:relative;height:220px;width:100%"><canvas id="q-breakdown-chart"></canvas></div></div></div></div><div id="view-evaluations" class="q-view-section"><div class="q-view-header"><h2>Değerlendirme Geçmişi</h2><div id="admin-filters" style="display:none;gap:10px"><button class="add-btn" onclick="logEvaluationPopup()"><i class="fas fa-plus" aria-hidden="true"></i>Ekle</button><button class="admin-btn" onclick="exportEvaluations()"><i class="fas fa-file-csv" aria-hidden="true"></i>Rapor</button><select id="q-admin-group" onchange="updateAgentListBasedOnGroup()" class="minimal-select"><option value="all">Tüm Gruplar</option></select><select id="q-admin-agent" onchange="fetchEvaluationsForAgent()" class="minimal-select"><option value="all">Tüm Temsilciler</option></select></div></div><div id="evaluations-list" class="q-scroll-area"></div></div><div id="view-feedback" class="q-view-section"><div class="q-view-header"><h2>Geri Bildirimler</h2><div id="q-feedback-filters" style="display:flex;gap:10px;margin-left:auto;align-items:center;flex-wrap:wrap"><select id="q-feedback-group" onchange="updateFeedbackAgentList()" style="width:120px"><option value="all">Tüm Gruplar</option></select><select id="q-feedback-agent" onchange="refreshFeedbackData()" style="width:130px"><option value="all">Tüm Temsilciler</option></select></div><button id="manual-feedback-admin-btn" class="add-manual-feedback-btn" style="display:none" onclick="addManualFeedbackPopup()"><i class="fas fa-plus-circle" aria-hidden="true"></i>Geri Bildirim Ekle</button></div><div id="feedback-list" class="q-scroll-area"></div></div><div id="view-training" class="q-view-section"><div class="q-view-header"><h2>Eğitim & Gelişim</h2><button id="assign-training-btn" class="add-btn" style="display:none" onclick="assignTrainingPopup()">+ Eğitim Ata</button></div><div id="training-list" class="q-training-grid"></div></div></div></div><div class="crafted-by-badge">Crafted by Doğuş Yalçınkaya</div><script src="js/app.js"></script><script>function toggleUserDropdown() {
+<div id="quality-fullscreen" class="quality-fullscreen-wrapper" style="display:none"><div class="q-sidebar"><div class="q-sidebar-header"><i class="fas fa-chart-line fa-lg" aria-hidden="true"></i><span>S Sport Pusula</span></div><div class="q-user-profile"><div class="q-avatar-circle" id="q-side-avatar">U</div><div class="q-user-info"><div class="q-user-name" id="q-side-name">Kullanıcı Adı</div><div class="q-user-role" id="q-side-role">Temsilci</div></div></div><ul class="q-nav-menu"><li class="q-nav-item active" onclick='switchQualityTab("dashboard")'><i class="fas fa-home" aria-hidden="true"></i>Dashboard</li><li class="q-nav-item" onclick='switchQualityTab("evaluations")'><i class="fas fa-list-alt" aria-hidden="true"></i>Değerlendirmeler</li><li class="q-nav-item" onclick='switchQualityTab("feedback")'><i class="fas fa-comment-dots" aria-hidden="true"></i>Geri Bildirimler</li><li class="q-nav-item" onclick='switchQualityTab("training")'><i class="fas fa-graduation-cap" aria-hidden="true"></i>Eğitimlerim</li></ul><div class="q-sidebar-footer"><button onclick="closeFullQuality()" class="q-exit-btn"><i class="fas fa-sign-out-alt" aria-hidden="true"></i>Geri</button></div></div><div class="q-content"><div id="view-dashboard" class="q-view-section active">
+  <div class="q-view-header q-dash-header" style="flex-wrap:wrap;gap:10px">
+    <h2>Genel Bakış</h2>
+    <div class="q-dash-filters" style="display:flex;gap:10px;margin-left:auto;align-items:center;flex-wrap:wrap">
+      <select id="q-dash-group" onchange="updateDashAgentList()" class="minimal-select" style="max-width:140px">
+        <option value="all">Tüm Gruplar</option>
+      </select>
+      <select id="q-dash-agent" onchange="refreshQualityData()" class="minimal-select" style="max-width:150px">
+        <option value="all">Tüm Temsilciler</option>
+      </select>
+      <select id="q-dash-channel" onchange="refreshQualityData()" class="minimal-select" style="max-width:120px">
+        <option value="all">Tüm Kanallar</option>
+        <option value="sales">Satış</option>
+        <option value="chat">Chat</option>
+        <option value="other">Diğer</option>
+      </select>
+      <div class="q-period-selector" style="margin-left:10px">
+        <span>Dönem:</span>
+        <select id="q-dash-month" onchange="refreshQualityData()"></select>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-stats-row q-stats-row-4">
+    <div class="q-stat-box box-blue">
+      <div class="stat-icon"><i class="fas fa-star" aria-hidden="true"></i></div>
+      <div class="stat-info"><span class="stat-val" id="q-dash-score">-</span><span class="stat-label">Ortalama Puan</span></div>
+    </div>
+    <div class="q-stat-box box-green">
+      <div class="stat-icon"><i class="fas fa-phone-volume" aria-hidden="true"></i></div>
+      <div class="stat-info"><span class="stat-val" id="q-dash-count">-</span><span class="stat-label">Değerlendirilen</span></div>
+    </div>
+    <div class="q-stat-box box-orange">
+      <div class="stat-icon"><i class="fas fa-bullseye" aria-hidden="true"></i></div>
+      <div class="stat-info"><span class="stat-val" id="q-dash-target">-%</span><span class="stat-label">90+ Oranı</span></div>
+    </div>
+    <div class="q-stat-box box-red">
+      <div class="stat-icon"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i></div>
+      <div class="stat-info"><span class="stat-val" id="q-dash-worst">-</span><span class="stat-label">En Zayıf Kriter</span></div>
+    </div>
+  </div>
+
+  <div class="q-dashboard-grid v2">
+    <div class="q-chart-card q-card-ring">
+      <h3 id="q-dash-ring-title">Puan Durumu</h3>
+      <div class="score-circle-outer large-ring" id="q-dash-ring"><div class="score-circle-inner" id="q-dash-ring-text">-</div></div>
+      <div id="q-dash-agent-scores" class="q-dash-agent-scores" style="display:none"></div>
+    </div>
+
+    <div class="q-chart-card q-card-wide">
+      <div class="q-card-head">
+        <h3>Puan Trendi</h3>
+        <div class="q-card-sub" id="q-trend-sub">Seçili dönem günlük ortalama</div>
+      </div>
+      <div class="q-chart-wrap"><canvas id="q-trend-chart"></canvas></div>
+    </div>
+
+    <div class="q-chart-card">
+      <div class="q-card-head">
+        <h3>Kanal Dağılımı</h3>
+        <div class="q-card-sub" id="q-channel-sub">Satış / Chat</div>
+      </div>
+      <div class="q-chart-wrap" style="height:230px"><canvas id="q-channel-chart"></canvas></div>
+    </div>
+
+    <div class="q-chart-card">
+      <div class="q-card-head">
+        <h3>Puan Dağılımı</h3>
+        <div class="q-card-sub">Skor aralıkları</div>
+      </div>
+      <div class="q-chart-wrap" style="height:230px"><canvas id="q-score-dist-chart"></canvas></div>
+    </div>
+
+    <div class="q-chart-card q-card-wide">
+      <div class="q-card-head">
+        <h3>Puan Kırılımları</h3>
+        <div class="q-card-sub">En düşük 6 kriter</div>
+      </div>
+      <div class="q-chart-wrap"><canvas id="q-breakdown-chart"></canvas></div>
+    </div>
+
+    <div class="q-chart-card q-card-wide">
+      <div class="q-card-head">
+        <h3>Takım Ortalamaları</h3>
+        <div class="q-card-sub" id="q-group-sub">En düşükten en yükseğe</div>
+      </div>
+      <div class="q-chart-wrap"><canvas id="q-group-avg-chart"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<div id="view-evaluations" class="q-view-section"><div class="q-view-header"><h2>Değerlendirme Geçmişi</h2><div id="admin-filters" style="display:none;gap:10px"><button class="add-btn" onclick="logEvaluationPopup()"><i class="fas fa-plus" aria-hidden="true"></i>Ekle</button><button class="admin-btn" onclick="exportEvaluations()"><i class="fas fa-file-csv" aria-hidden="true"></i>Rapor</button><select id="q-admin-group" onchange="updateAgentListBasedOnGroup()" class="minimal-select"><option value="all">Tüm Gruplar</option></select><select id="q-admin-agent" onchange="fetchEvaluationsForAgent()" class="minimal-select"><option value="all">Tüm Temsilciler</option></select></div></div><div id="evaluations-list" class="q-scroll-area"></div></div><div id="view-feedback" class="q-view-section"><div class="q-view-header"><h2>Geri Bildirimler</h2><div id="q-feedback-filters" style="display:flex;gap:10px;margin-left:auto;align-items:center;flex-wrap:wrap"><select id="q-feedback-group" onchange="updateFeedbackAgentList()" style="width:120px"><option value="all">Tüm Gruplar</option></select><select id="q-feedback-agent" onchange="refreshFeedbackData()" style="width:130px"><option value="all">Tüm Temsilciler</option></select></div><button id="manual-feedback-admin-btn" class="add-manual-feedback-btn" style="display:none" onclick="addManualFeedbackPopup()"><i class="fas fa-plus-circle" aria-hidden="true"></i>Geri Bildirim Ekle</button></div><div id="feedback-list" class="q-scroll-area"></div></div><div id="view-training" class="q-view-section"><div class="q-view-header"><h2>Eğitim & Gelişim</h2><button id="assign-training-btn" class="add-btn" style="display:none" onclick="assignTrainingPopup()">+ Eğitim Ata</button></div><div id="training-list" class="q-training-grid"></div></div></div></div><div class="crafted-by-badge">Crafted by Doğuş Yalçınkaya</div><script src="js/app.js"></script><script>function toggleUserDropdown() {
             const dropdown = document.getElementById('userDropdown');
             const arrow = document.getElementById('user-menu-arrow');
             dropdown.classList.toggle('show');
