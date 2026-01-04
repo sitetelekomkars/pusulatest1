@@ -19,7 +19,7 @@ body {
     font-family: 'Segoe UI', 'Roboto', Helvetica, Arial, sans-serif; 
     background-color: var(--bg); 
     color: var(--text-dark);
-    user-select: none; 
+    user-select: text; 
     overflow-x: hidden;
 }
 /* --- LOGIN SCREEN --- */
@@ -1384,31 +1384,24 @@ body.editing .edit-icon { display: block !important; }
 /* Filters: keep compact on smaller screens */
 .q-dash-filters .minimal-select{ min-width: 120px; }
 
-/* Forgot password link */
+/* --- P0 Patch: a11y & security improvements --- */
 .forgot-link{
   display:block;
-  margin-top:12px;
+  margin-top:10px;
   text-align:center;
   font-size:0.9rem;
-  color:#6a5acd;
-  text-decoration:none;
+  color: var(--primary);
+  text-decoration: underline;
 }
-.forgot-link:hover{ text-decoration:underline; }
+.forgot-link:focus{
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
 
-/* Quality objections */
-.q-objection-btn{
-  margin-top:10px;
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  border:1px solid rgba(0,0,0,.12);
-  background:#fff;
-  padding:8px 10px;
-  border-radius:8px;
-  font-weight:600;
-  cursor:pointer;
-}
-.q-objection-btn:disabled{
-  opacity:.6;
-  cursor:not-allowed;
-}
+.ticker-date{ color:#fabb00; font-weight:700; }
+.ticker-title{ color:#fabb00; font-weight:700; }
+.ticker-desc{ color:#ddd; }
+.news-card{ background:#151515; border:1px solid #2a2a2a; border-radius:12px; padding:12px; margin-bottom:10px; }
+.news-card h3{ margin:0 0 6px 0; font-size:1rem; }
+.news-meta{ display:flex; gap:8px; align-items:center; margin-top:8px; flex-wrap:wrap; }
+.news-tag{ font-size:0.75rem; padding:3px 8px; border-radius:999px; background:#333; color:#fff; }
