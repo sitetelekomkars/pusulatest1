@@ -1,3 +1,14 @@
+
+function formatShiftDate(d){
+    try{
+        const dt=new Date(d);
+        if(!isNaN(dt)){
+            return dt.toLocaleDateString('tr-TR',{weekday:'short', day:'2-digit', month:'2-digit'});
+        }
+    }catch(e){}
+    return d;
+}
+
 const BAKIM_MODU = false;
 
 function showGlobalError(message){
@@ -4957,7 +4968,7 @@ function renderShiftData(shifts){
         if(myRow && headers.length){
             const cellsHtml = headers.map((h,idx)=>{
                 const v = (myRow.cells || [])[idx] || '';
-                return `<div class="shift-day"><div class="shift-day-date">${escapeHtml(h)}</div><div class="shift-day-slot">${escapeHtml(v)}</div></div>`;
+                return `<div class="shift-day"><div class="shift-day-date">${formatShiftDate(h)}</div><div class="shift-day-slot">${escapeHtml(v)}</div></div>`;
             }).join('');
             myPlanEl.innerHTML = `
                 <div class="shift-card-header">Benim Vardiyam</div>
@@ -4976,7 +4987,7 @@ function renderShiftData(shifts){
             tableWrap.innerHTML = '<p style="color:#666;">Vardiya tablosu henüz hazırlanmadı.</p>';
         }else{
             let html = '<table class="shift-table"><thead><tr><th>Temsilci</th>';
-            headers.forEach(h => { html += `<th>${escapeHtml(h)}</th>`; });
+            headers.forEach(h => { html += `<th>${formatShiftDate(h)}</th>`; });
             html += '</tr></thead><tbody>';
             rows.forEach(r => {
                 html += '<tr>';
