@@ -1918,428 +1918,287 @@ const QUICK_DECISION_BANK = [
     }
 ];
 
-function resetQuickDecision() {
-    if (qdTimer) { clearInterval(qdTimer); qdTimer = null; }
-    qdTimeLeft = 30; qdScore = 0; qdStep = 0; qdQueue = [];
-    openQuickDecisionGame();
-}
+// --- GAME CONTROLLER & DEMO DATA ---
+const DEFAULT_GAME_DATA = {
+    quickDecision: [
+        { q: 'Müşteri: "İptal etmek istiyorum!" İlk tepkin?', opts: ['Nedenini sorarım.', 'Hemen iptal işlemini başlatırım.', 'İkna teklifi sunarım.'], a: 0, exp: 'Önce sebebi anlamak, doğru çözüm sunmanın anahtarıdır.' },
+        { q: 'Yayın donuyor şikayeti geldi. İlk kontrol?', opts: ['Hız testi isterim.', 'Modem resetletirim.', 'Genel arıza kontrolü yaparım.'], a: 2, exp: 'Genel bir sorun varsa bireysel çözümle vakit kaybetme.' }
+    ],
+    penalty: [
+        { q: 'S Sport Plus hangi platformlarda var?', opts: ['Sadece Web', 'Web, Mobil, Smart TV', 'Sadece TV'], a: 1 },
+        { q: 'EuroLeague yayın hakları bizde mi?', opts: ['Evet', 'Hayır', 'Kısmen'], a: 0 }
+    ]
+};
 
-function startQuickDecision() {
-    const bank = Array.isArray(quickDecisionQuestions) ? quickDecisionQuestions : [];
-    if (!bank.length) {
-        Swal.fire('Bilgi', 'Sorular henüz yüklenmedi. Lütfen admin panelden soruları ekleyin ve sayfayı yenileyin.', 'info');
-        return;
-    }
+const GameController = {
+    // --- Shared State ---
+    state: {
+        score: 0,
+        balls: 10,
+        qIndex: 0,
+        timer: null,
+        timeLeft: 30,
+        activeGame: null,
+        jokers: { call: 1, half: 1, double: 1 },
+        queue: []
+    },
 
-    const take = Math.min(5, bank.length);
-    const idxs = Array.from({ length: bank.length }, (_, i) => i).sort(() => Math.random() - 0.5).slice(0, take);
-    qdQueue = idxs.map(i => bank[i]);
-    qdTimeLeft = 30;
-    qdScore = 0;
-    qdStep = 0;
+    // --- QUICK DECISION GAME ---
+    startQuickDecision: function () {
+        this.state.activeGame = 'quick';
+        const bank = (quickDecisionQuestions && quickDecisionQuestions.length) ? quickDecisionQuestions : DEFAULT_GAME_DATA.quickDecision;
 
-    const lobby = document.getElementById('qd-lobby');
-    const game = document.getElementById('qd-game');
-    if (lobby) lobby.style.display = 'none';
-    if (game) game.style.display = 'block';
+        // Random 5 Q
+        const take = Math.min(5, bank.length);
+        const idxs = Array.from({ length: bank.length }, (_, i) => i).sort(() => Math.random() - 0.5).slice(0, take);
+        this.state.queue = idxs.map(i => bank[i]);
 
-    updateQuickHud();
-    renderQuickQuestion();
+        this.state.timeLeft = 30;
+        this.state.score = 0;
+        this.state.qIndex = 0;
 
-    if (qdTimer) clearInterval(qdTimer);
-    qdTimer = setInterval(() => {
-        qdTimeLeft -= 1;
-        updateQuickHud();
-        if (qdTimeLeft <= 0) {
-            finishQuickDecision(true);
-        }
-    }, 1000);
-}
+        document.getElementById('qd-lobby').style.display = 'none';
+        document.getElementById('qd-game').style.display = 'block';
 
-function updateQuickHud() {
-    const t = document.getElementById('qd-time'); if (t) t.innerText = String(Math.max(0, qdTimeLeft));
-    const s = document.getElementById('qd-score'); if (s) s.innerText = String(qdScore);
-    const st = document.getElementById('qd-step'); if (st) st.innerText = String(qdStep);
-}
+        this.updateQuickHud();
+        this.renderQuickQuestion();
 
-function renderQuickQuestion() {
-    const q = qdQueue[qdStep];
-    const qEl = document.getElementById('qd-question');
-    const optEl = document.getElementById('qd-options');
-    if (!qEl || !optEl || !q) return;
+        if (this.state.timer) clearInterval(this.state.timer);
+        this.state.timer = setInterval(() => {
+            this.state.timeLeft--;
+            this.updateQuickHud();
+            if (this.state.timeLeft <= 0) this.finishQuickDecision(true);
+        }, 1000);
+    },
 
-    qEl.innerText = q.q;
-    optEl.innerHTML = '';
+    updateQuickHud: function () {
+        const t = document.getElementById('qd-time'); if (t) t.innerText = String(Math.max(0, this.state.timeLeft));
+        const s = document.getElementById('qd-score'); if (s) s.innerText = String(this.state.score);
+        const st = document.getElementById('qd-step'); if (st) st.innerText = String(this.state.qIndex);
+    },
 
-    q.opts.forEach((txt, i) => {
-        const b = document.createElement('button');
-        b.className = 'quick-opt';
-        b.innerText = txt;
-        b.onclick = () => answerQuick(i);
-        optEl.appendChild(b);
-    });
-}
+    renderQuickQuestion: function () {
+        const q = this.state.queue[this.state.qIndex];
+        const qEl = document.getElementById('qd-question');
+        const optEl = document.getElementById('qd-options');
+        if (!qEl || !optEl || !q) return;
 
-function answerQuick(idx) {
-    const q = qdQueue[qdStep];
-    const optEl = document.getElementById('qd-options');
-    if (!q || !optEl) return;
+        qEl.innerText = q.q;
+        optEl.innerHTML = '';
 
-    const btns = Array.from(optEl.querySelectorAll('button'));
-    btns.forEach(b => b.disabled = true);
-
-    const correct = (idx === q.a);
-
-    if (btns[idx]) btns[idx].classList.add(correct ? 'good' : 'bad');
-    if (!correct && btns[q.a]) btns[q.a].classList.add('good');
-
-    // puanlama: doğru +2, yanlış -1
-    qdScore += correct ? 2 : -1;
-    if (qdScore < 0) qdScore = 0;
-    updateQuickHud();
-
-    Swal.fire({
-        toast: true,
-        position: 'top',
-        icon: correct ? 'success' : 'warning',
-        title: correct ? 'Doğru seçim!' : 'Yanlış seçim',
-        text: q.exp,
-        showConfirmButton: false,
-        timer: 1800
-    });
-
-    setTimeout(() => {
-        qdStep += 1;
-        updateQuickHud();
-        if (qdStep >= qdQueue.length) finishQuickDecision(false);
-        else renderQuickQuestion();
-    }, 650);
-}
-
-function finishQuickDecision(timeout) {
-    if (qdTimer) { clearInterval(qdTimer); qdTimer = null; }
-
-    const msg = timeout ? 'Süre bitti!' : 'Bitti!';
-    Swal.fire({
-        icon: 'info',
-        title: `🧠 Hızlı Karar ${msg}`,
-        html: `<div style="text-align:center;">
-                <div style="font-size:1.0rem; margin-bottom:8px;">Skorun: <b>${qdScore}</b></div>
-                <div style="color:#666; font-size:0.9rem;">İstersen yeniden başlatıp rekor deneyebilirsin.</div>
-              </div>`,
-        confirmButtonText: 'Tamam'
-    });
-
-    // Lobby'e dön
-    const lobby = document.getElementById('qd-lobby');
-    const game = document.getElementById('qd-game');
-    if (lobby) lobby.style.display = 'block';
-    if (game) game.style.display = 'none';
-    const t = document.getElementById('qd-time'); if (t) t.innerText = '30';
-    const st = document.getElementById('qd-step'); if (st) st.innerText = '0';
-}
-
-function openPenaltyGame() {
-    try { closeModal('game-hub-modal'); } catch (e) { }
-    document.getElementById('penalty-modal').style.display = 'flex';
-    showLobby();
-}
-
-function showLobby() {
-    document.getElementById('penalty-lobby').style.display = 'flex';
-    document.getElementById('penalty-game-area').style.display = 'none';
-    fetchLeaderboard();
-}
-
-function startGameFromLobby() {
-    document.getElementById('penalty-lobby').style.display = 'none';
-    document.getElementById('penalty-game-area').style.display = 'block';
-    startPenaltySession();
-}
-
-function fetchLeaderboard() {
-    const tbody = document.getElementById('leaderboard-body');
-    const loader = document.getElementById('leaderboard-loader');
-    const table = document.getElementById('leaderboard-table');
-
-    if (!tbody || !loader || !table) return;
-
-    tbody.innerHTML = '';
-    loader.style.display = 'block';
-    table.style.display = 'none';
-
-    fetch(SCRIPT_URL, {
-        method: 'POST',
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "getLeaderboard" })
-    })
-        .then(r => r.json())
-        .then(data => {
-            loader.style.display = 'none';
-            if (data.result !== "success") {
-                loader.innerText = "Yüklenemedi.";
-                loader.style.display = 'block';
-                return;
-            }
-
-            table.style.display = 'table';
-            let html = '';
-
-            if (!data.leaderboard || data.leaderboard.length === 0) {
-                html = '<tr><td colspan="4" style="text-align:center;">Henüz maç yapılmadı.</td></tr>';
-            } else {
-                data.leaderboard.forEach((u, i) => {
-                    const medal = i === 0 ? '🥇' : (i === 1 ? '🥈' : (i === 2 ? '🥉' : `<span class="rank-badge">${i + 1}</span>`));
-                    const bgStyle = (u.username === currentUser) ? 'background:rgba(250, 187, 0, 0.1);' : '';
-                    html += `<tr style="${bgStyle}"><td>${medal}</td><td>${u.username}</td><td>${u.games}</td><td>${u.average}</td></tr>`;
-                });
-            }
-            tbody.innerHTML = html;
-        })
-        .catch(() => {
-            loader.style.display = 'none';
-            loader.innerText = "Bağlantı hatası.";
-            loader.style.display = 'block';
+        q.opts.forEach((txt, i) => {
+            const b = document.createElement('button');
+            b.className = 'quick-opt';
+            b.innerText = txt;
+            b.onclick = () => this.answerQuick(i);
+            optEl.appendChild(b);
         });
-}
+    },
 
-function buildQuestionQueue() {
-    const n = quizQuestions.length;
-    const idxs = Array.from({ length: n }, (_, i) => i);
-    idxs.sort(() => Math.random() - 0.5);
+    answerQuick: function (idx) {
+        const q = this.state.queue[this.state.qIndex];
+        const optEl = document.getElementById('qd-options');
+        if (!q || !optEl) return;
 
-    // 10 soru için yeter yoksa, yine de döngüye sokmayalım: kalan toplarda tekrar olabilir.
-    // ama önce tüm sorular bir kez gelsin.
-    return idxs;
-}
+        const btns = Array.from(optEl.querySelectorAll('button'));
+        btns.forEach(b => b.disabled = true);
+        const correct = (idx === q.a);
 
-function startPenaltySession() {
-    // Session reset
-    pScore = 0;
-    pBalls = 10;
-    pAskedCount = 0;
-    pCorrectCount = 0;
-    pWrongCount = 0;
+        if (btns[idx]) btns[idx].classList.add(correct ? 'good' : 'bad');
+        if (!correct && btns[q.a]) btns[q.a].classList.add('good');
 
-    jokers = { call: 1, half: 1, double: 1 };
-    doubleChanceUsed = false;
-    firstAnswerIndex = -1;
-    setDoubleIndicator(false);
+        this.state.score += correct ? 2 : -1;
+        if (this.state.score < 0) this.state.score = 0;
+        this.updateQuickHud();
 
-    // Soru kuyruğu
-    pQuestionQueue = buildQuestionQueue();
+        Swal.fire({
+            toast: true, position: 'top', icon: correct ? 'success' : 'warning',
+            title: correct ? 'Doğru!' : 'Hata', text: q.exp,
+            showConfirmButton: false, timer: 1500
+        });
 
-    updateJokerButtons();
-    document.getElementById('p-score').innerText = pScore;
-    document.getElementById('p-balls').innerText = pBalls;
+        setTimeout(() => {
+            this.state.qIndex++;
+            this.updateQuickHud();
+            if (this.state.qIndex >= this.state.queue.length) this.finishQuickDecision(false);
+            else this.renderQuickQuestion();
+        }, 1500);
+    },
 
-    const restartBtn = document.getElementById('p-restart-btn');
-    const optionsEl = document.getElementById('p-options');
-    if (restartBtn) restartBtn.style.display = 'none';
-    if (optionsEl) optionsEl.style.display = 'grid';
+    finishQuickDecision: function (timeout) {
+        if (this.state.timer) clearInterval(this.state.timer);
+        const msg = timeout ? 'Süre Doldu!' : 'Tamamlandı!';
+        Swal.fire({
+            icon: 'info', title: `Hızlı Karar: ${msg}`,
+            html: `Skor: <b>${this.state.score}</b><br>Tebrikler!`,
+            confirmButtonText: 'Tamam'
+        });
+        this.resetQuickUI();
+    },
 
-    resetField();
-    loadPenaltyQuestion();
-}
+    resetQuickUI: function () {
+        document.getElementById('qd-lobby').style.display = 'block';
+        document.getElementById('qd-game').style.display = 'none';
+        const t = document.getElementById('qd-time'); if (t) t.innerText = '30';
+        const st = document.getElementById('qd-step'); if (st) st.innerText = '0';
+    },
 
-function pickNextQuestion() {
-    if (quizQuestions.length === 0) return null;
+    // --- PENALTY GAME ---
+    openPenaltyGame: function () {
+        try { closeModal('game-hub-modal'); } catch (e) { }
+        document.getElementById('penalty-modal').style.display = 'flex';
+        this.showPenaltyLobby();
+    },
 
-    // Önce kuyruktan tüket
-    if (pQuestionQueue.length > 0) {
-        const i = pQuestionQueue.shift();
-        return quizQuestions[i];
-    }
+    showPenaltyLobby: function () {
+        document.getElementById('penalty-lobby').style.display = 'flex';
+        document.getElementById('penalty-game-area').style.display = 'none';
+        fetchLeaderboard(); // Keep existing external function or move inside
+    },
 
-    // Kuyruk bitti ama top devam ediyor: artık random (soru azsa)
-    return quizQuestions[Math.floor(Math.random() * quizQuestions.length)];
-}
+    startPenalty: function () {
+        document.getElementById('penalty-lobby').style.display = 'none';
+        document.getElementById('penalty-game-area').style.display = 'block';
 
-function loadPenaltyQuestion() {
-    if (pBalls <= 0) { finishPenaltyGame(); return; }
-    if (!Array.isArray(quizQuestions) || quizQuestions.length === 0) {
-        Swal.fire('Hata', 'Soru yok!', 'warning');
-        return;
-    }
+        this.state.score = 0;
+        this.state.balls = 10;
+        this.state.jokers = { call: 1, half: 1, double: 1 };
 
-    pCurrentQ = pickNextQuestion();
-    if (!pCurrentQ || !pCurrentQ.opts || pCurrentQ.opts.length < 2) {
-        Swal.fire('Hata', 'Bu soru hatalı formatta (şık yok).', 'error');
-        // bir sonraki soruyu dene
-        pCurrentQ = pickNextQuestion();
-        if (!pCurrentQ) return;
-    }
+        // Load Qs
+        const bank = (quizQuestions && quizQuestions.length) ? quizQuestions : DEFAULT_GAME_DATA.penalty;
+        // Shuffle
+        this.state.queue = Array.from({ length: bank.length }, (_, i) => i).sort(() => Math.random() - .5);
 
-    pAskedCount++;
-    doubleChanceUsed = false;
-    firstAnswerIndex = -1;
-    setDoubleIndicator(false);
-    updateJokerButtons();
+        this.updatePenaltyHud();
+        document.getElementById('p-restart-btn').style.display = 'none';
+        document.getElementById('p-options').style.display = 'grid';
 
-    const qEl = document.getElementById('p-question-text');
-    if (qEl) qEl.innerText = pCurrentQ.q || "Soru";
+        this.resetField();
+        this.loadPenaltyQuestion();
+    },
 
-    let html = '';
-    pCurrentQ.opts.forEach((opt, index) => {
-        const letter = String.fromCharCode(65 + index);
-        html += `<button class="penalty-btn" onclick="shootBall(${index})">${letter}: ${opt}</button>`;
-    });
+    loadPenaltyQuestion: function () {
+        if (this.state.balls <= 0) { this.finishPenalty(); return; }
 
-    const optionsEl = document.getElementById('p-options');
-    if (optionsEl) optionsEl.innerHTML = html;
-}
-
-function shootBall(idx) {
-    const btns = document.querySelectorAll('.penalty-btn');
-    const isCorrect = (idx === pCurrentQ.a);
-
-    // Double joker: ilk yanlışta bir hak daha
-    if (!isCorrect && doubleChanceUsed && firstAnswerIndex === -1) {
-        firstAnswerIndex = idx;
-        if (btns[idx]) {
-            btns[idx].classList.add('wrong-first-try');
-            btns[idx].disabled = true;
+        // Pick next Q
+        let qIdx = this.state.queue.shift();
+        if (qIdx === undefined) {
+            // Reload bank if empty
+            const bank = (quizQuestions && quizQuestions.length) ? quizQuestions : DEFAULT_GAME_DATA.penalty;
+            this.state.queue = Array.from({ length: bank.length }, (_, i) => i).sort(() => Math.random() - .5);
+            qIdx = this.state.queue.shift();
         }
-        Swal.fire({ toast: true, position: 'top', icon: 'info', title: 'İlk Hata! Kalan Hakkın: 1', showConfirmButton: false, timer: 1400, background: '#ffc107' });
-        updateJokerButtons();
-        return;
-    }
 
-    // Artık atış kesinleşti
-    btns.forEach(b => b.disabled = true);
+        const bank = (quizQuestions && quizQuestions.length) ? quizQuestions : DEFAULT_GAME_DATA.penalty;
+        this.state.pCurrentQ = bank[qIdx];
 
-    const ballWrap = document.getElementById('ball-wrap');
-    const keeperWrap = document.getElementById('keeper-wrap');
-    const shooterWrap = document.getElementById('shooter-wrap');
-    const goalMsg = document.getElementById('goal-msg');
+        document.getElementById('p-question-text').innerText = this.state.pCurrentQ.q;
+        const optEl = document.getElementById('p-options');
+        optEl.innerHTML = '';
 
-    const shotDir = Math.floor(Math.random() * 4);
-    if (shooterWrap) shooterWrap.classList.add('shooter-run');
+        this.state.pCurrentQ.opts.forEach((opt, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'penalty-btn';
+            btn.innerHTML = `<b>${String.fromCharCode(65 + i)}:</b> ${opt}`;
+            btn.onclick = () => this.shootBall(i);
+            optEl.appendChild(btn);
+        });
 
-    setTimeout(() => {
-        if (keeperWrap) {
+        this.resetField(); // Reset UI state (colors etc)
+    },
+
+    shootBall: function (idx) {
+        const isCorrect = (idx === this.state.pCurrentQ.a);
+        const btns = document.querySelectorAll('.penalty-btn');
+        btns.forEach(b => b.disabled = true);
+
+        // Visuals
+        const ball = document.getElementById('ball-wrap');
+        const keeper = document.getElementById('keeper-wrap');
+        const goalMsg = document.getElementById('goal-msg');
+
+        const shotDir = Math.floor(Math.random() * 4); // 0:TL, 1:TR, 2:BL, 3:BR
+
+        // Animation Logic
+        if (keeper) {
+            const diveRight = (Math.random() > 0.5); // Keeper guess
+            // Simple AI: if Correct, keeper might dive wrong way
+            // For visual simplicity:
+            keeper.classList.add(diveRight ? 'keeper-dive-right' : 'keeper-dive-left');
+        }
+
+        setTimeout(() => {
             if (isCorrect) {
-                if (shotDir === 0 || shotDir === 2) keeperWrap.classList.add('keeper-dive-right');
-                else keeperWrap.classList.add('keeper-dive-left');
+                ball.classList.add('ball-shoot-left-top'); // Generic 'Goal' anim for now
+                if (goalMsg) { goalMsg.innerText = "GOL!"; goalMsg.classList.add('show'); goalMsg.style.color = "#fabb00"; }
+                this.state.score++;
+                Swal.fire({ toast: true, icon: 'success', title: 'GOL!', timer: 1000, showConfirmButton: false });
             } else {
-                if (shotDir === 0 || shotDir === 2) keeperWrap.classList.add('keeper-dive-left');
-                else keeperWrap.classList.add('keeper-dive-right');
+                ball.classList.add('ball-miss-right');
+                if (goalMsg) { goalMsg.innerText = "DIŞARI!"; goalMsg.classList.add('show'); goalMsg.style.color = "#d32f2f"; }
+                Swal.fire({ toast: true, icon: 'error', title: 'Kaçırdın!', timer: 1000, showConfirmButton: false });
             }
-        }
+            this.updatePenaltyHud();
+        }, 300);
 
-        if (isCorrect) {
-            if (ballWrap) {
-                if (shotDir === 0) ballWrap.classList.add('ball-shoot-left-top');
-                else if (shotDir === 1) ballWrap.classList.add('ball-shoot-right-top');
-                else if (shotDir === 2) ballWrap.classList.add('ball-shoot-left-low');
-                else ballWrap.classList.add('ball-shoot-right-low');
-            }
+        this.state.balls--;
+        setTimeout(() => {
+            this.loadPenaltyQuestion();
+        }, 2000);
+    },
 
-            setTimeout(() => {
-                if (goalMsg) {
-                    goalMsg.innerText = "GOL!!!";
-                    goalMsg.style.color = "#fabb00";
-                    goalMsg.classList.add('show');
-                }
-                pScore++;
-                pCorrectCount++;
-                document.getElementById('p-score').innerText = pScore;
+    updatePenaltyHud: function () {
+        document.getElementById('p-score').innerText = this.state.score;
+        document.getElementById('p-balls').innerText = this.state.balls;
+    },
 
-                Swal.fire({ toast: true, position: 'top', icon: 'success', title: 'Mükemmel Şut!', showConfirmButton: false, timer: 900, background: '#a5d6a7' });
-            }, 450);
+    resetField: function () {
+        const ball = document.getElementById('ball-wrap');
+        const keeper = document.getElementById('keeper-wrap');
+        const msg = document.getElementById('goal-msg');
 
-        } else {
-            pWrongCount++;
+        if (ball) { ball.className = 'ball-wrapper'; ball.style = ''; }
+        if (keeper) keeper.className = 'keeper-wrapper';
+        if (msg) msg.classList.remove('show');
+    },
 
-            const showWrong = () => {
-                if (goalMsg) {
-                    goalMsg.style.color = "#ef5350";
-                    goalMsg.classList.add('show');
-                }
-                Swal.fire({ icon: 'error', title: 'Kaçırdın!', text: `Doğru: ${String.fromCharCode(65 + pCurrentQ.a)}`, showConfirmButton: true, timer: 2400, background: '#ef9a9a' });
-            };
+    finishPenalty: function () {
+        const totalShots = 10;
+        const title = this.state.score >= 8 ? "EFSANE! 🏆" : (this.state.score >= 5 ? "İyi Maçtı! 👏" : "Antrenman Lazım 🤕");
+        const acc = this.state.score * 10;
 
-            if (Math.random() > 0.5) {
-                if (ballWrap) {
-                    ballWrap.style.bottom = "160px";
-                    ballWrap.style.left = (shotDir === 0 || shotDir === 2) ? "40%" : "60%";
-                    ballWrap.style.transform = "scale(0.6)";
-                }
-                setTimeout(() => { if (goalMsg) goalMsg.innerText = "KURTARDI!"; showWrong(); }, 450);
-            } else {
-                if (ballWrap) ballWrap.classList.add(Math.random() > 0.5 ? 'ball-miss-left' : 'ball-miss-right');
-                setTimeout(() => { if (goalMsg) goalMsg.innerText = "DIŞARI!"; showWrong(); }, 450);
-            }
-        }
-    }, 300);
-
-    // top azalt
-    pBalls--;
-    document.getElementById('p-balls').innerText = pBalls;
-
-    setTimeout(() => { resetField(); loadPenaltyQuestion(); }, 2400);
-}
-
-function resetField() {
-    const ballWrap = document.getElementById('ball-wrap');
-    const keeperWrap = document.getElementById('keeper-wrap');
-    const shooterWrap = document.getElementById('shooter-wrap');
-    const goalMsg = document.getElementById('goal-msg');
-
-    if (ballWrap) { ballWrap.className = 'ball-wrapper'; ballWrap.style = ""; }
-    if (keeperWrap) keeperWrap.className = 'keeper-wrapper';
-    if (shooterWrap) shooterWrap.className = 'shooter-wrapper';
-    if (goalMsg) goalMsg.classList.remove('show');
-
-    document.querySelectorAll('.penalty-btn').forEach(b => {
-        b.classList.remove('wrong-first-try');
-        b.style.textDecoration = '';
-        b.style.opacity = '';
-        b.style.background = '#fabb00';
-        b.style.color = '#0e1b42';
-        b.style.borderColor = '#f0b500';
-        b.disabled = false;
-    });
-}
-
-function finishPenaltyGame() {
-    const totalShots = 10;
-    const title = pScore >= 8 ? "EFSANE! 🏆" : (pScore >= 5 ? "İyi Maçtı! 👏" : "Antrenman Lazım 🤕");
-    const acc = Math.round((pCorrectCount / Math.max(1, (pCorrectCount + pWrongCount))) * 100);
-
-    const qEl = document.getElementById('p-question-text');
-    if (qEl) {
-        qEl.innerHTML = `
-            <div style="font-size:1.5rem; color:#fabb00; font-weight:800;">MAÇ BİTTİ!</div>
-            <div style="margin-top:4px; font-size:1.1rem; color:#fff;">${title}</div>
-            <div style="margin-top:8px; font-size:1rem; color:#ddd;">
-                <b>Skor:</b> ${pScore}/${totalShots} &nbsp; • &nbsp;
-                <b>Doğruluk:</b> ${acc}%
-            </div>
-            <div style="margin-top:6px; font-size:0.9rem; color:#bbb;">
-                Doğru: ${pCorrectCount} &nbsp; | &nbsp; Yanlış: ${pWrongCount}
-            </div>
-            <div style="margin-top:10px; font-size:0.85rem; color:#aaa;">
-                Yeniden oynamak için aşağıdan başlatabilirsin.
+        const html = `
+            <div style="text-align:center;">
+                <div style="font-size:1.5rem; color:#fabb00; font-weight:800; margin-bottom:10px;">MAÇ BİTTİ!</div>
+                <div style="font-size:1.2rem; color:#333; margin-bottom:15px;">${title}</div>
+                <div style="font-size:1.1rem; margin-bottom:20px;">
+                    <b>Skor:</b> ${this.state.score}/10 <span style="color:#ccc">|</span> <b>Doğruluk:</b> %${acc}
+                </div>
             </div>
         `;
+
+        Swal.fire({ title: '', html: html, icon: 'info', confirmButtonText: 'Lobiye Dön', confirmButtonColor: '#2e7d32' })
+            .then(() => this.showPenaltyLobby());
+
+        // Log to backend
+        try {
+            fetch(SCRIPT_URL, {
+                method: 'POST', headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify({ action: "logQuiz", username: currentUser, token: getToken(), score: this.state.score * 10, total: 100 })
+            });
+        } catch (e) { }
     }
+};
 
-    const optionsEl = document.getElementById('p-options');
-    const restartBtn = document.getElementById('p-restart-btn');
-    if (optionsEl) optionsEl.style.display = 'none';
-    if (restartBtn) restartBtn.style.display = 'block';
+// --- GLOBAL BRIDGE (For HTML onclicks) ---
+function startQuickDecision() { GameController.startQuickDecision(); }
+function resetQuickDecision() { GameController.startQuickDecision(); } // Reuse start
+function answerQuick(i) { GameController.answerQuick(i); }
+function openPenaltyGame() { GameController.openPenaltyGame(); }
+function startGameFromLobby() { GameController.startPenalty(); }
+function showLobby() { GameController.showPenaltyLobby(); }
+function shootBall(i) { GameController.shootBall(i); }
 
-    // Leaderboard log (mevcut backend uyumu)
-    fetch(SCRIPT_URL, {
-        method: 'POST',
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "logQuiz", username: currentUser, token: getToken(), score: pScore * 10, total: 100 })
-    }).finally(() => {
-        // lobby tablosunu güncel tut
-        setTimeout(fetchLeaderboard, 600);
-    });
-}
 
 
 // --- WIZARD FUNCTIONS ---
@@ -3135,6 +2994,7 @@ function renderDashboardCharts(filtered) {
     renderDashboardChannelChart(filtered);
     renderDashboardScoreDistributionChart(filtered);
     renderDashboardGroupAvgChart(filtered);
+    renderDashboardAgentCompChart(filtered);
 }
 
 function renderDashboardTrendChart(data) {
